@@ -44,9 +44,10 @@ struct CopilotAdapterTests {
         let swiftInstr = try #require(
             artifacts.first { $0.kind == .rules && $0.location.path.hasSuffix("swift.instructions.md") }
         )
-        #expect(swiftInstr.loadMode == .conditional(globs: ["Sources/**/*.swift", "Tests/**/*.swift"]))
+        let expectedSwiftGlobs = ["Sources/**/*.swift", "Tests/**/*.swift"]
+        #expect(swiftInstr.loadMode == .conditional(globs: expectedSwiftGlobs))
         let resolvedSwiftInstr = try #require(resolution.ordered.first { $0.artifactID == swiftInstr.id })
-        #expect(resolvedSwiftInstr.effectiveLoadMode == .conditional(globs: ["Sources/**/*.swift", "Tests/**/*.swift"]))
+        #expect(resolvedSwiftInstr.effectiveLoadMode == .conditional(globs: expectedSwiftGlobs))
 
         let sqlInstr = try #require(
             artifacts.first { $0.kind == .rules && $0.location.path.hasSuffix("migrations.instructions.md") }
