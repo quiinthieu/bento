@@ -1,0 +1,10 @@
+[mcp_servers.github]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-github", "--project"]
+enabled_tools = ["get_issue", "list_pulls"]
+disabled_tools = ["merge_pull_request"]
+
+[mcp_servers.postgres]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-postgres"]
+env_vars = ["DATABASE_URL"]

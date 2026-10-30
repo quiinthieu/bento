@@ -1,0 +1,8 @@
+{
+  "cloud-tools": {
+    "overrides": ["*"]
+  },
+  "disabled-ext": {
+    "overrides": ["!*"]
+  }
+}

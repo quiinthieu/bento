@@ -1,0 +1,2 @@
+description = "Deploy storefront preview"
+prompt = "Deploy storefront preview environment for {{args}}."

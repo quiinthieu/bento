@@ -1,0 +1,35 @@
+{
+  // User Gemini CLI settings with JSONC comment
+  "context": {
+    "fileName": ["AGENTS.md", "GEMINI.md"]
+  },
+  "mcp": {
+    "excluded": ["experimental-mcp"]
+  },
+  "mcpServers": {
+    "docs": {
+      "command": "npx",
+      "args": ["-y", "@user/docs-mcp"],
+      "env": {
+        "DOCS_API_KEY": "TEST_SYNTHETIC_GEMINI_KEY_PLACEHOLDER"
+      }
+    },
+    "experimental-mcp": {
+      "url": "http://localhost:8090/sse"
+    }
+  },
+  "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "scripts/check-shell.sh",
+            "timeout": 30000
+          }
+        ]
+      }
+    ]
+  }
+}

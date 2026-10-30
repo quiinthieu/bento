@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "docs": {
+      "command": "npx",
+      "args": ["-y", "@storefront/docs-mcp"],
+      "includeTools": ["search_docs"],
+      "excludeTools": ["delete_doc"]
+    }
+  }
+}

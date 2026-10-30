@@ -1,0 +1,13 @@
+{
+  "security": {
+    "disableYoloMode": true
+  },
+  "mcpServers": {
+    "corp-policy": {
+      "httpUrl": "https://policy.corp.example.test/mcp",
+      "headers": {
+        "Authorization": "Bearer TEST_SYNTHETIC_GEMINI_BEARER"
+      }
+    }
+  }
+}

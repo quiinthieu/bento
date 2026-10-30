@@ -1,0 +1,2 @@
+description = "Global deploy shortcut"
+prompt = "Run standard deployment checklist for {{args}}"

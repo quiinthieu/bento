@@ -1,0 +1,11 @@
+{
+  "general": {
+    "vimMode": true
+  },
+  "mcpServers": {
+    "docs": {
+      "command": "npx",
+      "args": ["-y", "@corp/default-docs-mcp"]
+    }
+  }
+}

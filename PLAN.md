@@ -615,7 +615,7 @@ Each task is sized for one agent session (~0.5–2 days of agent work). Tick `[x
   *AC:* parser tests include malformed inputs from `hostile/`. Redaction tests prove that no secret values survive in `payload_json`.
 - [x] **T04 Claude Code adapter.** PathCatalog, discover, resolve (precedence, `.mcp.json` approval, nested CLAUDE.md, rules dir, skills/plugins/agents/commands/hooks), `Docs/adapters/claude-code.md` with verified doc links.
   *AC:* `claude-basic`, `claude-plugins` and `claude-precedence` goldens pass. Contract tests pass. Shadowing reasons are present.
-- [ ] **T05 Codex + Gemini adapters.** As T04 for Codex (config.toml + project config, mcp_servers, AGENTS.md chain incl. override + byte cap, .agents/skills, hooks.json) and Gemini (settings tiers, GEMINI.md hierarchy + context.fileName, extensions, commands toml).
+- [x] **T05 Codex + Gemini adapters.** As T04 for Codex (config.toml + project config, mcp_servers, AGENTS.md chain incl. override + byte cap, .agents/skills, hooks.json) and Gemini (settings tiers, GEMINI.md hierarchy + context.fileName, extensions, commands toml).
   *AC:* `codex-basic` and `gemini-basic` goldens and contract tests pass. Docs files are written.
 - [ ] **T06 Copilot, Cursor, Windsurf adapters + repo discovery.** Copilot full inventory and resolution (`applyTo` → conditional). Cursor/Windsurf inventory + rules only (capabilities exclude budget/usage). Repo discovery from §5.3.
   *AC:* goldens pass. Repo discovery finds all repos referenced by fixture logs/configs, dedupes by real path and ignores missing dirs.

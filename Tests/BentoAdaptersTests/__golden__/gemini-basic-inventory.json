@@ -1,0 +1,1284 @@
+[
+  {
+    "agent" : "gemini",
+    "contentHash" : "e29dce2ac42bc068d9e9ea0fe8aee88765e2a79c718b43a7974968853d777054",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "64c4d386ad6024cb2203a58d9754eb1512754c70228204c2109abb3ef29bacfe",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/Library/Application Support/GeminiCli/system-defaults.json",
+      "realPath" : "<HOME>/Library/Application Support/GeminiCli/system-defaults.json"
+    },
+    "name" : "system-defaults.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "general" : {
+              "vimMode" : true
+            },
+            "mcpServers" : {
+              "docs" : {
+                "args" : [
+                  "-y",
+                  "@corp/default-docs-mcp"
+                ],
+                "command" : "npx"
+              }
+            }
+          }
+        }
+      }
+    },
+    "scope" : 5
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "e29dce2ac42bc068d9e9ea0fe8aee88765e2a79c718b43a7974968853d777054",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "3d4ac1abc96aa91cd61ada477bd89929c80b3514cbef2b737703a7b7bc4241a2",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "docs"
+      ],
+      "path" : "<HOME>/Library/Application Support/GeminiCli/system-defaults.json",
+      "realPath" : "<HOME>/Library/Application Support/GeminiCli/system-defaults.json"
+    },
+    "name" : "docs",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@corp/default-docs-mcp"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 5
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "614edab806ab1112775b33289249a0813ef0c7625c52c91aedeca88b60f2c972",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "4576dafa17685211c2ad097ddba39ed0b271c0ab24b3fa4f6aa42171402bbef2",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/Library/Application Support/GeminiCli/settings.json",
+      "realPath" : "<HOME>/Library/Application Support/GeminiCli/settings.json"
+    },
+    "name" : "settings.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "mcpServers" : {
+              "corp-policy" : {
+                "headers" : {
+                  "Authorization" : "«redacted»"
+                },
+                "httpUrl" : "https://policy.corp.example.test/mcp"
+              }
+            },
+            "security" : {
+              "disableYoloMode" : true
+            }
+          }
+        }
+      }
+    },
+    "scope" : 0
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "614edab806ab1112775b33289249a0813ef0c7625c52c91aedeca88b60f2c972",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "ee35e62a26a38e62500accca91a6da9adf73dcda8b8d7fdc265bc3195928cd2e",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "corp-policy"
+      ],
+      "path" : "<HOME>/Library/Application Support/GeminiCli/settings.json",
+      "realPath" : "<HOME>/Library/Application Support/GeminiCli/settings.json"
+    },
+    "name" : "corp-policy",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "http" : {
+              "url" : "https://policy.corp.example.test/mcp"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 0
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "aa90442eefbd0805c75f7d1b5e93257199132d2304dfdb398268186f1cb20283",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "bbcc8589225e84927024c43744172097f585f1f298d829e77700d99997f0bc05",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/settings.json",
+      "realPath" : "<HOME>/.gemini/settings.json"
+    },
+    "name" : "settings.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "context" : {
+              "fileName" : [
+                "AGENTS.md",
+                "GEMINI.md"
+              ]
+            },
+            "hooks" : {
+              "BeforeTool" : [
+                {
+                  "hooks" : [
+                    {
+                      "command" : "scripts/check-shell.sh",
+                      "timeout" : 30000,
+                      "type" : "command"
+                    }
+                  ],
+                  "matcher" : "run_shell_command"
+                }
+              ]
+            },
+            "mcp" : {
+              "excluded" : [
+                "experimental-mcp"
+              ]
+            },
+            "mcpServers" : {
+              "docs" : {
+                "args" : [
+                  "-y",
+                  "@user/docs-mcp"
+                ],
+                "command" : "npx",
+                "env" : {
+                  "DOCS_API_KEY" : "«redacted»"
+                }
+              },
+              "experimental-mcp" : {
+                "url" : "http://localhost:8090/sse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "aa90442eefbd0805c75f7d1b5e93257199132d2304dfdb398268186f1cb20283",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "1d9fb0fc0c50e37ab42e3c2bdb6966c463152a4c61792c78ba24a4fb783013f1",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "docs"
+      ],
+      "path" : "<HOME>/.gemini/settings.json",
+      "realPath" : "<HOME>/.gemini/settings.json"
+    },
+    "name" : "docs",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+            "DOCS_API_KEY"
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@user/docs-mcp"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "aa90442eefbd0805c75f7d1b5e93257199132d2304dfdb398268186f1cb20283",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "88b026b977eecccf04554427c0d40a49ceb7cfc929d1cc99832882f392534498",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "experimental-mcp"
+      ],
+      "path" : "<HOME>/.gemini/settings.json",
+      "realPath" : "<HOME>/.gemini/settings.json"
+    },
+    "name" : "experimental-mcp",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "sse" : {
+              "url" : "http://localhost:8090/sse"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "aa90442eefbd0805c75f7d1b5e93257199132d2304dfdb398268186f1cb20283",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "19e8a1ad0c9f78ca4fd24b634885f9458c7035cc760fb9e004d2144954a92ae3",
+    "kind" : "hook",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "hooks",
+        "BeforeTool",
+        "0",
+        "hooks",
+        "0"
+      ],
+      "path" : "<HOME>/.gemini/settings.json",
+      "realPath" : "<HOME>/.gemini/settings.json"
+    },
+    "name" : "BeforeTool (run_shell_command)",
+    "payload" : {
+      "hook" : {
+        "_0" : {
+          "command" : "scripts/check-shell.sh",
+          "event" : "BeforeTool",
+          "matcher" : "run_shell_command",
+          "timeoutSeconds" : 30
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "ae6cd840b4726c546388af4d2d642fe233c7be359d25817fe6ef1e5bd89fdeb3",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "70b3e145fc6d34e2abc463664501620a2863876fad45526a9b38e36e23bdc6af",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/GEMINI.md",
+      "realPath" : "<HOME>/.gemini/GEMINI.md"
+    },
+    "name" : "GEMINI.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 77,
+          "characterCount" : 77,
+          "content" : "# Global Gemini Memory\n\n@./shared-style.md\n\n- Prefer structured error types.\n",
+          "imports" : [
+            "./shared-style.md"
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "cc5256a44ac96de18d783ca76c82edd75ee16f22ca79b4a66d45377c4bfe0baf",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "dccf971aade905996f243d9c19923c5f98224b24804baad10386971b62595603",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/shared-style.md",
+      "realPath" : "<HOME>/.gemini/shared-style.md"
+    },
+    "name" : "shared-style.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 63,
+          "characterCount" : 63,
+          "content" : "# Shared Style Guide\n\n- Keep functions pure and deterministic.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "4d143a507fcce8d8f87356a285f52ea2817252793762b0c2d5cd42ec6841270e",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "23a0f314d18540b6c1631b66b85516f31e469a4d22da8453b5c7fb60a48eb829",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.agents/skills/pr-review/SKILL.md",
+      "realPath" : "<HOME>/.agents/skills/pr-review/SKILL.md"
+    },
+    "name" : "pr-review",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "Review diffs for concurrency safety and test coverage.\n",
+          "description" : "Preferred cross-agent PR review skill",
+          "frontmatter" : {
+            "description" : "Preferred cross-agent PR review skill",
+            "name" : "pr-review"
+          },
+          "name" : "pr-review",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "976f09de4ad8a5260bab02b6fe3932b39d30e052f8a8cb987ebea556b5652b58",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "b158539cde733d16d6aad43e814b779d1a1bd67793c9c7214ce492dd3287efa8",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/skills/pr-review/SKILL.md",
+      "realPath" : "<HOME>/.gemini/skills/pr-review/SKILL.md"
+    },
+    "name" : "pr-review",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "Fallback review checklist.\n",
+          "description" : "Fallback Gemini PR review skill",
+          "frontmatter" : {
+            "description" : "Fallback Gemini PR review skill",
+            "name" : "pr-review"
+          },
+          "name" : "pr-review",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "7f69aeb5074dac4b352a37fbf54e231d2fff481ee0717b31ea8ce92324c7786e",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "6106cdfbe288bc037ed0b9e79f03e30b817e6643f6627b5d01ae06a22f34935d",
+    "kind" : "subagent",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/agents/architecture-critic.md",
+      "realPath" : "<HOME>/.gemini/agents/architecture-critic.md"
+    },
+    "name" : "architecture-critic",
+    "payload" : {
+      "subagent" : {
+        "_0" : {
+          "body" : "Verify that lower-level core modules never import higher-level UI or adapter modules.\n",
+          "description" : "Reviews module boundaries and dependency direction",
+          "frontmatter" : {
+            "description" : "Reviews module boundaries and dependency direction",
+            "model" : "gemini-2.5-pro",
+            "name" : "architecture-critic",
+            "tools" : [
+              "read_file",
+              "grep_search"
+            ]
+          },
+          "model" : "gemini-2.5-pro",
+          "name" : "architecture-critic",
+          "tools" : [
+            "read_file",
+            "grep_search"
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "2b5f82f595049e2f4ea033d78813d113fb82697e7bd163a7b888569fe6c9debb",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "bee9f1c53e63283cd4da0746874d1f04aba65d9d43793eb2fd16d7d409d73d5b",
+    "kind" : "command",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/commands/deploy.toml",
+      "realPath" : "<HOME>/.gemini/commands/deploy.toml"
+    },
+    "name" : "deploy",
+    "payload" : {
+      "command" : {
+        "_0" : {
+          "argumentHint" : "{{args}}",
+          "body" : "Run standard deployment checklist for {{args}}",
+          "description" : "Global deploy shortcut",
+          "name" : "deploy"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "2bda9de6717f34268460b889be02603dafe1d0cd549527456818fc15138b376a",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "8da6931e6f64976d15efdb263037bfa1535449e9328127f837fae5069c8bb029",
+    "kind" : "command",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/commands/git/commit.toml",
+      "realPath" : "<HOME>/.gemini/commands/git/commit.toml"
+    },
+    "name" : "git:commit",
+    "payload" : {
+      "command" : {
+        "_0" : {
+          "body" : "Inspect staged changes and draft a commit message.",
+          "description" : "Draft a Conventional Commit message",
+          "name" : "git:commit"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "314998771695fa96dcfd97cdccf9aac42a8104beb40efa72a0935f4fac41436b",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "ea4451caf3a5563e36d1c411649833f224a20056df542d30e750ed2bdf0f1079",
+    "kind" : "plugin",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/extensions/cloud-tools/gemini-extension.json",
+      "realPath" : "<HOME>/.gemini/extensions/cloud-tools/gemini-extension.json"
+    },
+    "name" : "cloud-tools",
+    "payload" : {
+      "plugin" : {
+        "_0" : {
+          "agents" : [
+            "incident-responder"
+          ],
+          "commands" : [
+            "logs:tail"
+          ],
+          "description" : "Cloud deployment and log analysis tools",
+          "mcpServers" : [
+            "cloud-logs",
+            "docs"
+          ],
+          "name" : "cloud-tools",
+          "skills" : [
+            "log-triage"
+          ],
+          "version" : "1.4.0"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "314998771695fa96dcfd97cdccf9aac42a8104beb40efa72a0935f4fac41436b",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "a057af10836a287b13210c1acfd91f66cd81cd4706eee386d1212d9a94a59645",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "cloud-logs"
+      ],
+      "path" : "<HOME>/.gemini/extensions/cloud-tools/gemini-extension.json",
+      "realPath" : "<HOME>/.gemini/extensions/cloud-tools/gemini-extension.json"
+    },
+    "name" : "cloud-logs",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+            "CLOUD_API_SECRET"
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "${extensionPath}/server.js"
+              ],
+              "command" : "node"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "314998771695fa96dcfd97cdccf9aac42a8104beb40efa72a0935f4fac41436b",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "a3e2fab6739a3f1868e170f07a53cf33993a4d69ce5335b7f7c4c055652a7e83",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "docs"
+      ],
+      "path" : "<HOME>/.gemini/extensions/cloud-tools/gemini-extension.json",
+      "realPath" : "<HOME>/.gemini/extensions/cloud-tools/gemini-extension.json"
+    },
+    "name" : "docs",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "${extensionPath}/docs.js"
+              ],
+              "command" : "node"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "dd3ceedf1c2bcac3269c587c052f2377934e41233be5f927d3672e5902feb40d",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "8f2c36c57015798d565c2d2930f65efc88f874af41d5b93f627c9b653dc0873f",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/extensions/cloud-tools/CLOUD.md",
+      "realPath" : "<HOME>/.gemini/extensions/cloud-tools/CLOUD.md"
+    },
+    "name" : "CLOUD.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 103,
+          "characterCount" : 103,
+          "content" : "# Cloud Tools Extension Context\n\n- Prefer structured JSON log queries when inspecting cloud incidents.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "b1a8fbbedf2fd118f2740242d0b71b64148af125c28f1f5b8b05f09ac375ec3c",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "3076d055ba3c9e020ff77a7bf8c4684d02d5e624d562efdec6ddb76c2c845d47",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/extensions/cloud-tools/skills/log-triage/SKILL.md",
+      "realPath" : "<HOME>/.gemini/extensions/cloud-tools/skills/log-triage/SKILL.md"
+    },
+    "name" : "log-triage",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "Group log spikes by status code and deployment revision.\n",
+          "description" : "Triages production cloud log anomalies",
+          "frontmatter" : {
+            "description" : "Triages production cloud log anomalies",
+            "name" : "log-triage"
+          },
+          "name" : "log-triage",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "14b93f34ec679ad7113d11f68c4c2d5fcc7972ce55579c241a8000f9c9b5a1d5",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "945a2a33c3abc3d484d449f50c4fbf9c3881463c13e783e028f06691db73f49a",
+    "kind" : "subagent",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/extensions/cloud-tools/agents/incident-responder.md",
+      "realPath" : "<HOME>/.gemini/extensions/cloud-tools/agents/incident-responder.md"
+    },
+    "name" : "incident-responder",
+    "payload" : {
+      "subagent" : {
+        "_0" : {
+          "body" : "Summarize root cause, blast radius, and rollback steps.\n",
+          "description" : "Investigates cloud service incidents",
+          "frontmatter" : {
+            "description" : "Investigates cloud service incidents",
+            "model" : "gemini-2.5-flash",
+            "name" : "incident-responder"
+          },
+          "model" : "gemini-2.5-flash",
+          "name" : "incident-responder"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "7753f91f1824dbbf7355c6a0914a252def064146dcc946ea8c83c4db0deb469e",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "9ac8adf7dd310df520a1b7f6d613ead8bf838112f2099ec38b80f8f07bb7aa57",
+    "kind" : "command",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/extensions/cloud-tools/commands/logs/tail.toml",
+      "realPath" : "<HOME>/.gemini/extensions/cloud-tools/commands/logs/tail.toml"
+    },
+    "name" : "logs:tail",
+    "payload" : {
+      "command" : {
+        "_0" : {
+          "argumentHint" : "{{args}}",
+          "body" : "Query recent error logs for service {{args}}.",
+          "description" : "Tail recent cloud logs",
+          "name" : "logs:tail"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "f51d2f5f8be2aeb4bc56c86e8b84512e46086c7cac9de7b1ab934583bd7a0192",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "578652f5c37ea9c45f9e811f60f6a74d4a99feda014ed559f8ece01293461722",
+    "kind" : "hook",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "hooks",
+        "AfterTool",
+        "0",
+        "hooks",
+        "0"
+      ],
+      "path" : "<HOME>/.gemini/extensions/cloud-tools/hooks/hooks.json",
+      "realPath" : "<HOME>/.gemini/extensions/cloud-tools/hooks/hooks.json"
+    },
+    "name" : "AfterTool (mcp_cloud-logs_.*)",
+    "payload" : {
+      "hook" : {
+        "_0" : {
+          "command" : "node ${extensionPath}/audit-hook.js",
+          "event" : "AfterTool",
+          "matcher" : "mcp_cloud-logs_.*",
+          "timeoutSeconds" : 15
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "88f09416e31af446fbe22cff2942784108d9cbf47cb4cb3c75aff4dbe475a178",
+    "diagnostics" : [
+
+    ],
+    "enabled" : false,
+    "id" : "eccb0d6435d9cffce088458fa888ac2702fd4df65ac1965aaaa89d0468af3ad7",
+    "kind" : "plugin",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/extensions/disabled-ext/gemini-extension.json",
+      "realPath" : "<HOME>/.gemini/extensions/disabled-ext/gemini-extension.json"
+    },
+    "name" : "disabled-ext",
+    "payload" : {
+      "plugin" : {
+        "_0" : {
+          "agents" : [
+
+          ],
+          "commands" : [
+
+          ],
+          "description" : "Disabled experimental extension",
+          "mcpServers" : [
+
+          ],
+          "name" : "disabled-ext",
+          "skills" : [
+            "unused-ext-skill"
+          ],
+          "version" : "0.1.0"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "186514199f91c3d42b15fa36c18603eb6fd43af74b5931ccfa455f9e8722c62c",
+    "diagnostics" : [
+
+    ],
+    "enabled" : false,
+    "id" : "8224d49f323b623505ddbe4db8c6689f5872e1d906b56ab3379bc33425b3a88c",
+    "kind" : "skill",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.gemini/extensions/disabled-ext/skills/unused-ext-skill/SKILL.md",
+      "realPath" : "<HOME>/.gemini/extensions/disabled-ext/skills/unused-ext-skill/SKILL.md"
+    },
+    "name" : "unused-ext-skill",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "Should remain disabled when parent extension is disabled.\n",
+          "description" : "Skill from disabled extension",
+          "frontmatter" : {
+            "description" : "Skill from disabled extension",
+            "name" : "unused-ext-skill"
+          },
+          "name" : "unused-ext-skill",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "ac730bdde1af8fc8b65dcbb941479acaa1945c97017974af84d544337cb77b17",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "c071bb053b38ba17acf4678497facf0e65a90c9742a85b83192116d053ecc407",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/storefront/.gemini/settings.json",
+      "realPath" : "<HOME>/repos/storefront/.gemini/settings.json"
+    },
+    "name" : "settings.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "mcpServers" : {
+              "docs" : {
+                "args" : [
+                  "-y",
+                  "@storefront/docs-mcp"
+                ],
+                "command" : "npx",
+                "excludeTools" : [
+                  "delete_doc"
+                ],
+                "includeTools" : [
+                  "search_docs"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "ac730bdde1af8fc8b65dcbb941479acaa1945c97017974af84d544337cb77b17",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "b5ebfdba62dcad890c7d813816e84a15cf52014834eca4eae8f76160422c3898",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "docs"
+      ],
+      "path" : "<HOME>/repos/storefront/.gemini/settings.json",
+      "realPath" : "<HOME>/repos/storefront/.gemini/settings.json"
+    },
+    "name" : "docs",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "allowedTools" : [
+            "search_docs"
+          ],
+          "disabled" : false,
+          "disabledTools" : [
+            "delete_doc"
+          ],
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@storefront/docs-mcp"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "b3a28a078904fd6112146acb47b74199d3a0d8754294cd393baee849c0b9a2d6",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "9dc3c28a6f1ec47d4f0ceab1404dc4111683790503557e3b35c57b59564d1596",
+    "kind" : "ignoreFile",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/storefront/.geminiignore",
+      "realPath" : "<HOME>/repos/storefront/.geminiignore"
+    },
+    "name" : ".geminiignore",
+    "payload" : {
+      "other" : {
+
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "0caa9f0523527f7e43b8715bb9f5b3b5189b480002ae0382986944482f016d2e",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "0678e26314ba18af100772dd6d6d1febbe7c7938a54a087b37caf9e4e9fded78",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/storefront/AGENTS.md",
+      "realPath" : "<HOME>/repos/storefront/AGENTS.md"
+    },
+    "name" : "AGENTS.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 82,
+          "characterCount" : 82,
+          "content" : "# Storefront Agent Rules\n\n- Validate cart totals in integer minor currency units.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "86f96e9009e9f07dc80245b28dd098a06b0aa298f87edb735bd14a49ab9c120f",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "57016f1322f0bf5dd0ce4ba0b67dd0086c24b0f69746827ce0fcc6932d316bb4",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/storefront/GEMINI.md",
+      "realPath" : "<HOME>/repos/storefront/GEMINI.md"
+    },
+    "name" : "GEMINI.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 69,
+          "characterCount" : 69,
+          "content" : "# Storefront Gemini Context\n\n- Use typed DTOs at service boundaries.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "c0726a525bca9de4faaa1427fe30423e56be7f5e8c92d2c3f1be00efe30336dc",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "23a5a71e5632c83ac0a377490c81c6d4bdf5e145c9f72be1ecf64b67e99e70d2",
+    "kind" : "subagent",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/storefront/.gemini/agents/checkout-auditor.md",
+      "realPath" : "<HOME>/repos/storefront/.gemini/agents/checkout-auditor.md"
+    },
+    "name" : "checkout-auditor",
+    "payload" : {
+      "subagent" : {
+        "_0" : {
+          "body" : "Ensure payment capture transitions are idempotent.\n",
+          "description" : "Audits checkout state transitions",
+          "frontmatter" : {
+            "description" : "Audits checkout state transitions",
+            "model" : "gemini-2.5-flash",
+            "name" : "checkout-auditor"
+          },
+          "model" : "gemini-2.5-flash",
+          "name" : "checkout-auditor"
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "30cd57a823a6f4d0190b2f9ba7bc64d923362a65116c1cb5c54183084a39384b",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "73957c705285d225f7db5da02f5583d19366808808d9bef6311cae03bb5aec3d",
+    "kind" : "command",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/storefront/.gemini/commands/deploy.toml",
+      "realPath" : "<HOME>/repos/storefront/.gemini/commands/deploy.toml"
+    },
+    "name" : "deploy",
+    "payload" : {
+      "command" : {
+        "_0" : {
+          "argumentHint" : "{{args}}",
+          "body" : "Deploy storefront preview environment for {{args}}.",
+          "description" : "Deploy storefront preview",
+          "name" : "deploy"
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "gemini",
+    "contentHash" : "65795e38cee5db0535e11821564e349d588e4dcbeb3b036446565008fccf389c",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "2a5dc8718a90fb5ff401c6844dac51601a8092f3984e88006131c548bb9d61c1",
+    "kind" : "rules",
+    "loadMode" : {
+      "conditional" : {
+        "globs" : [
+          "checkout/**"
+        ]
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/storefront/checkout/GEMINI.md",
+      "realPath" : "<HOME>/repos/storefront/checkout/GEMINI.md"
+    },
+    "name" : "GEMINI.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 77,
+          "characterCount" : 77,
+          "content" : "# Checkout Subdirectory Context\n\n- Never log raw payment instrument numbers.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 3
+  }
+]
