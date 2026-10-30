@@ -1,0 +1,46 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+
+# Xcode & XcodeGen
+DerivedData/
+build/
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.xcresult
+
+# Signing & Secrets (never commit real signing configs or keys)
+Config/Signing.xcconfig
+!Config/Signing.xcconfig.example
+*.p12
+*.cer
+*.mobileprovision
+.env
+.env.*
+
+# Release artifacts
+*.dmg
+*.pkg
+*.app/
+dist/
