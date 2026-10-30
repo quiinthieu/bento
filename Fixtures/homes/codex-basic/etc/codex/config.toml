@@ -1,0 +1,6 @@
+approval_policy = "on-request"
+
+[mcp_servers.corp-audit]
+url = "https://mcp.corp.example.test/v1"
+bearer_token_env_var = "CORP_AUDIT_TOKEN"
+enabled_tools = ["audit_log"]

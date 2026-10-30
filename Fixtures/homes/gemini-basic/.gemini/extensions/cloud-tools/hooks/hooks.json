@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "AfterTool": [
+      {
+        "matcher": "mcp_cloud-logs_.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${extensionPath}/audit-hook.js",
+            "timeout": 15000
+          }
+        ]
+      }
+    ]
+  }
+}

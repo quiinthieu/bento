@@ -1,0 +1,194 @@
+{
+  "agent" : "codex",
+  "folder" : "<HOME>/repos/backend-api",
+  "ordered" : [
+    {
+      "artifactID" : "bb8c9786d46a1473d59ec75c46a96917d0a950afb0c330ee64ad36cced2229c4",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "merged settings from ~/.codex/config.toml"
+    },
+    {
+      "artifactID" : "70a8ddcc160c9ef79812ec15658be163ccc989e70ad86ddf8d66c468b62d072e",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "merged settings from project .codex/config.toml"
+    },
+    {
+      "artifactID" : "ae7bd5d836d431edc818ddf15d80beb95aa922a44555219aaab7cffa2c56e1dd",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "merged settings from /etc/codex/config.toml"
+    },
+    {
+      "artifactID" : "0b606e4b6c4c66087cabe793c19c4504678e4ebac5d196adf2398008efb0adf1",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "loaded in Codex instruction chain from ~/.codex/AGENTS.md"
+    },
+    {
+      "artifactID" : "0aa72aab086e1d1f3bb055c3f0638e37256ccbced593a8731df3ce8114aabf11",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "loaded from project AGENTS.override.md, truncated to fit project_doc_max_bytes (150 B)"
+    },
+    {
+      "artifactID" : "03f858bb6a244132ac3cf0bb3c21085bb9c4460e74f4eac3d6cea30192915866",
+      "effectiveLoadMode" : {
+        "conditional" : {
+          "globs" : [
+            "services/auth/**"
+          ]
+        }
+      },
+      "reason" : "nested directory instructions under services/auth/ (loaded when launched inside)"
+    },
+    {
+      "artifactID" : "d63c5e4aeac5fe3fddb0757d8fa6d5062c015f5a9108bbc224ab63f2f8e1561d",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "active MCP server from /etc/codex/config.toml"
+    },
+    {
+      "artifactID" : "ba04c55e5ee69f3045e224b0e924a1ded2a9883e61abb04da7f82d3e10c47ca0",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "active MCP server from project .codex/config.toml"
+    },
+    {
+      "artifactID" : "9503fe293b0f832fdd0b2e1cc512976ed09a0e729b372208dcfe50e7d1c687bd",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "disabled via enabled = false in ~/.codex/config.toml"
+    },
+    {
+      "artifactID" : "21095b5bc32db2e90c2b9e60ee45c7d25f2ecd3b352471f64bd0fa820860bcc7",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "active MCP server from project .codex/config.toml"
+    },
+    {
+      "artifactID" : "ecbe397afe558b4e3453e6866577509e038e240dcdb4a57bb0546ed29921354e",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "active skill metadata from project .agents/skills"
+    },
+    {
+      "artifactID" : "cfb5ab0ca070b853c0048a24fa91bc165ffc75c43ef9391a368992c99e91b8b4",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "active skill metadata from ~/.codex/skills/.system"
+    },
+    {
+      "artifactID" : "977057e6d676c734ed0301a4d9c637ddf2c82870f7250fbb8d790f62c9b32cb0",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "active skill metadata from ~/.agents/skills"
+    },
+    {
+      "artifactID" : "3f564a326d3ffcc98284f49e2102bc4bce50f89da05c30b3b9a91096654af975",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "active lifecycle hook from /etc/codex/hooks.json"
+    },
+    {
+      "artifactID" : "741c03ab2ac2570a4b40b2a4df470167eaae226a0310cd7c737d4cdcd8ac4789",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "active lifecycle hook from project .codex/hooks.json"
+    },
+    {
+      "artifactID" : "36fc09aa3f9533a9480ceef805eb7f497132d8f166b7cd71d272c647a5957fbe",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "active lifecycle hook from ~/.codex/hooks.json"
+    },
+    {
+      "artifactID" : "b4e6dab4992c5bdd27954cefe74bd93d0b6c51abb81fff74fc0a4f877f6d8041",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "active lifecycle hook from ~/.codex/config.toml"
+    }
+  ],
+  "shadowed" : [
+    {
+      "reason" : "AGENTS.md overridden by AGENTS.override.md in the same directory (project AGENTS.override.md)",
+      "shadowedArtifactID" : "97e301bcd7053a3e56112c210c9ad7433ba44ea9d4ce726517eba914d0e58c6b",
+      "winningArtifactID" : "0aa72aab086e1d1f3bb055c3f0638e37256ccbced593a8731df3ce8114aabf11"
+    },
+    {
+      "reason" : "MCP server 'github' in ~/.codex/config.toml overridden by project .codex/config.toml",
+      "shadowedArtifactID" : "179879434d9e8c59e119848b8d961a923e4534f794accbf6b0658e1aa2b5f3a0",
+      "winningArtifactID" : "ba04c55e5ee69f3045e224b0e924a1ded2a9883e61abb04da7f82d3e10c47ca0"
+    },
+    {
+      "reason" : "Skill 'release-check' in ~/.agents/skills overridden by project .agents/skills",
+      "shadowedArtifactID" : "4c33fcdb92a9ca53e0aeef2ab54473232dd0ccdb67994803a16efb397aa8e088",
+      "winningArtifactID" : "ecbe397afe558b4e3453e6866577509e038e240dcdb4a57bb0546ed29921354e"
+    },
+    {
+      "reason" : "Skill 'sql-helper' in ~/.codex/skills/sql-helper/SKILL.md overridden by ~/.agents/skills",
+      "shadowedArtifactID" : "bb2bf5cbb366ba32f730f33046192544db1aa6e8ee32931ded31c309a4406eb5",
+      "winningArtifactID" : "977057e6d676c734ed0301a4d9c637ddf2c82870f7250fbb8d790f62c9b32cb0"
+    }
+  ],
+  "warnings" : [
+    {
+      "code" : "rules.truncated",
+      "location" : {
+        "path" : "<HOME>/repos/backend-api/AGENTS.override.md",
+        "realPath" : "<HOME>/repos/backend-api/AGENTS.override.md"
+      },
+      "message" : "Truncated 'AGENTS.override.md' (132 bytes) to fit remaining 92 bytes of project_doc_max_bytes (150 bytes)",
+      "severity" : "warning"
+    }
+  ]
+}

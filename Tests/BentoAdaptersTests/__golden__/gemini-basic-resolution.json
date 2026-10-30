@@ -1,0 +1,290 @@
+{
+  "agent" : "gemini",
+  "folder" : "<HOME>/repos/storefront",
+  "ordered" : [
+    {
+      "artifactID" : "64c4d386ad6024cb2203a58d9754eb1512754c70228204c2109abb3ef29bacfe",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "merged settings from /Library/Application Support/GeminiCli/system-defaults.json; keys [mcpServers] overridden by higher-precedence tier"
+    },
+    {
+      "artifactID" : "bbcc8589225e84927024c43744172097f585f1f298d829e77700d99997f0bc05",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "merged settings from ~/.gemini/settings.json; keys [mcpServers] overridden by higher-precedence tier"
+    },
+    {
+      "artifactID" : "c071bb053b38ba17acf4678497facf0e65a90c9742a85b83192116d053ecc407",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "merged settings from project .gemini/settings.json; keys [mcpServers] overridden by higher-precedence tier"
+    },
+    {
+      "artifactID" : "4576dafa17685211c2ad097ddba39ed0b271c0ab24b3fa4f6aa42171402bbef2",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "merged system override settings from /Library/Application Support/GeminiCli/settings.json (highest precedence)"
+    },
+    {
+      "artifactID" : "ea4451caf3a5563e36d1c411649833f224a20056df542d30e750ed2bdf0f1079",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "enabled Gemini CLI extension (cloud-tools)"
+    },
+    {
+      "artifactID" : "eccb0d6435d9cffce088458fa888ac2702fd4df65ac1965aaaa89d0468af3ad7",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "disabled Gemini CLI extension (disabled-ext)"
+    },
+    {
+      "artifactID" : "9dc3c28a6f1ec47d4f0ceab1404dc4111683790503557e3b35c57b59564d1596",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "active file exclusion rules from project .geminiignore"
+    },
+    {
+      "artifactID" : "70b3e145fc6d34e2abc463664501620a2863876fad45526a9b38e36e23bdc6af",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "concatenated global user context from ~/.gemini/GEMINI.md"
+    },
+    {
+      "artifactID" : "dccf971aade905996f243d9c19923c5f98224b24804baad10386971b62595603",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "concatenated global user context from ~/.gemini/shared-style.md"
+    },
+    {
+      "artifactID" : "0678e26314ba18af100772dd6d6d1febbe7c7938a54a087b37caf9e4e9fded78",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "concatenated workspace context from project AGENTS.md"
+    },
+    {
+      "artifactID" : "57016f1322f0bf5dd0ce4ba0b67dd0086c24b0f69746827ce0fcc6932d316bb4",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "concatenated workspace context from project GEMINI.md"
+    },
+    {
+      "artifactID" : "8f2c36c57015798d565c2d2930f65efc88f874af41d5b93f627c9b653dc0873f",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "concatenated extension context from extension 'cloud-tools' (CLOUD.md)"
+    },
+    {
+      "artifactID" : "2a5dc8718a90fb5ff401c6844dac51601a8092f3984e88006131c548bb9d61c1",
+      "effectiveLoadMode" : {
+        "conditional" : {
+          "globs" : [
+            "checkout/**"
+          ]
+        }
+      },
+      "reason" : "JIT subdirectory context under checkout/ (loaded when accessing files inside)"
+    },
+    {
+      "artifactID" : "a057af10836a287b13210c1acfd91f66cd81cd4706eee386d1212d9a94a59645",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "active MCP server from extension 'cloud-tools' (gemini-extension.json)"
+    },
+    {
+      "artifactID" : "ee35e62a26a38e62500accca91a6da9adf73dcda8b8d7fdc265bc3195928cd2e",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "active MCP server from /Library/Application Support/GeminiCli/settings.json"
+    },
+    {
+      "artifactID" : "b5ebfdba62dcad890c7d813816e84a15cf52014834eca4eae8f76160422c3898",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "active MCP server from project .gemini/settings.json"
+    },
+    {
+      "artifactID" : "88b026b977eecccf04554427c0d40a49ceb7cfc929d1cc99832882f392534498",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "excluded by mcp.excluded setting (~/.gemini/settings.json)"
+    },
+    {
+      "artifactID" : "3076d055ba3c9e020ff77a7bf8c4684d02d5e624d562efdec6ddb76c2c845d47",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "active skill metadata from extension 'cloud-tools' (SKILL.md)"
+    },
+    {
+      "artifactID" : "23a0f314d18540b6c1631b66b85516f31e469a4d22da8453b5c7fb60a48eb829",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "active skill metadata from ~/.agents/skills"
+    },
+    {
+      "artifactID" : "8224d49f323b623505ddbe4db8c6689f5872e1d906b56ab3379bc33425b3a88c",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "disabled skill in extension 'disabled-ext' (SKILL.md)"
+    },
+    {
+      "artifactID" : "6106cdfbe288bc037ed0b9e79f03e30b817e6643f6627b5d01ae06a22f34935d",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "active subagent from ~/.gemini/agents/architecture-critic.md"
+    },
+    {
+      "artifactID" : "23a5a71e5632c83ac0a377490c81c6d4bdf5e145c9f72be1ecf64b67e99e70d2",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "active subagent from project .gemini/checkout-auditor.md"
+    },
+    {
+      "artifactID" : "945a2a33c3abc3d484d449f50c4fbf9c3881463c13e783e028f06691db73f49a",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "active subagent from extension 'cloud-tools' (incident-responder.md)"
+    },
+    {
+      "artifactID" : "73957c705285d225f7db5da02f5583d19366808808d9bef6311cae03bb5aec3d",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "active slash command from project .gemini/deploy.toml"
+    },
+    {
+      "artifactID" : "8da6931e6f64976d15efdb263037bfa1535449e9328127f837fae5069c8bb029",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "active slash command from ~/.gemini/commands/git/commit.toml"
+    },
+    {
+      "artifactID" : "9ac8adf7dd310df520a1b7f6d613ead8bf838112f2099ec38b80f8f07bb7aa57",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "active slash command from extension 'cloud-tools' (tail.toml)"
+    },
+    {
+      "artifactID" : "578652f5c37ea9c45f9e811f60f6a74d4a99feda014ed559f8ece01293461722",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "active lifecycle hook from extension 'cloud-tools' (hooks.json)"
+    },
+    {
+      "artifactID" : "19e8a1ad0c9f78ca4fd24b634885f9458c7035cc760fb9e004d2144954a92ae3",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "active lifecycle hook from ~/.gemini/settings.json"
+    }
+  ],
+  "shadowed" : [
+    {
+      "reason" : "MCP server 'docs' in ~/.gemini/settings.json overridden by project .gemini/settings.json",
+      "shadowedArtifactID" : "1d9fb0fc0c50e37ab42e3c2bdb6966c463152a4c61792c78ba24a4fb783013f1",
+      "winningArtifactID" : "b5ebfdba62dcad890c7d813816e84a15cf52014834eca4eae8f76160422c3898"
+    },
+    {
+      "reason" : "MCP server 'docs' in /Library/Application Support/GeminiCli/system-defaults.json overridden by project .gemini/settings.json",
+      "shadowedArtifactID" : "3d4ac1abc96aa91cd61ada477bd89929c80b3514cbef2b737703a7b7bc4241a2",
+      "winningArtifactID" : "b5ebfdba62dcad890c7d813816e84a15cf52014834eca4eae8f76160422c3898"
+    },
+    {
+      "reason" : "MCP server 'docs' in extension 'cloud-tools' (gemini-extension.json) overridden by project .gemini/settings.json",
+      "shadowedArtifactID" : "a3e2fab6739a3f1868e170f07a53cf33993a4d69ce5335b7f7c4c055652a7e83",
+      "winningArtifactID" : "b5ebfdba62dcad890c7d813816e84a15cf52014834eca4eae8f76160422c3898"
+    },
+    {
+      "reason" : "Skill 'pr-review' in ~/.gemini/skills/pr-review/SKILL.md overridden by ~/.agents/skills",
+      "shadowedArtifactID" : "b158539cde733d16d6aad43e814b779d1a1bd67793c9c7214ce492dd3287efa8",
+      "winningArtifactID" : "23a0f314d18540b6c1631b66b85516f31e469a4d22da8453b5c7fb60a48eb829"
+    },
+    {
+      "reason" : "Command 'deploy' in ~/.gemini/commands/deploy.toml overridden by project .gemini/deploy.toml",
+      "shadowedArtifactID" : "bee9f1c53e63283cd4da0746874d1f04aba65d9d43793eb2fd16d7d409d73d5b",
+      "winningArtifactID" : "73957c705285d225f7db5da02f5583d19366808808d9bef6311cae03bb5aec3d"
+    }
+  ],
+  "warnings" : [
+
+  ]
+}

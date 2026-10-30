@@ -1,0 +1,25 @@
+model = "gpt-5-codex"
+profile = "backend"
+project_doc_max_bytes = 150
+project_doc_fallback_filenames = ["TEAM_GUIDE.md"]
+api_key = "TEST_SYNTHETIC_CODEX_KEY_PLACEHOLDER"
+
+[profiles.backend]
+sandbox_mode = "workspace-write"
+
+[projects."~/repos/backend-api"]
+trust_level = "trusted"
+
+[mcp_servers.github]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-github", "--user"]
+[mcp_servers.github.env]
+GITHUB_PERSONAL_ACCESS_TOKEN = "TEST_SYNTHETIC_TOKEN_PLACEHOLDER"
+
+[mcp_servers.legacy-search]
+command = "uvx"
+args = ["mcp-legacy-search"]
+enabled = false
+
+[hooks]
+notify = ["echo", "codex-turn-complete"]

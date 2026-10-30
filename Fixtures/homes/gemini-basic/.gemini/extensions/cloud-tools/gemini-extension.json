@@ -1,0 +1,19 @@
+{
+  "name": "cloud-tools",
+  "version": "1.4.0",
+  "description": "Cloud deployment and log analysis tools",
+  "contextFileName": "CLOUD.md",
+  "mcpServers": {
+    "cloud-logs": {
+      "command": "node",
+      "args": ["${extensionPath}/server.js"],
+      "env": {
+        "CLOUD_API_SECRET": "TEST_SYNTHETIC_EXT_SECRET_PLACEHOLDER"
+      }
+    },
+    "docs": {
+      "command": "node",
+      "args": ["${extensionPath}/docs.js"]
+    }
+  }
+}

@@ -1,0 +1,876 @@
+[
+  {
+    "agent" : "codex",
+    "contentHash" : "b4b846ebe8505d7f2b46e8171c27627f11b76a82f523f9d5d39da28e4bd9c2ff",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "ae7bd5d836d431edc818ddf15d80beb95aa922a44555219aaab7cffa2c56e1dd",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/etc/codex/config.toml",
+      "realPath" : "<HOME>/etc/codex/config.toml"
+    },
+    "name" : "config.toml",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "toml",
+          "tree" : {
+            "approval_policy" : "on-request",
+            "mcp_servers" : {
+              "corp-audit" : {
+                "bearer_token_env_var" : "«redacted»",
+                "enabled_tools" : [
+                  "audit_log"
+                ],
+                "url" : "https://mcp.corp.example.test/v1"
+              }
+            }
+          }
+        }
+      }
+    },
+    "scope" : 0
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "b4b846ebe8505d7f2b46e8171c27627f11b76a82f523f9d5d39da28e4bd9c2ff",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "d63c5e4aeac5fe3fddb0757d8fa6d5062c015f5a9108bbc224ab63f2f8e1561d",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcp_servers",
+        "corp-audit"
+      ],
+      "path" : "<HOME>/etc/codex/config.toml",
+      "realPath" : "<HOME>/etc/codex/config.toml"
+    },
+    "name" : "corp-audit",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "allowedTools" : [
+            "audit_log"
+          ],
+          "disabled" : false,
+          "envKeys" : [
+            "CORP_AUDIT_TOKEN"
+          ],
+          "transport" : {
+            "http" : {
+              "url" : "https://mcp.corp.example.test/v1"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 0
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "2edb4f786b903b43b37b83f9120a4b9b768ceed51962f14b77ca4b2570f63848",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "3f564a326d3ffcc98284f49e2102bc4bce50f89da05c30b3b9a91096654af975",
+    "kind" : "hook",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "hooks",
+        "SessionStart",
+        "0",
+        "hooks",
+        "0"
+      ],
+      "path" : "<HOME>/etc/codex/hooks.json",
+      "realPath" : "<HOME>/etc/codex/hooks.json"
+    },
+    "name" : "SessionStart",
+    "payload" : {
+      "hook" : {
+        "_0" : {
+          "command" : "/usr/local/bin/codex-session-check",
+          "event" : "SessionStart",
+          "timeoutSeconds" : 10
+        }
+      }
+    },
+    "scope" : 0
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "00f9056985a2d4f59d60e599e5c61ac33df8b3417576b11dcb808267325cb456",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "bb8c9786d46a1473d59ec75c46a96917d0a950afb0c330ee64ad36cced2229c4",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.codex/config.toml",
+      "realPath" : "<HOME>/.codex/config.toml"
+    },
+    "name" : "config.toml",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "toml",
+          "tree" : {
+            "api_key" : "«redacted»",
+            "hooks" : {
+              "notify" : [
+                "echo",
+                "codex-turn-complete"
+              ]
+            },
+            "mcp_servers" : {
+              "github" : {
+                "args" : [
+                  "-y",
+                  "@modelcontextprotocol/server-github",
+                  "--user"
+                ],
+                "command" : "npx",
+                "env" : {
+                  "GITHUB_PERSONAL_ACCESS_TOKEN" : "«redacted»"
+                }
+              },
+              "legacy-search" : {
+                "args" : [
+                  "mcp-legacy-search"
+                ],
+                "command" : "uvx",
+                "enabled" : false
+              }
+            },
+            "model" : "gpt-5-codex",
+            "profile" : "backend",
+            "profiles" : {
+              "backend" : {
+                "sandbox_mode" : "workspace-write"
+              }
+            },
+            "project_doc_fallback_filenames" : [
+              "TEAM_GUIDE.md"
+            ],
+            "project_doc_max_bytes" : 150,
+            "projects" : {
+              "~/repos/backend-api" : {
+                "trust_level" : "trusted"
+              }
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "00f9056985a2d4f59d60e599e5c61ac33df8b3417576b11dcb808267325cb456",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "179879434d9e8c59e119848b8d961a923e4534f794accbf6b0658e1aa2b5f3a0",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcp_servers",
+        "github"
+      ],
+      "path" : "<HOME>/.codex/config.toml",
+      "realPath" : "<HOME>/.codex/config.toml"
+    },
+    "name" : "github",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+            "GITHUB_PERSONAL_ACCESS_TOKEN"
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@modelcontextprotocol/server-github",
+                "--user"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "00f9056985a2d4f59d60e599e5c61ac33df8b3417576b11dcb808267325cb456",
+    "diagnostics" : [
+
+    ],
+    "enabled" : false,
+    "id" : "9503fe293b0f832fdd0b2e1cc512976ed09a0e729b372208dcfe50e7d1c687bd",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcp_servers",
+        "legacy-search"
+      ],
+      "path" : "<HOME>/.codex/config.toml",
+      "realPath" : "<HOME>/.codex/config.toml"
+    },
+    "name" : "legacy-search",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : true,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "mcp-legacy-search"
+              ],
+              "command" : "uvx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "00f9056985a2d4f59d60e599e5c61ac33df8b3417576b11dcb808267325cb456",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "b4e6dab4992c5bdd27954cefe74bd93d0b6c51abb81fff74fc0a4f877f6d8041",
+    "kind" : "hook",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "hooks",
+        "notify"
+      ],
+      "path" : "<HOME>/.codex/config.toml",
+      "realPath" : "<HOME>/.codex/config.toml"
+    },
+    "name" : "notify",
+    "payload" : {
+      "hook" : {
+        "_0" : {
+          "command" : "echo codex-turn-complete",
+          "event" : "notify"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "0bc0073f1fee5d0753c5162cc047d3ab4e31320b928f66621a824434b9b04d34",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "36fc09aa3f9533a9480ceef805eb7f497132d8f166b7cd71d272c647a5957fbe",
+    "kind" : "hook",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "hooks",
+        "PreToolUse",
+        "0",
+        "hooks",
+        "0"
+      ],
+      "path" : "<HOME>/.codex/hooks.json",
+      "realPath" : "<HOME>/.codex/hooks.json"
+    },
+    "name" : "PreToolUse (Bash)",
+    "payload" : {
+      "hook" : {
+        "_0" : {
+          "command" : "scripts/lint-command.sh",
+          "event" : "PreToolUse",
+          "matcher" : "Bash",
+          "timeoutSeconds" : 15
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "26f3a91420a824b45a5095afe84d3f818c8fe6fff8e4ffb73c13e5e8a9a328ea",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "0b606e4b6c4c66087cabe793c19c4504678e4ebac5d196adf2398008efb0adf1",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.codex/AGENTS.md",
+      "realPath" : "<HOME>/.codex/AGENTS.md"
+    },
+    "name" : "AGENTS.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 58,
+          "characterCount" : 58,
+          "content" : "# Global Codex Rules\n\n- Prefer small, testable functions.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "2baf77689dbc18ef166c9e4cbc19ff02b476803496094753e3ea2595195f896e",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "4c33fcdb92a9ca53e0aeef2ab54473232dd0ccdb67994803a16efb397aa8e088",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.agents/skills/release-check/SKILL.md",
+      "realPath" : "<HOME>/.agents/skills/release-check/SKILL.md"
+    },
+    "name" : "release-check",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "Verify changelog entries before tagging.\n",
+          "description" : "User release checklist",
+          "frontmatter" : {
+            "description" : "User release checklist",
+            "name" : "release-check"
+          },
+          "name" : "release-check",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "7260cc1a61ccbe36845a18bf8825e9cc8ef1c5bfe12e7256406851364c9ae398",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "977057e6d676c734ed0301a4d9c637ddf2c82870f7250fbb8d790f62c9b32cb0",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.agents/skills/sql-helper/SKILL.md",
+      "realPath" : "<HOME>/.agents/skills/sql-helper/SKILL.md"
+    },
+    "name" : "sql-helper",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "Run scripts/explain.sql against read-only replicas.\n",
+          "description" : "Cross-agent SQL helper",
+          "frontmatter" : {
+            "description" : "Cross-agent SQL helper",
+            "name" : "sql-helper"
+          },
+          "name" : "sql-helper",
+          "supportingFiles" : [
+            "scripts/explain.sql"
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "dd6003963e28b711eec619fa19ac7d9e48cb9999aeb8f8bec466eac018acca31",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "bb2bf5cbb366ba32f730f33046192544db1aa6e8ee32931ded31c309a4406eb5",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.codex/skills/sql-helper/SKILL.md",
+      "realPath" : "<HOME>/.codex/skills/sql-helper/SKILL.md"
+    },
+    "name" : "sql-helper",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "Inspect query plans using EXPLAIN ANALYZE.\n",
+          "description" : "Personal Codex SQL helper",
+          "frontmatter" : {
+            "description" : "Personal Codex SQL helper",
+            "name" : "sql-helper"
+          },
+          "name" : "sql-helper",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "298156267ae3836cd0b0686802c24aa8a270dd2064d2c98f98810d2ee55cae04",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "cfb5ab0ca070b853c0048a24fa91bc165ffc75c43ef9391a368992c99e91b8b4",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.codex/skills/.system/skill-creator/SKILL.md",
+      "realPath" : "<HOME>/.codex/skills/.system/skill-creator/SKILL.md"
+    },
+    "name" : "skill-creator",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "Follow the standard SKILL.md frontmatter conventions when creating a new skill.\n",
+          "description" : "Built-in skill scaffolding guide",
+          "frontmatter" : {
+            "description" : "Built-in skill scaffolding guide",
+            "name" : "skill-creator"
+          },
+          "name" : "skill-creator",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 5
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "6e1fa37f77372ca55dd1c7f861d3ef67a635d92350b996d50d733b39908f59f2",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "70a8ddcc160c9ef79812ec15658be163ccc989e70ad86ddf8d66c468b62d072e",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/backend-api/.codex/config.toml",
+      "realPath" : "<HOME>/repos/backend-api/.codex/config.toml"
+    },
+    "name" : "config.toml",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "toml",
+          "tree" : {
+            "mcp_servers" : {
+              "github" : {
+                "args" : [
+                  "-y",
+                  "@modelcontextprotocol/server-github",
+                  "--project"
+                ],
+                "command" : "npx",
+                "disabled_tools" : [
+                  "merge_pull_request"
+                ],
+                "enabled_tools" : [
+                  "get_issue",
+                  "list_pulls"
+                ]
+              },
+              "postgres" : {
+                "args" : [
+                  "-y",
+                  "@modelcontextprotocol/server-postgres"
+                ],
+                "command" : "npx",
+                "env_vars" : [
+                  "DATABASE_URL"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "6e1fa37f77372ca55dd1c7f861d3ef67a635d92350b996d50d733b39908f59f2",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "ba04c55e5ee69f3045e224b0e924a1ded2a9883e61abb04da7f82d3e10c47ca0",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcp_servers",
+        "github"
+      ],
+      "path" : "<HOME>/repos/backend-api/.codex/config.toml",
+      "realPath" : "<HOME>/repos/backend-api/.codex/config.toml"
+    },
+    "name" : "github",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "allowedTools" : [
+            "get_issue",
+            "list_pulls"
+          ],
+          "disabled" : false,
+          "disabledTools" : [
+            "merge_pull_request"
+          ],
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@modelcontextprotocol/server-github",
+                "--project"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "6e1fa37f77372ca55dd1c7f861d3ef67a635d92350b996d50d733b39908f59f2",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "21095b5bc32db2e90c2b9e60ee45c7d25f2ecd3b352471f64bd0fa820860bcc7",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcp_servers",
+        "postgres"
+      ],
+      "path" : "<HOME>/repos/backend-api/.codex/config.toml",
+      "realPath" : "<HOME>/repos/backend-api/.codex/config.toml"
+    },
+    "name" : "postgres",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+            "DATABASE_URL"
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@modelcontextprotocol/server-postgres"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "cae0f31ac40789f0b941bf14a924d2d938099668641f5cba7f6b4718c154ea35",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "741c03ab2ac2570a4b40b2a4df470167eaae226a0310cd7c737d4cdcd8ac4789",
+    "kind" : "hook",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "hooks",
+        "PostToolUse",
+        "0",
+        "hooks",
+        "0"
+      ],
+      "path" : "<HOME>/repos/backend-api/.codex/hooks.json",
+      "realPath" : "<HOME>/repos/backend-api/.codex/hooks.json"
+    },
+    "name" : "PostToolUse (Write)",
+    "payload" : {
+      "hook" : {
+        "_0" : {
+          "command" : "swift format lint",
+          "event" : "PostToolUse",
+          "matcher" : "Write",
+          "timeoutSeconds" : 20
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "a2844a8a2137c3770d411e608f419e730acba4963140a31a82e0f46320c9d6df",
+    "diagnostics" : [
+      {
+        "code" : "rules.truncated",
+        "location" : {
+          "path" : "<HOME>/repos/backend-api/AGENTS.override.md",
+          "realPath" : "<HOME>/repos/backend-api/AGENTS.override.md"
+        },
+        "message" : "Codex instruction file 'AGENTS.override.md' exceeds cumulative project_doc_max_bytes limit (150 bytes)",
+        "severity" : "warning"
+      }
+    ],
+    "enabled" : true,
+    "id" : "0aa72aab086e1d1f3bb055c3f0638e37256ccbced593a8731df3ce8114aabf11",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/backend-api/AGENTS.override.md",
+      "realPath" : "<HOME>/repos/backend-api/AGENTS.override.md"
+    },
+    "name" : "AGENTS.override.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 132,
+          "characterCount" : 132,
+          "content" : "# Backend Override Rules\n\n- Enforce strict Swift 6 concurrency and value-type models across all API handlers and middleware layers.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : true
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "3c4a8308da76562810bae61f5587f92c2f8e5360cf4bf4f64a57f507874661e7",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "97e301bcd7053a3e56112c210c9ad7433ba44ea9d4ce726517eba914d0e58c6b",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/backend-api/AGENTS.md",
+      "realPath" : "<HOME>/repos/backend-api/AGENTS.md"
+    },
+    "name" : "AGENTS.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 67,
+          "characterCount" : 67,
+          "content" : "# Standard Backend Rules\n\n- Standard rules superseded by override.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "b4b40c1f92ce812a7051629a9447496779c96b56b36b74486210e16a1a04d542",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "ecbe397afe558b4e3453e6866577509e038e240dcdb4a57bb0546ed29921354e",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/backend-api/.agents/skills/release-check/SKILL.md",
+      "realPath" : "<HOME>/repos/backend-api/.agents/skills/release-check/SKILL.md"
+    },
+    "name" : "release-check",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "Run integration tests and schema migration dry-runs before release.\n",
+          "description" : "Backend API release verification workflow",
+          "frontmatter" : {
+            "description" : "Backend API release verification workflow",
+            "name" : "release-check"
+          },
+          "name" : "release-check",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "codex",
+    "contentHash" : "c4cd657f5c4fd01173e65e9aaca103383034ee64dfc882f7162425017942eb24",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "03f858bb6a244132ac3cf0bb3c21085bb9c4460e74f4eac3d6cea30192915866",
+    "kind" : "rules",
+    "loadMode" : {
+      "conditional" : {
+        "globs" : [
+          "services/auth/**"
+        ]
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/backend-api/services/auth/TEAM_GUIDE.md",
+      "realPath" : "<HOME>/repos/backend-api/services/auth/TEAM_GUIDE.md"
+    },
+    "name" : "services/auth/TEAM_GUIDE.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 106,
+          "characterCount" : 106,
+          "content" : "# Auth Service Team Guide\n\n- Validate JWT audience, issuer, and key rotation timestamps on every request.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 3
+  }
+]
