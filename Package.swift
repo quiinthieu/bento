@@ -13,7 +13,9 @@ let package = Package(
         .executable(name: "bentoctx", targets: ["bentoctx"])
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0")
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
+        .package(url: "https://github.com/dduan/TOMLDecoder.git", from: "0.4.5"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "6.0.0")
     ],
     targets: [
         .target(
@@ -23,7 +25,11 @@ let package = Package(
         ),
         .target(
             name: "BentoParsing",
-            dependencies: ["BentoCore"],
+            dependencies: [
+                "BentoCore",
+                .product(name: "TOMLDecoder", package: "TOMLDecoder"),
+                .product(name: "Yams", package: "Yams")
+            ],
             exclude: ["README.md"]
         ),
         .target(
@@ -111,6 +117,10 @@ let package = Package(
             name: "BentoCoreTests",
             dependencies: ["BentoCore", "BentoTestSupport"],
             exclude: ["__golden__"]
+        ),
+        .testTarget(
+            name: "BentoParsingTests",
+            dependencies: ["BentoCore", "BentoParsing", "BentoTestSupport"]
         ),
         .testTarget(
             name: "BentoUITests",

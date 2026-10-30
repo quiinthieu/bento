@@ -1,0 +1,5 @@
+# Hostile malformed TOML
+model = "gpt-5-codex"
+
+[mcp_servers.broken
+command = = "npx"

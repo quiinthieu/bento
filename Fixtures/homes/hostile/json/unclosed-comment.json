@@ -1,0 +1,7 @@
+{
+  "model": "claude-sonnet",
+  /* Unclosed block comment that runs to EOF
+  "permissions": {
+    "allow": ["Read"]
+  }
+}

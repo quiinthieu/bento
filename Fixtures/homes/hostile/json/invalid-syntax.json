@@ -1,0 +1,5 @@
+{
+  // Hostile malformed JSON: stray closing brace and trailing garbage
+  "model": "claude-sonnet",
+  "broken": [1, 2,]
+} trailing_garbage
