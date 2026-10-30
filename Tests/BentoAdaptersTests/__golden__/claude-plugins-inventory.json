@@ -1,0 +1,458 @@
+[
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "aa5083619ace69ac7f64aac242eab7222bd9bfc1a16f00cd2aec4028c276f467",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "774d228e0d6b5b326ecc3c568db14e9a66388bd0d2b4b2b4372c2cbea46a4eb3",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/settings.json",
+      "realPath" : "<HOME>/.claude/settings.json"
+    },
+    "name" : "settings.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "enabledPlugins" : {
+              "legacy-helper@acme-marketplace" : false,
+              "team-toolkit@acme-marketplace" : true
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "56c8453871a265f6d9610c884c0f781850e8282d9965c402a40617088b914291",
+    "diagnostics" : [
+
+    ],
+    "enabled" : false,
+    "id" : "73b6c307dfd1349c91f6bb880851ae192b207738473a87cf808ce482213c1d36",
+    "kind" : "plugin",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/plugins/cache/acme-marketplace/legacy-helper/0.9.0/.claude-plugin/plugin.json",
+      "realPath" : "<HOME>/.claude/plugins/cache/acme-marketplace/legacy-helper/0.9.0/.claude-plugin/plugin.json"
+    },
+    "name" : "legacy-helper",
+    "payload" : {
+      "plugin" : {
+        "_0" : {
+          "agents" : [
+
+          ],
+          "commands" : [
+
+          ],
+          "description" : "Disabled legacy plugin that should be inactive",
+          "mcpServers" : [
+
+          ],
+          "name" : "legacy-helper",
+          "skills" : [
+            "old-skill"
+          ],
+          "version" : "0.9.0"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "c4cd127afb5ff3ea53868c5e2b73525d74098b121f3c5bfee283a8d7ab1388b9",
+    "diagnostics" : [
+
+    ],
+    "enabled" : false,
+    "id" : "62aeeb4afd7caa225ded7f5a6fa62b6b5ba9598c61891a6320f6f8bcd10241fb",
+    "kind" : "skill",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/plugins/cache/acme-marketplace/legacy-helper/0.9.0/skills/old-skill/SKILL.md",
+      "realPath" : "<HOME>/.claude/plugins/cache/acme-marketplace/legacy-helper/0.9.0/skills/old-skill/SKILL.md"
+    },
+    "name" : "old-skill",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "\nLegacy instructions.\n",
+          "description" : "Deprecated workflow from disabled plugin.",
+          "frontmatter" : {
+            "description" : "Deprecated workflow from disabled plugin.",
+            "name" : "old-skill"
+          },
+          "name" : "old-skill",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "99e704d062d49d16b85bc5a3e7e33948b85c90308d374d9442e2767c3e3f6ec8",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "3c619c99b104cd8d5ddb3c1fb2080e40cff5cbd29e7ccf209abb619d73642b65",
+    "kind" : "plugin",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/.claude-plugin/plugin.json",
+      "realPath" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/.claude-plugin/plugin.json"
+    },
+    "name" : "team-toolkit",
+    "payload" : {
+      "plugin" : {
+        "_0" : {
+          "agents" : [
+            "security-auditor"
+          ],
+          "commands" : [
+            "changelog"
+          ],
+          "description" : "Shared engineering skills, agents, commands, hooks, and MCP tools",
+          "mcpServers" : [
+            "acme-tracker"
+          ],
+          "name" : "team-toolkit",
+          "skills" : [
+            "pr-audit",
+            "release-notes"
+          ],
+          "version" : "1.2.0"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "3e87b7f86764493ea2d45dc24c47efd6caf75ccb5291080d3ee80cdf8d94e038",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "c2398e4cb2e33e8609736003c4d66bb24222e3c2977d1967dbbb0526b5358a9e",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/skills/pr-audit/SKILL.md",
+      "realPath" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/skills/pr-audit/SKILL.md"
+    },
+    "name" : "pr-audit",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "\nRun the Acme reliability and observability checklist against changed files.\n",
+          "description" : "Audit pull requests against Acme reliability checklists.",
+          "frontmatter" : {
+            "description" : "Audit pull requests against Acme reliability checklists.",
+            "name" : "pr-audit"
+          },
+          "name" : "pr-audit",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "16178953b345badabeb5e6db21c2db7c399ea321d76a1ecfbe1998c9bbb29613",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "a742329ab1dca09f43b59945010c84d8b13b2c3407b4d598f571610c9c509e79",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/skills/release-notes/SKILL.md",
+      "realPath" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/skills/release-notes/SKILL.md"
+    },
+    "name" : "release-notes",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "\nCompile user-facing release notes from merged pull requests.\n",
+          "description" : "Generate release notes using the default plugin template.",
+          "frontmatter" : {
+            "description" : "Generate release notes using the default plugin template.",
+            "name" : "release-notes"
+          },
+          "name" : "release-notes",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "60a896ef68883a50ef856122e11ca21f6294bcd3d691af31337d6a53e081e360",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "aa1ad0c9560366d5563b0dc3e93e51afd4d61020b2bc3666b6e3bfdb5e0dfa36",
+    "kind" : "subagent",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/agents/security-auditor.md",
+      "realPath" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/agents/security-auditor.md"
+    },
+    "name" : "security-auditor",
+    "payload" : {
+      "subagent" : {
+        "_0" : {
+          "body" : "\nAudit auth middleware, token validation, and secret redaction boundaries.\n",
+          "description" : "Inspect authentication, authorization, and secret handling paths.",
+          "frontmatter" : {
+            "description" : "Inspect authentication, authorization, and secret handling paths.",
+            "model" : "opus",
+            "name" : "security-auditor",
+            "tools" : [
+              "Read",
+              "Grep"
+            ]
+          },
+          "model" : "opus",
+          "name" : "security-auditor",
+          "tools" : [
+            "Read",
+            "Grep"
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "2c53dd706ecad3a50f4323f3d95c8386f8db9203a1d732b641e38efe8b52a804",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "8949d5a0ed607bfe49c2b4c2906ce91abf858d81d0adffc0450f26ec06d9c152",
+    "kind" : "command",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/commands/changelog.md",
+      "realPath" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/commands/changelog.md"
+    },
+    "name" : "changelog",
+    "payload" : {
+      "command" : {
+        "_0" : {
+          "body" : "\nDraft a concise Keep a Changelog entry for the current branch.\n",
+          "description" : "Append an entry to CHANGELOG.md under Unreleased.",
+          "name" : "changelog"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "06b779b25bbc8df750c644ba4877f2bbfd045600635990d43ce7cafdab0d9038",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "e263e07d149af453d8579fcd158a7c3e6c7701c82fcbb5d7468d091f9e925849",
+    "kind" : "hook",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "hooks",
+        "PostToolUse",
+        "0",
+        "hooks",
+        "0"
+      ],
+      "path" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/hooks/hooks.json",
+      "realPath" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/hooks/hooks.json"
+    },
+    "name" : "PostToolUse (Edit|Write)",
+    "payload" : {
+      "hook" : {
+        "_0" : {
+          "command" : "${CLAUDE_PLUGIN_ROOT}/scripts/post-edit-lint.sh",
+          "event" : "PostToolUse",
+          "matcher" : "Edit|Write",
+          "timeoutSeconds" : 20
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "3694acd45c7187dbff7175e8c2d0a5972c099353c26fbe58d6e063c82fd5a00b",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "e412d1e8ccdb81c6367f31c0f6651f166538c791ba82398bda2fb81d45154a0d",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "acme-tracker"
+      ],
+      "path" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/.mcp.json",
+      "realPath" : "<HOME>/.claude/plugins/cache/acme-marketplace/team-toolkit/1.2.0/.mcp.json"
+    },
+    "name" : "acme-tracker",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+            "ACME_TRACKER_SECRET"
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "${CLAUDE_PLUGIN_ROOT}/mcp/tracker.js"
+              ],
+              "command" : "node"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "37df7ad93a572ba62a6b2cc324e7f85412c7b44abbf02ad8cc1596191d719a48",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "fe4b15dfc658f9013836067884880ce8352658ef348a3cc11c9d89681d77e17e",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/service/CLAUDE.md",
+      "realPath" : "<HOME>/repos/service/CLAUDE.md"
+    },
+    "name" : "CLAUDE.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 86,
+          "characterCount" : 86,
+          "content" : "# Service Repository Instructions\n\n- Emit structured JSON logs for all HTTP handlers.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "2bc4a0dbeedaad6e706a36e675d2b77a1e71f6e70fad3cabcee450954b2d6e51",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "cc867c1e25b7c3ceaeed9d873e08c9b5df4255500da5339b8670891c2259d516",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/service/.claude/skills/release-notes/SKILL.md",
+      "realPath" : "<HOME>/repos/service/.claude/skills/release-notes/SKILL.md"
+    },
+    "name" : "release-notes",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "\nGenerate release notes grouped by Breaking Changes, Features, and Fixes for `service`.\n",
+          "description" : "Project-specific release notes skill overriding team-toolkit.",
+          "frontmatter" : {
+            "description" : "Project-specific release notes skill overriding team-toolkit.",
+            "name" : "release-notes"
+          },
+          "name" : "release-notes",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 2
+  }
+]

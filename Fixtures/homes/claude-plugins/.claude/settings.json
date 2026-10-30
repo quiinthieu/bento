@@ -1,0 +1,6 @@
+{
+  "enabledPlugins": {
+    "team-toolkit@acme-marketplace": true,
+    "legacy-helper@acme-marketplace": false
+  }
+}

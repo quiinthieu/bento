@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "env": {
+        "MEMORY_STORAGE_PATH": "/tmp/claude-memory"
+      }
+    },
+    "docs-search": {
+      "type": "http",
+      "url": "https://docs.example.test/mcp",
+      "env": {
+        "DOCS_ACCESS_TOKEN": "TEST_SYNTHETIC_TOKEN_PLACEHOLDER"
+      }
+    }
+  }
+}

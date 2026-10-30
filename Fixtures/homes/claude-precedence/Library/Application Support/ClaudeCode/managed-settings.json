@@ -1,0 +1,8 @@
+{
+  "model": "claude-opus-4-6",
+  "deniedMcpServers": [
+    {
+      "serverName": "blocked-mcp"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "corp-gateway": {
+      "type": "http",
+      "url": "https://mcp.corp.example.test/v1"
+    }
+  }
+}

@@ -123,6 +123,11 @@ let package = Package(
             dependencies: ["BentoCore", "BentoParsing", "BentoTestSupport"]
         ),
         .testTarget(
+            name: "BentoAdaptersTests",
+            dependencies: ["BentoCore", "BentoParsing", "BentoAdapters", "BentoTestSupport"],
+            exclude: ["__golden__"]
+        ),
+        .testTarget(
             name: "BentoUITests",
             dependencies: ["BentoCore", "BentoUI"]
         )

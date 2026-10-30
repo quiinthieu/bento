@@ -1,0 +1,902 @@
+[
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "013b4c168ef88d7e981462b1e40fbd8a024affa278be653f8fb859230b9527f8",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "44bfb899cc4a444162e38c67861aec3a10df061dcc56bcec6c41ed441da748c2",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/Library/Application Support/ClaudeCode/managed-settings.json",
+      "realPath" : "<HOME>/Library/Application Support/ClaudeCode/managed-settings.json"
+    },
+    "name" : "managed-settings.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "deniedMcpServers" : [
+              {
+                "serverName" : "blocked-mcp"
+              }
+            ],
+            "model" : "claude-opus-4-6"
+          }
+        }
+      }
+    },
+    "scope" : 0
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "41d9eec6ea1f798dcc6c4ed7f97ad36ba4f72aa333f146ad78babade2180861e",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "e1a63e864942f3abdd3308b82c1986ced2ff233294f08d42cb77ff85f89d02ae",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "corp-gateway"
+      ],
+      "path" : "<HOME>/Library/Application Support/ClaudeCode/managed-mcp.json",
+      "realPath" : "<HOME>/Library/Application Support/ClaudeCode/managed-mcp.json"
+    },
+    "name" : "corp-gateway",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "http" : {
+              "url" : "https://mcp.corp.example.test/v1"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 0
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "24df293c133a00a3d59e4242a123c865536c33a5d54049ae4494405048b8a17a",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "08d25b4d5aae3fb2273dd7ce21e1c1cdfb23bbaeb518f89f637502df621f52a8",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/Library/Application Support/ClaudeCode/CLAUDE.md",
+      "realPath" : "<HOME>/Library/Application Support/ClaudeCode/CLAUDE.md"
+    },
+    "name" : "CLAUDE.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 97,
+          "characterCount" : 97,
+          "content" : "# Enterprise Managed Policy\n\n- Never transmit customer PII outside approved corporate endpoints.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 0
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "7f46c72d11a0ca21960716880a8d571d13f40227307e948b4f52871fb01242e0",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "774d228e0d6b5b326ecc3c568db14e9a66388bd0d2b4b2b4372c2cbea46a4eb3",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/settings.json",
+      "realPath" : "<HOME>/.claude/settings.json"
+    },
+    "name" : "settings.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "enableAllProjectMcpServers" : false,
+            "model" : "claude-haiku-4-5"
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "5603f7f82fc59df0010ec96432942c1262f5341c8c231be636fcd5027989dcc0",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "dcfd15a708fe469159e3e39e91586462c91d20d368a93c631588ea1267ca65cb",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "blocked-mcp"
+      ],
+      "path" : "<HOME>/.claude.json",
+      "realPath" : "<HOME>/.claude.json"
+    },
+    "name" : "blocked-mcp",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@example/blocked-server"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "5603f7f82fc59df0010ec96432942c1262f5341c8c231be636fcd5027989dcc0",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "a794741a766343149f62c0df105b10701f4f1b46e030bda5fecec1012ef70033",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "corp-gateway"
+      ],
+      "path" : "<HOME>/.claude.json",
+      "realPath" : "<HOME>/.claude.json"
+    },
+    "name" : "corp-gateway",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "http" : {
+              "url" : "https://personal-override-attempt.example.test/v1"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "5603f7f82fc59df0010ec96432942c1262f5341c8c231be636fcd5027989dcc0",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "290063c226199bef2f883ad8a45ed0e52f8e6623e307ae2afce81bd3b39aa634",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "github"
+      ],
+      "path" : "<HOME>/.claude.json",
+      "realPath" : "<HOME>/.claude.json"
+    },
+    "name" : "github",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@modelcontextprotocol/server-github",
+                "--personal"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "5603f7f82fc59df0010ec96432942c1262f5341c8c231be636fcd5027989dcc0",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "8a0700a1aef1ee8c903a42cfbd4fdb3b83fd73e8b4a7cc861be6c15c5f2d1bd3",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "projects",
+        "~/repos/payments",
+        "mcpServers",
+        "github"
+      ],
+      "path" : "<HOME>/.claude.json",
+      "realPath" : "<HOME>/.claude.json"
+    },
+    "name" : "github",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@modelcontextprotocol/server-github",
+                "--payments-local"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 1
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "888f4a0d7d05cc12ab97770b3ec90eabdf73f9c3813d3be132b944c745a6f305",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "4fce622d1c78c08649fd48dd4432d32d59b56fcc041b39c3ec3bd511aea7d375",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/CLAUDE.md",
+      "realPath" : "<HOME>/.claude/CLAUDE.md"
+    },
+    "name" : "CLAUDE.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 74,
+          "characterCount" : 74,
+          "content" : "# User Claude Memory\n\n- Prefer explicit error types over untyped strings.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "18f684fb7d6a32f403795e7c673ee0f8abc3cabfc4b628143af01432eafc22c2",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "b932f6302ac313f68aee240150f6a509293aedb6978d6295780cee7e736dbe53",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/skills/deploy/SKILL.md",
+      "realPath" : "<HOME>/.claude/skills/deploy/SKILL.md"
+    },
+    "name" : "deploy",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "\nRun personal pre-deploy smoke checks.\n",
+          "description" : "Generic personal deploy checklist.",
+          "frontmatter" : {
+            "description" : "Generic personal deploy checklist.",
+            "name" : "deploy"
+          },
+          "name" : "deploy",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "346bc2635499120973665657edfec80558045368f4ac3f70496ce4958e9674ee",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "fac283ca51c9324f2ed51b5a6c3c74b4af8c4622eda63e1ffcae8c6f84c1c21e",
+    "kind" : "subagent",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/agents/architect.md",
+      "realPath" : "<HOME>/.claude/agents/architect.md"
+    },
+    "name" : "architect",
+    "payload" : {
+      "subagent" : {
+        "_0" : {
+          "body" : "\nReview module boundaries using personal defaults.\n",
+          "description" : "Personal architecture review subagent.",
+          "frontmatter" : {
+            "description" : "Personal architecture review subagent.",
+            "model" : "sonnet",
+            "name" : "architect"
+          },
+          "model" : "sonnet",
+          "name" : "architect"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "6237ef010c9761cf60185e90e9f7986360a73681ce8215f942ec4245f92b0ec2",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "c626fecc9d869fd870c762bd825f8150beec864954ffa3567af2b44c2bb4c375",
+    "kind" : "command",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/commands/verify.md",
+      "realPath" : "<HOME>/.claude/commands/verify.md"
+    },
+    "name" : "verify",
+    "payload" : {
+      "command" : {
+        "_0" : {
+          "body" : "\nRun unit tests and linter.\n",
+          "description" : "Run personal verification checks.",
+          "name" : "verify"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "40b7572e3911745a9e0a24ea4bca30fa357d60415958f2bb26cd827b3890b333",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "f2cf0d336bd60843baf1f406d4bd8cfcef42430c3a95d2b33ab770a850cdb908",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/payments/.claude/settings.json",
+      "realPath" : "<HOME>/repos/payments/.claude/settings.json"
+    },
+    "name" : "settings.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "enableAllProjectMcpServers" : true,
+            "model" : "claude-sonnet-4-5"
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "ccf3bbcd3c00188d653651e062c8f8a96d590fe8f2a95dd502f58ec0a01b8a8c",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "3f20710050d2ed2a72c9ba96c86a6d8b41e76b44aa1b9cad6188dcf7666066b7",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/payments/.claude/settings.local.json",
+      "realPath" : "<HOME>/repos/payments/.claude/settings.local.json"
+    },
+    "name" : "settings.local.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "enabledMcpjsonServers" : [
+              "stripe-sandbox"
+            ]
+          }
+        }
+      }
+    },
+    "scope" : 1
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "a35e7b2d8c7df1afea6a5f4f7141024678dd3b592c3c737555b4c7b0a6b860e9",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "3907b129f5e2eaa794a02d445b7350d85548ba16f287fec87e9cdd2381bc3af4",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "disabled-in-local"
+      ],
+      "path" : "<HOME>/repos/payments/.mcp.json",
+      "realPath" : "<HOME>/repos/payments/.mcp.json"
+    },
+    "name" : "disabled-in-local",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "./scripts/optional-mcp.js"
+              ],
+              "command" : "node"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "a35e7b2d8c7df1afea6a5f4f7141024678dd3b592c3c737555b4c7b0a6b860e9",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "c2a98a73d5dbd1fa6da96c71dbce18aa3feea62fcef8854bc1501d1a9ec4420a",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "github"
+      ],
+      "path" : "<HOME>/repos/payments/.mcp.json",
+      "realPath" : "<HOME>/repos/payments/.mcp.json"
+    },
+    "name" : "github",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@modelcontextprotocol/server-github",
+                "--project-shared"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "a35e7b2d8c7df1afea6a5f4f7141024678dd3b592c3c737555b4c7b0a6b860e9",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "a5d570b2766c941a303092e97e235a90a4e8e3cae4f5cd0d1ec40ceae26b3551",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "self-approved-attempt"
+      ],
+      "path" : "<HOME>/repos/payments/.mcp.json",
+      "realPath" : "<HOME>/repos/payments/.mcp.json"
+    },
+    "name" : "self-approved-attempt",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "sse" : {
+              "url" : "https://untrusted.example.test/sse"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "a35e7b2d8c7df1afea6a5f4f7141024678dd3b592c3c737555b4c7b0a6b860e9",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "e843f090b0784af2e907abc720ca216ef2e73f87dcb8396a67c16a612a5f75ba",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "stripe-sandbox"
+      ],
+      "path" : "<HOME>/repos/payments/.mcp.json",
+      "realPath" : "<HOME>/repos/payments/.mcp.json"
+    },
+    "name" : "stripe-sandbox",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "http" : {
+              "url" : "https://mcp.stripe-sandbox.example.test/v1"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "d7c4dab8c4104495bdd3e5ac1b0bada0fb9cab81acc64790d84462e736d069a9",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "048c4b7bcadfb656af9b98bebb5446450bdf177adc6626253dbdce0b40020b72",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/payments/CLAUDE.md",
+      "realPath" : "<HOME>/repos/payments/CLAUDE.md"
+    },
+    "name" : "CLAUDE.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 91,
+          "characterCount" : 91,
+          "content" : "# Payments Repository Rules\n\n- Require idempotency keys on all payment mutation endpoints.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "b7fd3f91a180757fd268b3082d64bb7cbd699ca966a1ab775c5e7811859f4aaa",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "79e1933182c5ded2205645f3a853135bc8f840cbddea2930f189c76875f37e76",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/payments/CLAUDE.local.md",
+      "realPath" : "<HOME>/repos/payments/CLAUDE.local.md"
+    },
+    "name" : "CLAUDE.local.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 68,
+          "characterCount" : 68,
+          "content" : "# Local Payments Sandbox\n\n- Use mock Stripe webhook secret locally.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 1
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "135c6d87f028766ca9f47e7d3d6eb5225599de92b116badd169e30daad627142",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "b5e28c0bf2e21879951803cb8732927b10ecb409c7139bb97e822f0e4a9be6af",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/payments/.claude/skills/deploy/SKILL.md",
+      "realPath" : "<HOME>/repos/payments/.claude/skills/deploy/SKILL.md"
+    },
+    "name" : "deploy",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "\nVerify PCI audit gates before promoting payments builds.\n",
+          "description" : "Payments PCI-compliant staged deployment workflow.",
+          "frontmatter" : {
+            "description" : "Payments PCI-compliant staged deployment workflow.",
+            "name" : "deploy"
+          },
+          "name" : "deploy",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "c5074de6c80d9c14ce7165085e155ab4062ccab661d07160c275a74437d48250",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "29f0c166f9911ec4486e5955b1db6c61b45c70deb3ac834327759a75520898ba",
+    "kind" : "subagent",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/payments/.claude/agents/architect.md",
+      "realPath" : "<HOME>/repos/payments/.claude/agents/architect.md"
+    },
+    "name" : "architect",
+    "payload" : {
+      "subagent" : {
+        "_0" : {
+          "body" : "\nEnforce double-entry accounting invariants across ledger transactions.\n",
+          "description" : "Payments domain architect enforcing double-entry ledger invariants.",
+          "frontmatter" : {
+            "description" : "Payments domain architect enforcing double-entry ledger invariants.",
+            "model" : "opus",
+            "name" : "architect",
+            "tools" : "Read, Grep"
+          },
+          "model" : "opus",
+          "name" : "architect",
+          "tools" : [
+            "Read",
+            "Grep"
+          ]
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "d90526242ebb51cbf7fa4ba5de6cf8f97856955f90a4d448bb58cd45f351215b",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "5d0c39018d96eac181f3dec93d407f779c05a37fcfdaf442db3e37a26c74f39f",
+    "kind" : "command",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/payments/.claude/commands/verify.md",
+      "realPath" : "<HOME>/repos/payments/.claude/commands/verify.md"
+    },
+    "name" : "verify",
+    "payload" : {
+      "command" : {
+        "_0" : {
+          "body" : "\nRun ledger invariant checks and payment gateway contract tests.\n",
+          "description" : "Run payments reconciliation and integration verification suite.",
+          "name" : "verify"
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "39e50c3e30ff5dc3a6e27b273514a519eb867ad95e51c639e043fc25e126f0ee",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "52cae15cd687f9ed772e636b627b4feffde15d4adf0c4dfa026754e928a81cde",
+    "kind" : "rules",
+    "loadMode" : {
+      "conditional" : {
+        "globs" : [
+          "services/ledger/**"
+        ]
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/payments/services/ledger/CLAUDE.md",
+      "realPath" : "<HOME>/repos/payments/services/ledger/CLAUDE.md"
+    },
+    "name" : "CLAUDE.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 115,
+          "characterCount" : 115,
+          "content" : "# Ledger Service Subdirectory Rules\n\n- Every journal entry must balance debits and credits in integer minor units.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 3
+  }
+]
