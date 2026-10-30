@@ -1,0 +1,4 @@
+// Copy to Config/Signing.xcconfig (gitignored) for local Developer ID signing.
+DEVELOPMENT_TEAM =
+CODE_SIGN_STYLE = Automatic
+CODE_SIGN_IDENTITY = -

@@ -1,0 +1,115 @@
+// swift-tools-version: 6.0
+
+import PackageDescription
+
+let package = Package(
+    name: "Bento",
+    platforms: [
+        .macOS(.v15)
+    ],
+    products: [
+        .library(name: "BentoCore", targets: ["BentoCore"]),
+        .library(name: "BentoUI", targets: ["BentoUI"]),
+        .executable(name: "bentoctx", targets: ["bentoctx"])
+    ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0")
+    ],
+    targets: [
+        .target(
+            name: "BentoCore",
+            dependencies: [],
+            exclude: ["README.md"]
+        ),
+        .target(
+            name: "BentoParsing",
+            dependencies: ["BentoCore"],
+            exclude: ["README.md"]
+        ),
+        .target(
+            name: "BentoAdapters",
+            dependencies: ["BentoCore", "BentoParsing"],
+            exclude: ["README.md"]
+        ),
+        .target(
+            name: "BentoScanner",
+            dependencies: ["BentoCore", "BentoAdapters"],
+            exclude: ["README.md"]
+        ),
+        .target(
+            name: "BentoTokenizer",
+            dependencies: ["BentoCore"],
+            exclude: ["README.md"]
+        ),
+        .target(
+            name: "BentoLogIngest",
+            dependencies: ["BentoCore", "BentoParsing"],
+            exclude: ["README.md"]
+        ),
+        .target(
+            name: "BentoMCPProbe",
+            dependencies: ["BentoCore"],
+            exclude: ["README.md"]
+        ),
+        .target(
+            name: "BentoHygiene",
+            dependencies: ["BentoCore", "BentoParsing", "BentoTokenizer"],
+            exclude: ["README.md"]
+        ),
+        .target(
+            name: "BentoStore",
+            dependencies: ["BentoCore"],
+            exclude: ["README.md"]
+        ),
+        .target(
+            name: "BentoFixes",
+            dependencies: ["BentoCore", "BentoParsing", "BentoStore"],
+            exclude: ["README.md"]
+        ),
+        .target(
+            name: "BentoUI",
+            dependencies: [
+                "BentoCore",
+                "BentoScanner",
+                "BentoLogIngest",
+                "BentoTokenizer",
+                "BentoMCPProbe",
+                "BentoHygiene",
+                "BentoFixes",
+                "BentoStore"
+            ],
+            exclude: ["README.md"]
+        ),
+        .executableTarget(
+            name: "bentoctx",
+            dependencies: [
+                "BentoCore",
+                "BentoScanner",
+                "BentoLogIngest",
+                "BentoTokenizer",
+                "BentoMCPProbe",
+                "BentoHygiene",
+                "BentoFixes",
+                "BentoStore",
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
+            ],
+            path: "Sources/BentoCLI",
+            exclude: ["README.md"]
+        ),
+        .executableTarget(
+            name: "BentoApp",
+            dependencies: ["BentoUI"],
+            path: "Sources/BentoApp",
+            exclude: ["README.md"]
+        ),
+        .testTarget(
+            name: "BentoCoreTests",
+            dependencies: ["BentoCore"]
+        ),
+        .testTarget(
+            name: "BentoUITests",
+            dependencies: ["BentoCore", "BentoUI"]
+        )
+    ],
+    swiftLanguageModes: [.v6]
+)

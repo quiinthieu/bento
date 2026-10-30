@@ -1,0 +1,15 @@
+// Single source of truth for product naming and identifiers.
+// Keep synchronized with Sources/BentoCore/Product.swift.
+
+BENTO_PRODUCT_NAME = Bento
+BENTO_BUNDLE_ID = com.quiinthieu.bento
+BENTO_CLI_NAME = bentoctx
+BENTO_SUPPORT_DIR_NAME = Bento
+BENTO_VERSION = 0.1.0
+BENTO_BUILD_NUMBER = 1
+
+PRODUCT_NAME = $(BENTO_PRODUCT_NAME)
+PRODUCT_BUNDLE_IDENTIFIER = $(BENTO_BUNDLE_ID)
+MARKETING_VERSION = $(BENTO_VERSION)
+CURRENT_PROJECT_VERSION = $(BENTO_BUILD_NUMBER)
+MACOSX_DEPLOYMENT_TARGET = 15.0

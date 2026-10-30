@@ -1,0 +1,48 @@
+name: Bento
+configFiles:
+  Debug: Config/Product.xcconfig
+  Release: Config/Product.xcconfig
+options:
+  bundleIdPrefix: com.quiinthieu
+  deploymentTarget:
+    macOS: "15.0"
+  minimumXcodeGenVersion: "2.38.0"
+packages:
+  BentoPackage:
+    path: .
+targets:
+  BentoMacApp:
+    type: application
+    platform: macOS
+    deploymentTarget: "15.0"
+    configFiles:
+      Debug: Config/Product.xcconfig
+      Release: Config/Product.xcconfig
+    sources:
+      - path: XcodeApp
+    settings:
+      base:
+        PRODUCT_NAME: $(BENTO_PRODUCT_NAME)
+        PRODUCT_BUNDLE_IDENTIFIER: $(BENTO_BUNDLE_ID)
+        MARKETING_VERSION: $(BENTO_VERSION)
+        CURRENT_PROJECT_VERSION: $(BENTO_BUILD_NUMBER)
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_ENTITLEMENTS: Config/Bento.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: $(BENTO_PRODUCT_NAME)
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - package: BentoPackage
+        product: BentoUI
+      - package: BentoPackage
+        product: BentoCore
+schemes:
+  BentoMacApp:
+    build:
+      targets:
+        BentoMacApp: all

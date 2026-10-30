@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: macOS Build, Test & Lint
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 16
+        run: |
+          if [ -d "/Applications/Xcode_16.4.app" ]; then
+            sudo xcode-select -s "/Applications/Xcode_16.4.app"
+          elif [ -d "/Applications/Xcode_16.3.app" ]; then
+            sudo xcode-select -s "/Applications/Xcode_16.3.app"
+          elif [ -d "/Applications/Xcode_16.2.app" ]; then
+            sudo xcode-select -s "/Applications/Xcode_16.2.app"
+          fi
+          swift --version
+          xcodebuild -version
+
+      - name: Run write-isolation lint & self-test
+        run: |
+          Scripts/lint-writes.sh
+          Scripts/test-lint-writes.sh
+
+      - name: Check Swift formatting
+        run: swift format lint --strict -r Package.swift Sources Tests XcodeApp
+
+      - name: Swift Package build (warnings as errors)
+        run: swift build -Xswiftc -warnings-as-errors
+
+      - name: Swift Package test
+        run: swift test --parallel -Xswiftc -warnings-as-errors
+
+      - name: Install XcodeGen if needed
+        run: which xcodegen >/dev/null 2>&1 || brew install xcodegen
+
+      - name: Generate Xcode project and build macOS App target
+        run: |
+          xcodegen generate
+          xcodebuild \
+            -project Bento.xcodeproj \
+            -scheme BentoMacApp \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
