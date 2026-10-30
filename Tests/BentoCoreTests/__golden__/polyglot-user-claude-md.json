@@ -1,0 +1,34 @@
+{
+  "agent" : "claudeCode",
+  "contentHash" : "0903db99e3f1353af91e2151bd63891cb0a3863cdc22fe41670c6d7bbf4d74cb",
+  "diagnostics" : [
+
+  ],
+  "enabled" : true,
+  "id" : "4fce622d1c78c08649fd48dd4432d32d59b56fcc041b39c3ec3bd511aea7d375",
+  "kind" : "rules",
+  "loadMode" : {
+    "always" : {
+
+    }
+  },
+  "location" : {
+    "path" : "<HOME>/.claude/CLAUDE.md",
+    "realPath" : "<HOME>/.claude/CLAUDE.md"
+  },
+  "name" : "CLAUDE.md",
+  "payload" : {
+    "rules" : {
+      "_0" : {
+        "byteCount" : 128,
+        "characterCount" : 128,
+        "content" : "# Global Claude Instructions\n\n- Always run unit tests before committing changes.\n- Use 4 spaces for indentation in Swift files.\n",
+        "imports" : [
+
+        ],
+        "wasTruncated" : false
+      }
+    }
+  },
+  "scope" : 4
+}

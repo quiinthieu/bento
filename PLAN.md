@@ -607,7 +607,7 @@ Each task is sized for one agent session (~0.5–2 days of agent work). Tick `[x
 ### M0 Skeleton
 - [x] **T01 Package & tooling skeleton.** Create `Package.swift` with all targets in §3.1 (empty stubs), `Product.swift`, `Config/Product.xcconfig`, a XcodeGen `Project.yml` for the App target, CI workflow, `swift-format` config, `Scripts/lint-writes.sh`, and `DependencyGraphTests`.
   *AC:* `swift build && swift test` is green on macOS 15. The app launches an empty window titled from `Product.name`. Changing `Product.name` renames the window and CLI help. The lint script fails on a deliberately added `Data.write` in Core (verified by a test script). CI is green.
-- [ ] **T02 Core models + ReadOnlyFileSystem + fixture harness.** Implement the §4.1 types, `ArtifactID` hashing, `AgentEnvironment`, `LocalReadOnlyFileSystem`, `FixtureHome` test helper, the `empty/` and `polyglot/` skeleton fixtures, and the golden-file helper.
+- [x] **T02 Core models + ReadOnlyFileSystem + fixture harness.** Implement the §4.1 types, `ArtifactID` hashing, `AgentEnvironment`, `LocalReadOnlyFileSystem`, `FixtureHome` test helper, the `empty/` and `polyglot/` skeleton fixtures, and the golden-file helper.
   *AC:* Codable round-trip tests for all models. Stable IDs are covered by a test. The golden helper records and compares.
 
 ### M1 Inventory & resolution

@@ -1,0 +1,8 @@
+---
+description: Code style guidelines
+globs: ["**/*.ts"]
+alwaysApply: true
+---
+
+- Use spaces for indentation across all source files.
+- Use pnpm for JavaScript package management.
