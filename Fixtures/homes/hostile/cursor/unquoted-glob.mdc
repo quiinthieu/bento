@@ -1,0 +1,10 @@
+---
+description: Swift concurrency and formatting rules
+globs: *.swift, Sources/**/*.swift
+alwaysApply: false
+---
+
+# Swift Conventions
+
+- Use 4 spaces for indentation in Swift files.
+- Annotate UI view models with `@MainActor`.

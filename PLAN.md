@@ -611,7 +611,7 @@ Each task is sized for one agent session (~0.5–2 days of agent work). Tick `[x
   *AC:* Codable round-trip tests for all models. Stable IDs are covered by a test. The golden helper records and compares.
 
 ### M1 Inventory & resolution
-- [ ] **T03 Parsing module.** JSON (with comments tolerance), TOML (ADR choosing the lib), YAML frontmatter, `.mdc`, markdown rule-unit splitter, `@import` resolver (Claude/Gemini syntax, cycle detection, max depth), secret redaction.
+- [x] **T03 Parsing module.** JSON (with comments tolerance), TOML (ADR choosing the lib), YAML frontmatter, `.mdc`, markdown rule-unit splitter, `@import` resolver (Claude/Gemini syntax, cycle detection, max depth), secret redaction.
   *AC:* parser tests include malformed inputs from `hostile/`. Redaction tests prove that no secret values survive in `payload_json`.
 - [ ] **T04 Claude Code adapter.** PathCatalog, discover, resolve (precedence, `.mcp.json` approval, nested CLAUDE.md, rules dir, skills/plugins/agents/commands/hooks), `Docs/adapters/claude-code.md` with verified doc links.
   *AC:* `claude-basic`, `claude-plugins` and `claude-precedence` goldens pass. Contract tests pass. Shadowing reasons are present.
