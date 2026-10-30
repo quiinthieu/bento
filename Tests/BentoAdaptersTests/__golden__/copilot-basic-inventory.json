@@ -1,0 +1,969 @@
+[
+  {
+    "agent" : "copilot",
+    "contentHash" : "63ce5953a227b6f2f02590f584d3c0058eec011661533fa5033b2e3fa8870982",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "fb11bde83abdb3ac8b5b1ef3b5c369a4e6b3f635d5870c15442782d5afe503fb",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.copilot/config.json",
+      "realPath" : "<HOME>/.copilot/config.json"
+    },
+    "name" : "config.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "github_token" : "«redacted»",
+            "model" : "claude-sonnet-4",
+            "trusted_folders" : [
+              "~/repos/octocat-api",
+              "~/repos/missing-ghost-repo"
+            ]
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "c23e8a03a5d4f590d4543ecfdeabc9e3a416ada6b50651780923c2b804981906",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "6647be24ddc7a7dc10b833662a30db2921f86885efc6a005cbd7d273187dbf22",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.copilot/settings.json",
+      "realPath" : "<HOME>/.copilot/settings.json"
+    },
+    "name" : "settings.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "hooks" : {
+              "sessionStart" : [
+                {
+                  "bash" : "echo copilot-session-start",
+                  "timeoutSec" : 10,
+                  "type" : "command"
+                }
+              ]
+            },
+            "theme" : "dark"
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "c23e8a03a5d4f590d4543ecfdeabc9e3a416ada6b50651780923c2b804981906",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "94ea75191b09d9f5e5edd4f2fdc5d19db6d9caa284f4031bd6bee809f9b0da6c",
+    "kind" : "hook",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "hooks",
+        "sessionStart",
+        "0"
+      ],
+      "path" : "<HOME>/.copilot/settings.json",
+      "realPath" : "<HOME>/.copilot/settings.json"
+    },
+    "name" : "sessionStart",
+    "payload" : {
+      "hook" : {
+        "_0" : {
+          "command" : "echo copilot-session-start",
+          "event" : "sessionStart",
+          "timeoutSeconds" : 10
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "e1094abc5f72c99312f977b8d9c3bf788a3fc67fcb6b259a9dd786d4a31ab2a9",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "246e750351c8e9a9af613c2f3a4f50d12b444f7e720c9d98c3404dfeecf20d09",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.copilot/copilot-instructions.md",
+      "realPath" : "<HOME>/.copilot/copilot-instructions.md"
+    },
+    "name" : "copilot-instructions.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 165,
+          "characterCount" : 165,
+          "content" : "# Personal Copilot CLI Instructions\n\n- Prefer concise diffs and run unit tests before summarizing changes.\n- Explain trade-offs when modifying public API contracts.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "d434aa2feb8591a06d59d36308af2c02ebf0f3a094da6307d9b100b8fdd8e474",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "e0ecea37e6aec6a84d0eca29c87d44dad42f31065b88af3955b4e936d14de0d9",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "github-personal"
+      ],
+      "path" : "<HOME>/.copilot/mcp-config.json",
+      "realPath" : "<HOME>/.copilot/mcp-config.json"
+    },
+    "name" : "github-personal",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+            "GITHUB_PERSONAL_ACCESS_TOKEN"
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@github/mcp-server"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "d434aa2feb8591a06d59d36308af2c02ebf0f3a094da6307d9b100b8fdd8e474",
+    "diagnostics" : [
+
+    ],
+    "enabled" : false,
+    "id" : "b01eb91489d08a62b0e4fda35a8e06bed5fc23337f131b5bec8a9bb58b7d50c6",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "legacy-db"
+      ],
+      "path" : "<HOME>/.copilot/mcp-config.json",
+      "realPath" : "<HOME>/.copilot/mcp-config.json"
+    },
+    "name" : "legacy-db",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : true,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "mcp-legacy-db"
+              ],
+              "command" : "uvx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "d434aa2feb8591a06d59d36308af2c02ebf0f3a094da6307d9b100b8fdd8e474",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "cfa26debc8148b29071d263c5f27632ce5bf667eab359f207e1d74047236b437",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "observability"
+      ],
+      "path" : "<HOME>/.copilot/mcp-config.json",
+      "realPath" : "<HOME>/.copilot/mcp-config.json"
+    },
+    "name" : "observability",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "allowedTools" : [
+            "query_metrics",
+            "list_alerts"
+          ],
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "http" : {
+              "url" : "https://telemetry.personal.example.test/mcp"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "36ead83464266113114befc4d6eb71f0be0b63f538d6c886792dd2197934d26e",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "a60098df1e7a1f8a5e3429343dc8ee62f1652c20fe173fb5b54cfc3098d02b3b",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.agents/skills/pr-triage/SKILL.md",
+      "realPath" : "<HOME>/.agents/skills/pr-triage/SKILL.md"
+    },
+    "name" : "pr-triage",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "\n1. Verify linked issue and acceptance criteria.\n2. Check CI test matrix and migration safety.\n",
+          "description" : "Triages pull requests using cross-agent personal checklist",
+          "frontmatter" : {
+            "description" : "Triages pull requests using cross-agent personal checklist",
+            "name" : "pr-triage"
+          },
+          "name" : "pr-triage",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "593efeccba114d0fb8d497ff7a3729411d178b7cba09b14ee9a31b4548271922",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "a7de3fbae896cd0e387a1f04b29c152b490ff1fbf094951ec7841ce709ed0ede",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.copilot/skills/changelog-writer/SKILL.md",
+      "realPath" : "<HOME>/.copilot/skills/changelog-writer/SKILL.md"
+    },
+    "name" : "changelog-writer",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "\nSummarize user-visible additions, fixes, and breaking changes.\n",
+          "description" : "Drafts Keep a Changelog entries from merged pull requests",
+          "frontmatter" : {
+            "description" : "Drafts Keep a Changelog entries from merged pull requests",
+            "name" : "changelog-writer"
+          },
+          "name" : "changelog-writer",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "dba1be2b56136c59cde7a5ef4b491595cb2c9d92126832175bf4716bd96a2308",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "9f79d740bbbe2bc88e6eeb4f69a56804ca45e5ba5262181217c9d96045068e39",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.copilot/skills/pr-triage/SKILL.md",
+      "realPath" : "<HOME>/.copilot/skills/pr-triage/SKILL.md"
+    },
+    "name" : "pr-triage",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "\n1. Legacy triage workflow.\n",
+          "description" : "Legacy Copilot-only PR triage skill shadowed by .agents/skills",
+          "frontmatter" : {
+            "description" : "Legacy Copilot-only PR triage skill shadowed by .agents/skills",
+            "name" : "pr-triage"
+          },
+          "name" : "pr-triage",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "fab46238a664dc6bc3c64a6801254875a8d00dfd7fa06e909387fef138d58c3b",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "949e4989dcec8159e4709b345770cacdacd82e3fe2e92f2f77265b231085028b",
+    "kind" : "subagent",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.copilot/agents/docs-editor.agent.md",
+      "realPath" : "<HOME>/.copilot/agents/docs-editor.agent.md"
+    },
+    "name" : "docs-editor",
+    "payload" : {
+      "subagent" : {
+        "_0" : {
+          "body" : "\nKeep documentation concise, accurate, and aligned with current CLI flags.\n",
+          "description" : "Reviews Markdown documentation for clarity and accuracy",
+          "frontmatter" : {
+            "description" : "Reviews Markdown documentation for clarity and accuracy",
+            "name" : "docs-editor",
+            "tools" : [
+              "read",
+              "edit"
+            ]
+          },
+          "name" : "docs-editor",
+          "tools" : [
+            "read",
+            "edit"
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "af6f885246cf1f75afd1dc60574461db998ff79ebda6e3c79a1be4cc6d6e8be3",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "af8b8dab3c1122977e32e1b746240548605b1b6f6631642c4506e59b9359e188",
+    "kind" : "subagent",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.copilot/agents/security-reviewer.agent.md",
+      "realPath" : "<HOME>/.copilot/agents/security-reviewer.agent.md"
+    },
+    "name" : "security-reviewer",
+    "payload" : {
+      "subagent" : {
+        "_0" : {
+          "body" : "\nAudit changes for credential leaks and injection risks.\n",
+          "description" : "Personal baseline security reviewer shadowed by repository security-reviewer",
+          "frontmatter" : {
+            "description" : "Personal baseline security reviewer shadowed by repository security-reviewer",
+            "model" : "claude-sonnet-4",
+            "tools" : [
+              "read",
+              "search"
+            ]
+          },
+          "model" : "claude-sonnet-4",
+          "name" : "security-reviewer",
+          "tools" : [
+            "read",
+            "search"
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "258f9dc78bf8f09233e673eadf42206216af228448139a91d7afeaf8fe4986aa",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "bfceeabc3578e66703cef596bb75506fe0d1aad1da967021875b6bb8e650cee3",
+    "kind" : "hook",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "hooks",
+        "preToolUse",
+        "0"
+      ],
+      "path" : "<HOME>/.copilot/hooks/audit.json",
+      "realPath" : "<HOME>/.copilot/hooks/audit.json"
+    },
+    "name" : "preToolUse",
+    "payload" : {
+      "hook" : {
+        "_0" : {
+          "command" : "./scripts/verify-tool.sh",
+          "event" : "preToolUse",
+          "timeoutSeconds" : 15
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "019723f006ad0350cffa00020a0aaf4cdb07885f8af3614c58ee733674bc3e64",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "b48ea409fe4f518b67ac4710b9c6b80c4ef57221a89d0810d989fcd19f3f18a0",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/octocat-api/.github/copilot-instructions.md",
+      "realPath" : "<HOME>/repos/octocat-api/.github/copilot-instructions.md"
+    },
+    "name" : "copilot-instructions.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 197,
+          "characterCount" : 197,
+          "content" : "# Octocat API Repository Copilot Instructions\n\n- All REST endpoints must validate input schemas and return RFC 7807 problem details.\n- Maintain strict backwards compatibility across v2 API routes.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "c5be768ca75b16af7528d5d00842b95ea9155803779b0e27130f501d309619f8",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "d9b72eab97a51a65f43b0ea9a32e96f623ac7f871430de56aac9962f1f003659",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/octocat-api/AGENTS.md",
+      "realPath" : "<HOME>/repos/octocat-api/AGENTS.md"
+    },
+    "name" : "AGENTS.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 141,
+          "characterCount" : 141,
+          "content" : "# Octocat API Agent Guidelines\n\n- Run `swift test --parallel` before opening pull requests.\n- Document every public module in its README.md.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "f632b133050827ea8c360c15f7b42dbe7c8dea33238aeb7bf06f2b50b062ce7c",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "33e9b11d62c9f49dd50062eac0c4892cae1cfc4b95cdc23fe34cec8aabddaaed",
+    "kind" : "rules",
+    "loadMode" : {
+      "conditional" : {
+        "globs" : [
+          "db/migrations/**/*.sql"
+        ]
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/octocat-api/.github/instructions/migrations.instructions.md",
+      "realPath" : "<HOME>/repos/octocat-api/.github/instructions/migrations.instructions.md"
+    },
+    "name" : "migrations.instructions.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 228,
+          "characterCount" : 228,
+          "content" : "\n## Database Migration Instructions\n\n- Wrap DDL statements in explicit transactions where supported.\n- Never drop production columns in the same release as application code removal.\n",
+          "frontmatter" : {
+            "applyTo" : [
+              "db/migrations/**/*.sql"
+            ]
+          },
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "63d7ae88893a0e254c2447d0efb2e257a3351cc55010c16a7a603047dfe11246",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "df74b597197c1c592053ba68697e905681ac9efd0f79e80069fad9455917347c",
+    "kind" : "rules",
+    "loadMode" : {
+      "conditional" : {
+        "globs" : [
+          "Sources/**/*.swift",
+          "Tests/**/*.swift"
+        ]
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/octocat-api/.github/instructions/swift.instructions.md",
+      "realPath" : "<HOME>/repos/octocat-api/.github/instructions/swift.instructions.md"
+    },
+    "name" : "swift.instructions.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 215,
+          "characterCount" : 215,
+          "content" : "\n## Swift Concurrency & Style\n\n- Enable Swift 6 complete concurrency checking across all targets.\n- Prefer value types and actors over shared mutable classes.\n",
+          "frontmatter" : {
+            "applyTo" : "Sources/**/*.swift, Tests/**/*.swift"
+          },
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "72fac66ff5606faea2c2110d55776cef3ac2af0e18ba34bde151a172c91088dc",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "9165e0f7717715d8305bc8ce710fe065cd30d74d4011733daa68b23137407f80",
+    "kind" : "rules",
+    "loadMode" : {
+      "conditional" : {
+        "globs" : [
+          "services/billing/**"
+        ]
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/octocat-api/services/billing/AGENTS.md",
+      "realPath" : "<HOME>/repos/octocat-api/services/billing/AGENTS.md"
+    },
+    "name" : "services/billing/AGENTS.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 144,
+          "characterCount" : 144,
+          "content" : "# Billing Service Guidelines\n\n- Use integer minor currency units for all monetary amounts.\n- Record idempotency keys on every invoice mutation.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 3
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "fb19e0ef0773a78c5aa95e126b74c69a65a95f8900dfc6fd2c9423ea4f6e78a9",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "e9046eeecf11b3afff7d1ae29e2909b19c84c2a27bed13c3e8bea1ccae153644",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "observability"
+      ],
+      "path" : "<HOME>/repos/octocat-api/.github/mcp.json",
+      "realPath" : "<HOME>/repos/octocat-api/.github/mcp.json"
+    },
+    "name" : "observability",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "allowedTools" : [
+            "query_metrics",
+            "trace_request"
+          ],
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "http" : {
+              "url" : "https://telemetry.octocat-api.example.test/mcp"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "3f902290e64e46bc57d0dd722ce5d2e2ca22f33389a7072d2e2316b79c13bffc",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "ac54b840b6af855ba0ca3f8a67a5d686beeedb1cfe5f6d0637dd184352a7986b",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "servers",
+        "observability"
+      ],
+      "path" : "<HOME>/repos/octocat-api/.vscode/mcp.json",
+      "realPath" : "<HOME>/repos/octocat-api/.vscode/mcp.json"
+    },
+    "name" : "observability",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "http" : {
+              "url" : "https://telemetry.vscode-fallback.example.test/mcp"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "3f902290e64e46bc57d0dd722ce5d2e2ca22f33389a7072d2e2316b79c13bffc",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "151efb80a191cd4dcebef0ce2a6540144e0b24a1c6bb1733d63b3f54d488fd18",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "servers",
+        "openapi-preview"
+      ],
+      "path" : "<HOME>/repos/octocat-api/.vscode/mcp.json",
+      "realPath" : "<HOME>/repos/octocat-api/.vscode/mcp.json"
+    },
+    "name" : "openapi-preview",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@acme/openapi-mcp"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "3b7ad81980b311eb745e60fd4735bf3c3b0043140280ae2a77262640925412e1",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "c5cd92722b6b1a3b1a1af474d052c04163a66dc6b1d5a29336d537602104e4b8",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/octocat-api/.github/skills/api-contract/SKILL.md",
+      "realPath" : "<HOME>/repos/octocat-api/.github/skills/api-contract/SKILL.md"
+    },
+    "name" : "api-contract",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "\n1. Generate OpenAPI spec from route declarations.\n2. Check for breaking field removals or type narrowing.\n",
+          "description" : "Verifies OpenAPI 3.1 schema diffs against route handlers",
+          "frontmatter" : {
+            "description" : "Verifies OpenAPI 3.1 schema diffs against route handlers",
+            "name" : "api-contract"
+          },
+          "name" : "api-contract",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "e3551ed9db8a9f10b1a26bedf5b7d325fe2a6c7f1354d71589dc6f70e9731f29",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "3589d37d5d2fc4d99fcc6a14a48a3c4a305d959487977d2586e0f2cbc8ef4dc1",
+    "kind" : "subagent",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/octocat-api/.github/agents/security-reviewer.agent.md",
+      "realPath" : "<HOME>/repos/octocat-api/.github/agents/security-reviewer.agent.md"
+    },
+    "name" : "security-reviewer",
+    "payload" : {
+      "subagent" : {
+        "_0" : {
+          "body" : "\nAudit authentication middleware, RBAC checks, and SQL parameter binding.\n",
+          "description" : "Repository security reviewer overriding personal security-reviewer",
+          "frontmatter" : {
+            "description" : "Repository security reviewer overriding personal security-reviewer",
+            "model" : "claude-opus-4",
+            "tools" : [
+              "read",
+              "search",
+              "bash"
+            ]
+          },
+          "model" : "claude-opus-4",
+          "name" : "security-reviewer",
+          "tools" : [
+            "read",
+            "search",
+            "bash"
+          ]
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "be07bb372a703099af188ce16c1a81e5f46d4c08090f6255d02e0385ab65d8f5",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "6534ae6c290ef7894e4f286cd6fec78e758ea32bff3a2a02088653552b68e384",
+    "kind" : "command",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/octocat-api/.github/prompts/release-notes.prompt.md",
+      "realPath" : "<HOME>/repos/octocat-api/.github/prompts/release-notes.prompt.md"
+    },
+    "name" : "release-notes",
+    "payload" : {
+      "command" : {
+        "_0" : {
+          "body" : "\nDraft release notes grouping commits under Features, Fixes, and Security.\n",
+          "description" : "Generates structured release notes for an Octocat API tag",
+          "name" : "release-notes"
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "copilot",
+    "contentHash" : "7483e779a712489b1588d7c4b6d62edefad0c5eae801a5b4df2c08d4a13ee7bc",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "6205397f1d39ecb2fc2e37dda91bad29ee05ee906b0ff3690855bd0cbb6302bc",
+    "kind" : "hook",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "hooks",
+        "postToolUse",
+        "0"
+      ],
+      "path" : "<HOME>/repos/octocat-api/.github/hooks/ci-guard.json",
+      "realPath" : "<HOME>/repos/octocat-api/.github/hooks/ci-guard.json"
+    },
+    "name" : "postToolUse",
+    "payload" : {
+      "hook" : {
+        "_0" : {
+          "command" : "swift format lint Sources Tests",
+          "event" : "postToolUse",
+          "timeoutSeconds" : 20
+        }
+      }
+    },
+    "scope" : 2
+  }
+]

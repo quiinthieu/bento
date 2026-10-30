@@ -1,0 +1,3 @@
+# Legacy Cursor Rules
+
+- Keep bundle size per component package under 10 KB gzipped.

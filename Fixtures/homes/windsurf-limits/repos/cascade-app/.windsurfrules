@@ -1,0 +1,3 @@
+# Legacy Windsurf Workspace Rules
+
+- Keep public HTTP handler modules free of direct ORM imports.

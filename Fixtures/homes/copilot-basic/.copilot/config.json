@@ -1,0 +1,8 @@
+{
+  "model": "claude-sonnet-4",
+  "trusted_folders": [
+    "~/repos/octocat-api",
+    "~/repos/missing-ghost-repo"
+  ],
+  "github_token": "TEST_SYNTHETIC_COPILOT_TOKEN_PLACEHOLDER"
+}

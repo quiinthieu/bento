@@ -1,0 +1,161 @@
+{
+  "agent" : "cursor",
+  "folder" : "<HOME>/repos/design-system",
+  "ordered" : [
+    {
+      "artifactID" : "dea038760176b799e63ddc58301bc638ad798c6be0cdfb1ad0eb7f6610e22f6e",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Workspace root AGENTS.md"
+    },
+    {
+      "artifactID" : "74416c673a09c0d37f4b791cb9d7bc2ade4af1c29c287d79055445073f89765d",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Legacy Cursor workspace rules"
+    },
+    {
+      "artifactID" : "39a1fdba2b9bde96a5c10002bd223346514d9048311bf73130498ae44da532ac",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Cursor project rule (alwaysApply: true)"
+    },
+    {
+      "artifactID" : "115ebf174d1e122a941e285235eae080e7fc62ec3c6613462de2df588384a9b4",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "Cursor agent/manual-invoked rule"
+    },
+    {
+      "artifactID" : "cd81704207e2b54b18746bc8352385a49e506295a0a0f406e742aab83985b4b2",
+      "effectiveLoadMode" : {
+        "conditional" : {
+          "globs" : [
+            "packages/ui/**/*.tsx",
+            "packages/ui/**/*.ts"
+          ]
+        }
+      },
+      "reason" : "Cursor glob-scoped rule (packages/ui/**/*.tsx, packages/ui/**/*.ts)"
+    },
+    {
+      "artifactID" : "2352a5b68a9f40f00b1d73e95126a4f50ccbf2d9044493ec86b71760be2741cd",
+      "effectiveLoadMode" : {
+        "conditional" : {
+          "globs" : [
+            "packages/icons/**"
+          ]
+        }
+      },
+      "reason" : "Nested subdirectory instructions (packages/icons/**)"
+    },
+    {
+      "artifactID" : "605475f76edaa24210c1538c6653858804b2cd3147121fdf0498337ee93f4949",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "Disabled Cursor MCP server in global Cursor configuration"
+    },
+    {
+      "artifactID" : "ee532b2caaebdd8cce29d7a476be54df4e500d4ac1020298e283de550506c44d",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Active Cursor MCP server from workspace Cursor configuration"
+    },
+    {
+      "artifactID" : "c747b3d3a8ade890605a91e9f514d29b0578fe624b2007f37cbf82638cf2b6a1",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Active Cursor MCP server from global Cursor configuration"
+    },
+    {
+      "artifactID" : "faac7f34549444026427e19e2fcd2ae7a4b1fee79c9698bedf94e00963effa85",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Active Cursor MCP server from workspace Cursor configuration"
+    },
+    {
+      "artifactID" : "271532e057c447638b747336d4a0c5fb1c5159ed366a3dc6385510baa3274d0e",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "Active Cursor skill from workspace Cursor configuration"
+    },
+    {
+      "artifactID" : "93db2b576c3f863db620645990195afb40eabe966878e6eed0e366250090e8e7",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "Active Cursor subagent from global Cursor configuration"
+    },
+    {
+      "artifactID" : "db86f1b126cba983693787b5bdd508c0cf0012cf8a2fadb91ba79ae3f7cd9897",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "Active Cursor subagent from workspace Cursor configuration"
+    },
+    {
+      "artifactID" : "2f1b3156045002e7359a3a9f02fc50dcfcb1685772b7938f9471b43c5d1aee2d",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "Cursor file exclusion rules (.cursorignore)"
+    },
+    {
+      "artifactID" : "512c445dc78ebab2273f7af34ad964efa7a915cb67a8a208f8fecaba4d0e5077",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "Cursor file exclusion rules (.cursorindexingignore)"
+    }
+  ],
+  "shadowed" : [
+    {
+      "reason" : "Shadowed by workspace Cursor MCP server 'figma'",
+      "shadowedArtifactID" : "c29fc79da52497a567a3ab9ce29cbcd7a2c5515d7359c29441ebaadf1a123733",
+      "winningArtifactID" : "ee532b2caaebdd8cce29d7a476be54df4e500d4ac1020298e283de550506c44d"
+    },
+    {
+      "reason" : "Shadowed by workspace Cursor skill 'component-audit'",
+      "shadowedArtifactID" : "8fad6a337321877276ea819ddf96d85746a301d8e2973b6b924d520e2990ef3f",
+      "winningArtifactID" : "271532e057c447638b747336d4a0c5fb1c5159ed366a3dc6385510baa3274d0e"
+    }
+  ],
+  "warnings" : [
+
+  ]
+}

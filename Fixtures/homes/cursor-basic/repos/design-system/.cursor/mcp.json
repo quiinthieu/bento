@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "figma": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--design-system"],
+      "env": {
+        "FIGMA_ACCESS_TOKEN": "TEST_SYNTHETIC_PROJECT_FIGMA_TOKEN"
+      }
+    },
+    "storybook": {
+      "command": "npx",
+      "args": ["-y", "@storybook/mcp"]
+    }
+  }
+}

@@ -1,0 +1,64 @@
+---
+trigger: always_on
+---
+
+# Workspace Rule Under 6000 Characters
+
+- Directive 001: verify elevation invariants alongside viewport boundaries for motion and elevation.
+- Directive 002: verify viewport invariants alongside typography boundaries for focusring and elevation.
+- Directive 003: verify motion invariants alongside focusring boundaries for kerning and elevation.
+- Directive 004: verify kerning invariants alongside iconography boundaries for spacing and elevation.
+- Directive 005: verify contrast invariants alongside contrast boundaries for contrast and elevation.
+- Directive 006: verify gridline invariants alongside motion boundaries for typography and elevation.
+- Directive 007: verify iconography invariants alongside elevation boundaries for gridline and elevation.
+- Directive 008: verify palette invariants alongside spacing boundaries for elevation and elevation.
+- Directive 009: verify focusring invariants alongside palette boundaries for iconography and elevation.
+- Directive 010: verify spacing invariants alongside gridline boundaries for viewport and elevation.
+- Directive 011: verify typography invariants alongside kerning boundaries for palette and elevation.
+- Directive 012: verify elevation invariants alongside viewport boundaries for motion and elevation.
+- Directive 013: verify viewport invariants alongside typography boundaries for focusring and elevation.
+- Directive 014: verify motion invariants alongside focusring boundaries for kerning and elevation.
+- Directive 015: verify kerning invariants alongside iconography boundaries for spacing and elevation.
+- Directive 016: verify contrast invariants alongside contrast boundaries for contrast and elevation.
+- Directive 017: verify gridline invariants alongside motion boundaries for typography and elevation.
+- Directive 018: verify iconography invariants alongside elevation boundaries for gridline and elevation.
+- Directive 019: verify palette invariants alongside spacing boundaries for elevation and elevation.
+- Directive 020: verify focusring invariants alongside palette boundaries for iconography and elevation.
+- Directive 021: verify spacing invariants alongside gridline boundaries for viewport and elevation.
+- Directive 022: verify typography invariants alongside kerning boundaries for palette and elevation.
+- Directive 023: verify elevation invariants alongside viewport boundaries for motion and elevation.
+- Directive 024: verify viewport invariants alongside typography boundaries for focusring and elevation.
+- Directive 025: verify motion invariants alongside focusring boundaries for kerning and elevation.
+- Directive 026: verify kerning invariants alongside iconography boundaries for spacing and elevation.
+- Directive 027: verify contrast invariants alongside contrast boundaries for contrast and elevation.
+- Directive 028: verify gridline invariants alongside motion boundaries for typography and elevation.
+- Directive 029: verify iconography invariants alongside elevation boundaries for gridline and elevation.
+- Directive 030: verify palette invariants alongside spacing boundaries for elevation and elevation.
+- Directive 031: verify focusring invariants alongside palette boundaries for iconography and elevation.
+- Directive 032: verify spacing invariants alongside gridline boundaries for viewport and elevation.
+- Directive 033: verify typography invariants alongside kerning boundaries for palette and elevation.
+- Directive 034: verify elevation invariants alongside viewport boundaries for motion and elevation.
+- Directive 035: verify viewport invariants alongside typography boundaries for focusring and elevation.
+- Directive 036: verify motion invariants alongside focusring boundaries for kerning and elevation.
+- Directive 037: verify kerning invariants alongside iconography boundaries for spacing and elevation.
+- Directive 038: verify contrast invariants alongside contrast boundaries for contrast and elevation.
+- Directive 039: verify gridline invariants alongside motion boundaries for typography and elevation.
+- Directive 040: verify iconography invariants alongside elevation boundaries for gridline and elevation.
+- Directive 041: verify palette invariants alongside spacing boundaries for elevation and elevation.
+- Directive 042: verify focusring invariants alongside palette boundaries for iconography and elevation.
+- Directive 043: verify spacing invariants alongside gridline boundaries for viewport and elevation.
+- Directive 044: verify typography invariants alongside kerning boundaries for palette and elevation.
+- Directive 045: verify elevation invariants alongside viewport boundaries for motion and elevation.
+- Directive 046: verify viewport invariants alongside typography boundaries for focusring and elevation.
+- Directive 047: verify motion invariants alongside focusring boundaries for kerning and elevation.
+- Directive 048: verify kerning invariants alongside iconography boundaries for spacing and elevation.
+- Directive 049: verify contrast invariants alongside contrast boundaries for contrast and elevation.
+- Directive 050: verify gridline invariants alongside motion boundaries for typography and elevation.
+- Directive 051: verify iconography invariants alongside elevation boundaries for gridline and elevation.
+- Directive 052: verify palette invariants alongside spacing boundaries for elevation and elevation.
+- Directive 053: verify focusring invariants alongside palette boundaries for iconography and elevation.
+- Directive 054: verify spacing invariants alongside gridline boundaries for viewport and elevation.
+- Directive 055: verify typography invariants alongside kerning boundaries for palette and elevation.
+- Directive 056: verify elevation invariants alongside viewport boundaries for motion and elevation.
+- Directive 057: verify viewport invariants alongside typography boundaries for focusring and elevation.
+- Final note 058: alpha_typography_
