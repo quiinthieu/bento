@@ -1,0 +1,12 @@
+{
+  "theme": "dark",
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "echo copilot-session-start",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}

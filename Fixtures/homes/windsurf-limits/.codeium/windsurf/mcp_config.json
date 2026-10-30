@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "POSTGRES_PASSWORD": "TEST_SYNTHETIC_WINDSURF_DB_PASSWORD"
+      },
+      "disabled": false
+    },
+    "internal-docs": {
+      "serverUrl": "https://docs.windsurf.example.test/mcp",
+      "headers": {
+        "Authorization": "Bearer TEST_SYNTHETIC_WINDSURF_DOCS_TOKEN"
+      },
+      "disabledTools": ["delete_article"]
+    },
+    "disabled-tracer": {
+      "command": "uvx",
+      "args": ["mcp-tracer"],
+      "disabled": true
+    }
+  }
+}

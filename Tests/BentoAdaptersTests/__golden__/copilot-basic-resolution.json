@@ -1,0 +1,227 @@
+{
+  "agent" : "copilot",
+  "folder" : "<HOME>/repos/octocat-api",
+  "ordered" : [
+    {
+      "artifactID" : "fb11bde83abdb3ac8b5b1ef3b5c369a4e6b3f635d5870c15442782d5afe503fb",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "Copilot CLI user configuration (config.json)"
+    },
+    {
+      "artifactID" : "6647be24ddc7a7dc10b833662a30db2921f86885efc6a005cbd7d273187dbf22",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "Copilot CLI user configuration (settings.json)"
+    },
+    {
+      "artifactID" : "246e750351c8e9a9af613c2f3a4f50d12b444f7e720c9d98c3404dfeecf20d09",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Personal Copilot instructions (copilot-instructions.md)"
+    },
+    {
+      "artifactID" : "b48ea409fe4f518b67ac4710b9c6b80c4ef57221a89d0810d989fcd19f3f18a0",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Repository Copilot custom instructions"
+    },
+    {
+      "artifactID" : "d9b72eab97a51a65f43b0ea9a32e96f623ac7f871430de56aac9962f1f003659",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Repository root AGENTS.md"
+    },
+    {
+      "artifactID" : "33e9b11d62c9f49dd50062eac0c4892cae1cfc4b95cdc23fe34cec8aabddaaed",
+      "effectiveLoadMode" : {
+        "conditional" : {
+          "globs" : [
+            "db/migrations/**/*.sql"
+          ]
+        }
+      },
+      "reason" : "Path-specific Copilot instructions (applyTo: db/migrations/**/*.sql)"
+    },
+    {
+      "artifactID" : "df74b597197c1c592053ba68697e905681ac9efd0f79e80069fad9455917347c",
+      "effectiveLoadMode" : {
+        "conditional" : {
+          "globs" : [
+            "Sources/**/*.swift",
+            "Tests/**/*.swift"
+          ]
+        }
+      },
+      "reason" : "Path-specific Copilot instructions (applyTo: Sources/**/*.swift, Tests/**/*.swift)"
+    },
+    {
+      "artifactID" : "9165e0f7717715d8305bc8ce710fe065cd30d74d4011733daa68b23137407f80",
+      "effectiveLoadMode" : {
+        "conditional" : {
+          "globs" : [
+            "services/billing/**"
+          ]
+        }
+      },
+      "reason" : "Nested subdirectory instructions (services/billing/**)"
+    },
+    {
+      "artifactID" : "e0ecea37e6aec6a84d0eca29c87d44dad42f31065b88af3955b4e936d14de0d9",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Active Copilot MCP server from personal Copilot MCP configuration"
+    },
+    {
+      "artifactID" : "b01eb91489d08a62b0e4fda35a8e06bed5fc23337f131b5bec8a9bb58b7d50c6",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "Disabled Copilot MCP server in personal Copilot MCP configuration"
+    },
+    {
+      "artifactID" : "e9046eeecf11b3afff7d1ae29e2909b19c84c2a27bed13c3e8bea1ccae153644",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Active Copilot MCP server from repository MCP configuration"
+    },
+    {
+      "artifactID" : "151efb80a191cd4dcebef0ce2a6540144e0b24a1c6bb1733d63b3f54d488fd18",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Active Copilot MCP server from workspace VS Code MCP configuration"
+    },
+    {
+      "artifactID" : "c5cd92722b6b1a3b1a1af474d052c04163a66dc6b1d5a29336d537602104e4b8",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "Active Copilot skill from repository Copilot skills"
+    },
+    {
+      "artifactID" : "a7de3fbae896cd0e387a1f04b29c152b490ff1fbf094951ec7841ce709ed0ede",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "Active Copilot skill from personal Copilot skills"
+    },
+    {
+      "artifactID" : "a60098df1e7a1f8a5e3429343dc8ee62f1652c20fe173fb5b54cfc3098d02b3b",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "Active Copilot skill from personal cross-agent skills"
+    },
+    {
+      "artifactID" : "949e4989dcec8159e4709b345770cacdacd82e3fe2e92f2f77265b231085028b",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "Active Copilot custom agent from personal custom agent"
+    },
+    {
+      "artifactID" : "3589d37d5d2fc4d99fcc6a14a48a3c4a305d959487977d2586e0f2cbc8ef4dc1",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "Active Copilot custom agent from repository custom agent"
+    },
+    {
+      "artifactID" : "6534ae6c290ef7894e4f286cd6fec78e758ea32bff3a2a02088653552b68e384",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "Active Copilot prompt command from repository prompt file"
+    },
+    {
+      "artifactID" : "94ea75191b09d9f5e5edd4f2fdc5d19db6d9caa284f4031bd6bee809f9b0da6c",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "Personal Copilot lifecycle hook"
+    },
+    {
+      "artifactID" : "bfceeabc3578e66703cef596bb75506fe0d1aad1da967021875b6bb8e650cee3",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "Personal Copilot lifecycle hook"
+    },
+    {
+      "artifactID" : "6205397f1d39ecb2fc2e37dda91bad29ee05ee906b0ff3690855bd0cbb6302bc",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "Repository Copilot lifecycle hook"
+    }
+  ],
+  "shadowed" : [
+    {
+      "reason" : "Shadowed by higher-precedence MCP server 'observability' in repository MCP configuration",
+      "shadowedArtifactID" : "ac54b840b6af855ba0ca3f8a67a5d686beeedb1cfe5f6d0637dd184352a7986b",
+      "winningArtifactID" : "e9046eeecf11b3afff7d1ae29e2909b19c84c2a27bed13c3e8bea1ccae153644"
+    },
+    {
+      "reason" : "Shadowed by higher-precedence MCP server 'observability' in repository MCP configuration",
+      "shadowedArtifactID" : "cfa26debc8148b29071d263c5f27632ce5bf667eab359f207e1d74047236b437",
+      "winningArtifactID" : "e9046eeecf11b3afff7d1ae29e2909b19c84c2a27bed13c3e8bea1ccae153644"
+    },
+    {
+      "reason" : "Shadowed by higher-precedence skill 'pr-triage' from personal cross-agent skills",
+      "shadowedArtifactID" : "9f79d740bbbe2bc88e6eeb4f69a56804ca45e5ba5262181217c9d96045068e39",
+      "winningArtifactID" : "a60098df1e7a1f8a5e3429343dc8ee62f1652c20fe173fb5b54cfc3098d02b3b"
+    },
+    {
+      "reason" : "Shadowed by higher-precedence custom agent 'security-reviewer' from repository custom agent",
+      "shadowedArtifactID" : "af8b8dab3c1122977e32e1b746240548605b1b6f6631642c4506e59b9359e188",
+      "winningArtifactID" : "3589d37d5d2fc4d99fcc6a14a48a3c4a305d959487977d2586e0f2cbc8ef4dc1"
+    }
+  ],
+  "warnings" : [
+
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "observability": {
+      "type": "http",
+      "url": "https://telemetry.octocat-api.example.test/mcp",
+      "tools": ["query_metrics", "trace_request"]
+    }
+  }
+}

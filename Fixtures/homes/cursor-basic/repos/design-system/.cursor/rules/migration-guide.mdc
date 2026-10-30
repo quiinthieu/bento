@@ -1,0 +1,6 @@
+---
+description: Apply when migrating legacy CSS modules to v3 design tokens
+---
+
+- Replace legacy `$spacing-*` SASS variables with `--ds-space-*` tokens.
+- Verify dark-mode surface contrast before removing deprecated classes.

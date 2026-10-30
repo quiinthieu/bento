@@ -1,0 +1,182 @@
+{
+  "agent" : "windsurf",
+  "folder" : "<HOME>/repos/cascade-app",
+  "ordered" : [
+    {
+      "artifactID" : "3afee665eaa3adcf516343e2b8347ee7c732d48350dd7b6775dde444b7ab30cf",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Enterprise system Windsurf rule"
+    },
+    {
+      "artifactID" : "937a95cdb4d5f9236938448ba6ba4f6880ffa468ed00c47962e3eaa616d31d19",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Global Windsurf Cascade rules"
+    },
+    {
+      "artifactID" : "858349e03c8b6586589edda15b6a883144898005bc6f61bcf533be40d45d55da",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Workspace root AGENTS.md"
+    },
+    {
+      "artifactID" : "cc83ea76d7d1a89fdb4a048043ffb5675d3d6cfa9df515922628ec2207278842",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Legacy Windsurf workspace rules"
+    },
+    {
+      "artifactID" : "9a31fca289cd80ef6497f4cffc0074912e792b2b8324b6eecd6653257588b77c",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "Workspace Windsurf model/manual-invoked rule"
+    },
+    {
+      "artifactID" : "35a3cb4b11d5979a4188383d9f91fe056a5fd5af81960c05c2aa01d91061b90b",
+      "effectiveLoadMode" : {
+        "conditional" : {
+          "globs" : [
+            "web/src/**/*.tsx",
+            "web/src/**/*.ts"
+          ]
+        }
+      },
+      "reason" : "Workspace Windsurf glob rule (web/src/**/*.tsx, web/src/**/*.ts)"
+    },
+    {
+      "artifactID" : "390e77e23e0ac49879ce2220537d549cfe57b6f088ad1826c01c8f8d38cdb024",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "Workspace Windsurf model/manual-invoked rule"
+    },
+    {
+      "artifactID" : "8779aad2d2ec759288f46d14bdc61e6a572d1a55b12764278cb9572f21312162",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Workspace Windsurf rule (always_on)"
+    },
+    {
+      "artifactID" : "6df419e6a25b84719e012d2490d16dca080bbb96c2bbb2afef1c3e655ff492b7",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Workspace Windsurf rule (always_on)"
+    },
+    {
+      "artifactID" : "2d89c471ab753546f1ea8bcd078f33ef69c391dd3d15aa8eace71d68bcbb773a",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Workspace Windsurf rule (always_on)"
+    },
+    {
+      "artifactID" : "f20914aa41c0c60e4932511660d90394d745f3225de4d950af94eb5e20ac251e",
+      "effectiveLoadMode" : {
+        "conditional" : {
+          "globs" : [
+            "web/**"
+          ]
+        }
+      },
+      "reason" : "Nested subdirectory instructions (web/**)"
+    },
+    {
+      "artifactID" : "40e81caffc36611a6669152d005be52a77af45df433909df9099abb753f4187d",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "Disabled Windsurf MCP server in global Windsurf configuration"
+    },
+    {
+      "artifactID" : "7d4b08ae41aa6bc39ffb0272fe81781de159ce1478a49ec880d35cc33eddb0e2",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Active Windsurf MCP server from global Windsurf configuration"
+    },
+    {
+      "artifactID" : "020d4246330d8c5724ad22b68d20eae78a1bf70c840bb31e0373d718f86eea9e",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "Active Windsurf MCP server from global Windsurf configuration"
+    },
+    {
+      "artifactID" : "d55700d147fb551f4d20c4d37502cca46e52730c646da7d4a76db3932c3ad33a",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "Active Windsurf workflow from workspace Windsurf configuration"
+    },
+    {
+      "artifactID" : "78aeec4b46847977076e078d91d4ab6c6c52c0526f986b5e4f5abf5de3727936",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "Windsurf context exclusion rules (.codeiumignore)"
+    }
+  ],
+  "shadowed" : [
+    {
+      "reason" : "Shadowed by workspace Windsurf workflow 'ship-check'",
+      "shadowedArtifactID" : "7495f22032bc56cc2ea1e7b092d6befbbb265977e36bc71a5c5d3da527f61994",
+      "winningArtifactID" : "d55700d147fb551f4d20c4d37502cca46e52730c646da7d4a76db3932c3ad33a"
+    }
+  ],
+  "warnings" : [
+    {
+      "code" : "rules.sizeLimitExceeded",
+      "location" : {
+        "path" : "<HOME>/.codeium/windsurf/memories/global_rules.md",
+        "realPath" : "<HOME>/.codeium/windsurf/memories/global_rules.md"
+      },
+      "message" : "Windsurf rule file 'global_rules.md' exceeds 6000-character limit (6050 characters)",
+      "severity" : "warning"
+    },
+    {
+      "code" : "rules.sizeLimitExceeded",
+      "location" : {
+        "path" : "<HOME>/repos/cascade-app/.windsurf/rules/over-12k.md",
+        "realPath" : "<HOME>/repos/cascade-app/.windsurf/rules/over-12k.md"
+      },
+      "message" : "Windsurf rule file 'over-12k.md' exceeds 12000-character limit (12050 characters)",
+      "severity" : "warning"
+    }
+  ]
+}

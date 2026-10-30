@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "github-personal": {
+      "type": "local",
+      "command": "npx",
+      "args": ["-y", "@github/mcp-server"],
+      "tools": ["*"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "TEST_SYNTHETIC_COPILOT_PAT_PLACEHOLDER"
+      }
+    },
+    "observability": {
+      "type": "http",
+      "url": "https://telemetry.personal.example.test/mcp",
+      "tools": ["query_metrics", "list_alerts"],
+      "headers": {
+        "Authorization": "Bearer TEST_SYNTHETIC_COPILOT_BEARER"
+      }
+    },
+    "legacy-db": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-legacy-db"],
+      "enabled": false
+    }
+  }
+}

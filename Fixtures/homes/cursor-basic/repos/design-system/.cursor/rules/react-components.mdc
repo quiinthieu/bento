@@ -1,0 +1,10 @@
+---
+description: React UI component patterns
+globs:
+  - "packages/ui/**/*.tsx"
+  - "packages/ui/**/*.ts"
+alwaysApply: false
+---
+
+- Forward refs on all primitive interactive components.
+- Colocate Storybook stories alongside component source files.

@@ -1,0 +1,7 @@
+---
+description: Core TypeScript and design token conventions
+alwaysApply: true
+---
+
+- Export named TypeScript interfaces for every component prop bag.
+- Reference semantic CSS custom properties instead of raw hex colors.

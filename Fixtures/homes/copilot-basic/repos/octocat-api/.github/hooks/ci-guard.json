@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "swift format lint Sources Tests",
+        "timeoutSec": 20
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "figma": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--personal"],
+      "env": {
+        "FIGMA_ACCESS_TOKEN": "TEST_SYNTHETIC_CURSOR_FIGMA_TOKEN"
+      }
+    },
+    "linear": {
+      "url": "https://mcp.linear.example.test/sse",
+      "headers": {
+        "Authorization": "Bearer TEST_SYNTHETIC_CURSOR_LINEAR_TOKEN"
+      }
+    },
+    "archived-mcp": {
+      "command": "uvx",
+      "args": ["mcp-archived"],
+      "disabled": true
+    }
+  }
+}

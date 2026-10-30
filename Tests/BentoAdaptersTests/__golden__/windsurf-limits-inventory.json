@@ -1,0 +1,633 @@
+[
+  {
+    "agent" : "windsurf",
+    "contentHash" : "e3c5df640328ee7f828541a2056b954739f419747a19423abbdf51f351c73e96",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "3afee665eaa3adcf516343e2b8347ee7c732d48350dd7b6775dde444b7ab30cf",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/Library/Application Support/Windsurf/rules/enterprise-security.md",
+      "realPath" : "<HOME>/Library/Application Support/Windsurf/rules/enterprise-security.md"
+    },
+    "name" : "enterprise-security.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 183,
+          "characterCount" : 183,
+          "content" : "# Enterprise Windsurf Security Policy\n\n- Never log customer PII or raw authentication tokens in telemetry payloads.\n- Require parameterized SQL queries across all data access layers.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 0
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "5da35d5bde5bc48ad8b98d198f97ffe57d1727067d191375a81f2c75f3abf1ff",
+    "diagnostics" : [
+      {
+        "code" : "rules.sizeLimitExceeded",
+        "location" : {
+          "path" : "<HOME>/.codeium/windsurf/memories/global_rules.md",
+          "realPath" : "<HOME>/.codeium/windsurf/memories/global_rules.md"
+        },
+        "message" : "Windsurf rule file 'global_rules.md' exceeds 6000-character limit (6050 characters)",
+        "severity" : "warning"
+      }
+    ],
+    "enabled" : true,
+    "id" : "937a95cdb4d5f9236938448ba6ba4f6880ffa468ed00c47962e3eaa616d31d19",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.codeium/windsurf/memories/global_rules.md",
+      "realPath" : "<HOME>/.codeium/windsurf/memories/global_rules.md"
+    },
+    "name" : "global_rules.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 6050,
+          "characterCount" : 6050,
+          "content" : "# Windsurf Global Cascade Rules (Over 6000 Characters)\n\n- Directive 001: verify span invariants alongside cardinality boundaries for correlation and span.\n- Directive 002: verify cardinality invariants alongside telemetry boundaries for histogram and span.\n- Directive 003: verify correlation invariants alongside histogram boundaries for observability and span.\n- Directive 004: verify observability invariants alongside baggage boundaries for sampler and span.\n- Directive 005: verify exporter invariants alongside exporter boundaries for exporter and span.\n- Directive 006: verify collector invariants alongside correlation boundaries for telemetry and span.\n- Directive 007: verify baggage invariants alongside span boundaries for collector and span.\n- Directive 008: verify tracing invariants alongside sampler boundaries for span and span.\n- Directive 009: verify histogram invariants alongside tracing boundaries for baggage and span.\n- Directive 010: verify sampler invariants alongside collector boundaries for cardinality and span.\n- Directive 011: verify telemetry invariants alongside observability boundaries for tracing and span.\n- Directive 012: verify span invariants alongside cardinality boundaries for correlation and span.\n- Directive 013: verify cardinality invariants alongside telemetry boundaries for histogram and span.\n- Directive 014: verify correlation invariants alongside histogram boundaries for observability and span.\n- Directive 015: verify observability invariants alongside baggage boundaries for sampler and span.\n- Directive 016: verify exporter invariants alongside exporter boundaries for exporter and span.\n- Directive 017: verify collector invariants alongside correlation boundaries for telemetry and span.\n- Directive 018: verify baggage invariants alongside span boundaries for collector and span.\n- Directive 019: verify tracing invariants alongside sampler boundaries for span and span.\n- Directive 020: verify histogram invariants alongside tracing boundaries for baggage and span.\n- Directive 021: verify sampler invariants alongside collector boundaries for cardinality and span.\n- Directive 022: verify telemetry invariants alongside observability boundaries for tracing and span.\n- Directive 023: verify span invariants alongside cardinality boundaries for correlation and span.\n- Directive 024: verify cardinality invariants alongside telemetry boundaries for histogram and span.\n- Directive 025: verify correlation invariants alongside histogram boundaries for observability and span.\n- Directive 026: verify observability invariants alongside baggage boundaries for sampler and span.\n- Directive 027: verify exporter invariants alongside exporter boundaries for exporter and span.\n- Directive 028: verify collector invariants alongside correlation boundaries for telemetry and span.\n- Directive 029: verify baggage invariants alongside span boundaries for collector and span.\n- Directive 030: verify tracing invariants alongside sampler boundaries for span and span.\n- Directive 031: verify histogram invariants alongside tracing boundaries for baggage and span.\n- Directive 032: verify sampler invariants alongside collector boundaries for cardinality and span.\n- Directive 033: verify telemetry invariants alongside observability boundaries for tracing and span.\n- Directive 034: verify span invariants alongside cardinality boundaries for correlation and span.\n- Directive 035: verify cardinality invariants alongside telemetry boundaries for histogram and span.\n- Directive 036: verify correlation invariants alongside histogram boundaries for observability and span.\n- Directive 037: verify observability invariants alongside baggage boundaries for sampler and span.\n- Directive 038: verify exporter invariants alongside exporter boundaries for exporter and span.\n- Directive 039: verify collector invariants alongside correlation boundaries for telemetry and span.\n- Directive 040: verify baggage invariants alongside span boundaries for collector and span.\n- Directive 041: verify tracing invariants alongside sampler boundaries for span and span.\n- Directive 042: verify histogram invariants alongside tracing boundaries for baggage and span.\n- Directive 043: verify sampler invariants alongside collector boundaries for cardinality and span.\n- Directive 044: verify telemetry invariants alongside observability boundaries for tracing and span.\n- Directive 045: verify span invariants alongside cardinality boundaries for correlation and span.\n- Directive 046: verify cardinality invariants alongside telemetry boundaries for histogram and span.\n- Directive 047: verify correlation invariants alongside histogram boundaries for observability and span.\n- Directive 048: verify observability invariants alongside baggage boundaries for sampler and span.\n- Directive 049: verify exporter invariants alongside exporter boundaries for exporter and span.\n- Directive 050: verify collector invariants alongside correlation boundaries for telemetry and span.\n- Directive 051: verify baggage invariants alongside span boundaries for collector and span.\n- Directive 052: verify tracing invariants alongside sampler boundaries for span and span.\n- Directive 053: verify histogram invariants alongside tracing boundaries for baggage and span.\n- Directive 054: verify sampler invariants alongside collector boundaries for cardinality and span.\n- Directive 055: verify telemetry invariants alongside observability boundaries for tracing and span.\n- Directive 056: verify span invariants alongside cardinality boundaries for correlation and span.\n- Directive 057: verify cardinality invariants alongside telemetry boundaries for histogram and span.\n- Directive 058: verify correlation invariants alongside histogram boundaries for observability and span.\n- Directive 059: verify observability invariants alongside baggage boundaries for sampler and span.\n- Directive 060: verify exporter invariants alongside exporter boundaries for exporter and span.\n- Final note 061: alpha_telemetry_alpha_telemetry\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : true
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "22550eb4d7d23518cad48cfd2027f11ea42f106ecbedcc7a52f7671e4098dd94",
+    "diagnostics" : [
+
+    ],
+    "enabled" : false,
+    "id" : "40e81caffc36611a6669152d005be52a77af45df433909df9099abb753f4187d",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "disabled-tracer"
+      ],
+      "path" : "<HOME>/.codeium/windsurf/mcp_config.json",
+      "realPath" : "<HOME>/.codeium/windsurf/mcp_config.json"
+    },
+    "name" : "disabled-tracer",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : true,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "mcp-tracer"
+              ],
+              "command" : "uvx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "22550eb4d7d23518cad48cfd2027f11ea42f106ecbedcc7a52f7671e4098dd94",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "7d4b08ae41aa6bc39ffb0272fe81781de159ce1478a49ec880d35cc33eddb0e2",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "internal-docs"
+      ],
+      "path" : "<HOME>/.codeium/windsurf/mcp_config.json",
+      "realPath" : "<HOME>/.codeium/windsurf/mcp_config.json"
+    },
+    "name" : "internal-docs",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "disabledTools" : [
+            "delete_article"
+          ],
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "http" : {
+              "url" : "https://docs.windsurf.example.test/mcp"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "22550eb4d7d23518cad48cfd2027f11ea42f106ecbedcc7a52f7671e4098dd94",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "020d4246330d8c5724ad22b68d20eae78a1bf70c840bb31e0373d718f86eea9e",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "postgres"
+      ],
+      "path" : "<HOME>/.codeium/windsurf/mcp_config.json",
+      "realPath" : "<HOME>/.codeium/windsurf/mcp_config.json"
+    },
+    "name" : "postgres",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+            "POSTGRES_PASSWORD"
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@modelcontextprotocol/server-postgres"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "0a363a74a01bc0ae2436118c24d12f083cd488c8465e2eae143baf2bc4a6feb7",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "7495f22032bc56cc2ea1e7b092d6befbbb265977e36bc71a5c5d3da527f61994",
+    "kind" : "command",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.codeium/windsurf/global_workflows/ship-check.md",
+      "realPath" : "<HOME>/.codeium/windsurf/global_workflows/ship-check.md"
+    },
+    "name" : "ship-check",
+    "payload" : {
+      "command" : {
+        "_0" : {
+          "body" : "\n1. Verify clean git working tree.\n2. Run baseline unit test suite.\n",
+          "description" : "Global pre-release verification workflow shadowed by workspace ship-check",
+          "name" : "ship-check"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "517289c927c04802b4acbf3aaea8afd725fc4709f3322cdf0f3ea4907764d97d",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "858349e03c8b6586589edda15b6a883144898005bc6f61bcf533be40d45d55da",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/cascade-app/AGENTS.md",
+      "realPath" : "<HOME>/repos/cascade-app/AGENTS.md"
+    },
+    "name" : "AGENTS.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 147,
+          "characterCount" : 147,
+          "content" : "# Cascade App Agent Guidelines\n\n- Validate environment configuration at service startup.\n- Keep unit tests deterministic without real network I/O.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "c512b5e1d844e57a5c6c7c6ad287c392ae56bfce0bd540f9ad35d5bf484d237e",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "cc83ea76d7d1a89fdb4a048043ffb5675d3d6cfa9df515922628ec2207278842",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/cascade-app/.windsurfrules",
+      "realPath" : "<HOME>/repos/cascade-app/.windsurfrules"
+    },
+    "name" : ".windsurfrules",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 98,
+          "characterCount" : 98,
+          "content" : "# Legacy Windsurf Workspace Rules\n\n- Keep public HTTP handler modules free of direct ORM imports.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "96731c2823ce22116b107ce1d6a2193191d25d2dde122314abd7aeac22c45cc4",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "9a31fca289cd80ef6497f4cffc0074912e792b2b8324b6eecd6653257588b77c",
+    "kind" : "rules",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/cascade-app/.windsurf/rules/architecture-decision.md",
+      "realPath" : "<HOME>/repos/cascade-app/.windsurf/rules/architecture-decision.md"
+    },
+    "name" : "architecture-decision.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 272,
+          "characterCount" : 272,
+          "content" : "\n# Database Architecture Guidance\n\n- Add concurrent indexes for tables exceeding one million rows.\n- Document rollback steps in every migration header comment.\n",
+          "frontmatter" : {
+            "description" : "Consult when altering relational database schemas or index layouts",
+            "trigger" : "model_decision"
+          },
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "05c36edcacd9e6032f4c97e198fedf6b4ddfbbc5f4ee1cf199c4625fe7836d00",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "35a3cb4b11d5979a4188383d9f91fe056a5fd5af81960c05c2aa01d91061b90b",
+    "kind" : "rules",
+    "loadMode" : {
+      "conditional" : {
+        "globs" : [
+          "web/src/**/*.tsx",
+          "web/src/**/*.ts"
+        ]
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/cascade-app/.windsurf/rules/frontend-glob.md",
+      "realPath" : "<HOME>/repos/cascade-app/.windsurf/rules/frontend-glob.md"
+    },
+    "name" : "frontend-glob.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 246,
+          "characterCount" : 246,
+          "content" : "\n# Cascade Frontend Glob Rules\n\n- Co-locate query hooks with feature routes under `web/src/features/`.\n- Prefer accessible semantic HTML elements over generic `div` click handlers.\n",
+          "frontmatter" : {
+            "globs" : "web/src/**/*.tsx, web/src/**/*.ts",
+            "trigger" : "glob"
+          },
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "621c04a393fedd640efd932ebeebd4205718320534e066145ea5c10537a5a886",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "390e77e23e0ac49879ce2220537d549cfe57b6f088ad1826c01c8f8d38cdb024",
+    "kind" : "rules",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/cascade-app/.windsurf/rules/incident-manual.md",
+      "realPath" : "<HOME>/repos/cascade-app/.windsurf/rules/incident-manual.md"
+    },
+    "name" : "incident-manual.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 178,
+          "characterCount" : 178,
+          "content" : "\n# Incident Response Playbook\n\n- Capture timeline timestamps in UTC ISO-8601 format.\n- Summarize customer impact, root cause, and follow-up action items.\n",
+          "frontmatter" : {
+            "trigger" : "manual"
+          },
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "9ab553fab3e3ffbc0c2fbe5851d23a8cbf5f870269d9fb26cd4413a5568a1dc4",
+    "diagnostics" : [
+      {
+        "code" : "rules.sizeLimitExceeded",
+        "location" : {
+          "path" : "<HOME>/repos/cascade-app/.windsurf/rules/over-12k.md",
+          "realPath" : "<HOME>/repos/cascade-app/.windsurf/rules/over-12k.md"
+        },
+        "message" : "Windsurf rule file 'over-12k.md' exceeds 12000-character limit (12050 characters)",
+        "severity" : "warning"
+      }
+    ],
+    "enabled" : true,
+    "id" : "8779aad2d2ec759288f46d14bdc61e6a572d1a55b12764278cb9572f21312162",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/cascade-app/.windsurf/rules/over-12k.md",
+      "realPath" : "<HOME>/repos/cascade-app/.windsurf/rules/over-12k.md"
+    },
+    "name" : "over-12k.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 12050,
+          "characterCount" : 12050,
+          "content" : "\n# Workspace Rule Over 12000 Characters\n\n- Directive 001: verify wal invariants alongside partition boundaries for heartbeat and wal.\n- Directive 002: verify partition invariants alongside replication boundaries for snapshot and wal.\n- Directive 003: verify heartbeat invariants alongside snapshot boundaries for quorum and wal.\n- Directive 004: verify quorum invariants alongside shard boundaries for consensus and wal.\n- Directive 005: verify checkpoint invariants alongside checkpoint boundaries for checkpoint and wal.\n- Directive 006: verify failover invariants alongside heartbeat boundaries for replication and wal.\n- Directive 007: verify shard invariants alongside wal boundaries for failover and wal.\n- Directive 008: verify compaction invariants alongside consensus boundaries for wal and wal.\n- Directive 009: verify snapshot invariants alongside compaction boundaries for shard and wal.\n- Directive 010: verify consensus invariants alongside failover boundaries for partition and wal.\n- Directive 011: verify replication invariants alongside quorum boundaries for compaction and wal.\n- Directive 012: verify wal invariants alongside partition boundaries for heartbeat and wal.\n- Directive 013: verify partition invariants alongside replication boundaries for snapshot and wal.\n- Directive 014: verify heartbeat invariants alongside snapshot boundaries for quorum and wal.\n- Directive 015: verify quorum invariants alongside shard boundaries for consensus and wal.\n- Directive 016: verify checkpoint invariants alongside checkpoint boundaries for checkpoint and wal.\n- Directive 017: verify failover invariants alongside heartbeat boundaries for replication and wal.\n- Directive 018: verify shard invariants alongside wal boundaries for failover and wal.\n- Directive 019: verify compaction invariants alongside consensus boundaries for wal and wal.\n- Directive 020: verify snapshot invariants alongside compaction boundaries for shard and wal.\n- Directive 021: verify consensus invariants alongside failover boundaries for partition and wal.\n- Directive 022: verify replication invariants alongside quorum boundaries for compaction and wal.\n- Directive 023: verify wal invariants alongside partition boundaries for heartbeat and wal.\n- Directive 024: verify partition invariants alongside replication boundaries for snapshot and wal.\n- Directive 025: verify heartbeat invariants alongside snapshot boundaries for quorum and wal.\n- Directive 026: verify quorum invariants alongside shard boundaries for consensus and wal.\n- Directive 027: verify checkpoint invariants alongside checkpoint boundaries for checkpoint and wal.\n- Directive 028: verify failover invariants alongside heartbeat boundaries for replication and wal.\n- Directive 029: verify shard invariants alongside wal boundaries for failover and wal.\n- Directive 030: verify compaction invariants alongside consensus boundaries for wal and wal.\n- Directive 031: verify snapshot invariants alongside compaction boundaries for shard and wal.\n- Directive 032: verify consensus invariants alongside failover boundaries for partition and wal.\n- Directive 033: verify replication invariants alongside quorum boundaries for compaction and wal.\n- Directive 034: verify wal invariants alongside partition boundaries for heartbeat and wal.\n- Directive 035: verify partition invariants alongside replication boundaries for snapshot and wal.\n- Directive 036: verify heartbeat invariants alongside snapshot boundaries for quorum and wal.\n- Directive 037: verify quorum invariants alongside shard boundaries for consensus and wal.\n- Directive 038: verify checkpoint invariants alongside checkpoint boundaries for checkpoint and wal.\n- Directive 039: verify failover invariants alongside heartbeat boundaries for replication and wal.\n- Directive 040: verify shard invariants alongside wal boundaries for failover and wal.\n- Directive 041: verify compaction invariants alongside consensus boundaries for wal and wal.\n- Directive 042: verify snapshot invariants alongside compaction boundaries for shard and wal.\n- Directive 043: verify consensus invariants alongside failover boundaries for partition and wal.\n- Directive 044: verify replication invariants alongside quorum boundaries for compaction and wal.\n- Directive 045: verify wal invariants alongside partition boundaries for heartbeat and wal.\n- Directive 046: verify partition invariants alongside replication boundaries for snapshot and wal.\n- Directive 047: verify heartbeat invariants alongside snapshot boundaries for quorum and wal.\n- Directive 048: verify quorum invariants alongside shard boundaries for consensus and wal.\n- Directive 049: verify checkpoint invariants alongside checkpoint boundaries for checkpoint and wal.\n- Directive 050: verify failover invariants alongside heartbeat boundaries for replication and wal.\n- Directive 051: verify shard invariants alongside wal boundaries for failover and wal.\n- Directive 052: verify compaction invariants alongside consensus boundaries for wal and wal.\n- Directive 053: verify snapshot invariants alongside compaction boundaries for shard and wal.\n- Directive 054: verify consensus invariants alongside failover boundaries for partition and wal.\n- Directive 055: verify replication invariants alongside quorum boundaries for compaction and wal.\n- Directive 056: verify wal invariants alongside partition boundaries for heartbeat and wal.\n- Directive 057: verify partition invariants alongside replication boundaries for snapshot and wal.\n- Directive 058: verify heartbeat invariants alongside snapshot boundaries for quorum and wal.\n- Directive 059: verify quorum invariants alongside shard boundaries for consensus and wal.\n- Directive 060: verify checkpoint invariants alongside checkpoint boundaries for checkpoint and wal.\n- Directive 061: verify failover invariants alongside heartbeat boundaries for replication and wal.\n- Directive 062: verify shard invariants alongside wal boundaries for failover and wal.\n- Directive 063: verify compaction invariants alongside consensus boundaries for wal and wal.\n- Directive 064: verify snapshot invariants alongside compaction boundaries for shard and wal.\n- Directive 065: verify consensus invariants alongside failover boundaries for partition and wal.\n- Directive 066: verify replication invariants alongside quorum boundaries for compaction and wal.\n- Directive 067: verify wal invariants alongside partition boundaries for heartbeat and wal.\n- Directive 068: verify partition invariants alongside replication boundaries for snapshot and wal.\n- Directive 069: verify heartbeat invariants alongside snapshot boundaries for quorum and wal.\n- Directive 070: verify quorum invariants alongside shard boundaries for consensus and wal.\n- Directive 071: verify checkpoint invariants alongside checkpoint boundaries for checkpoint and wal.\n- Directive 072: verify failover invariants alongside heartbeat boundaries for replication and wal.\n- Directive 073: verify shard invariants alongside wal boundaries for failover and wal.\n- Directive 074: verify compaction invariants alongside consensus boundaries for wal and wal.\n- Directive 075: verify snapshot invariants alongside compaction boundaries for shard and wal.\n- Directive 076: verify consensus invariants alongside failover boundaries for partition and wal.\n- Directive 077: verify replication invariants alongside quorum boundaries for compaction and wal.\n- Directive 078: verify wal invariants alongside partition boundaries for heartbeat and wal.\n- Directive 079: verify partition invariants alongside replication boundaries for snapshot and wal.\n- Directive 080: verify heartbeat invariants alongside snapshot boundaries for quorum and wal.\n- Directive 081: verify quorum invariants alongside shard boundaries for consensus and wal.\n- Directive 082: verify checkpoint invariants alongside checkpoint boundaries for checkpoint and wal.\n- Directive 083: verify failover invariants alongside heartbeat boundaries for replication and wal.\n- Directive 084: verify shard invariants alongside wal boundaries for failover and wal.\n- Directive 085: verify compaction invariants alongside consensus boundaries for wal and wal.\n- Directive 086: verify snapshot invariants alongside compaction boundaries for shard and wal.\n- Directive 087: verify consensus invariants alongside failover boundaries for partition and wal.\n- Directive 088: verify replication invariants alongside quorum boundaries for compaction and wal.\n- Directive 089: verify wal invariants alongside partition boundaries for heartbeat and wal.\n- Directive 090: verify partition invariants alongside replication boundaries for snapshot and wal.\n- Directive 091: verify heartbeat invariants alongside snapshot boundaries for quorum and wal.\n- Directive 092: verify quorum invariants alongside shard boundaries for consensus and wal.\n- Directive 093: verify checkpoint invariants alongside checkpoint boundaries for checkpoint and wal.\n- Directive 094: verify failover invariants alongside heartbeat boundaries for replication and wal.\n- Directive 095: verify shard invariants alongside wal boundaries for failover and wal.\n- Directive 096: verify compaction invariants alongside consensus boundaries for wal and wal.\n- Directive 097: verify snapshot invariants alongside compaction boundaries for shard and wal.\n- Directive 098: verify consensus invariants alongside failover boundaries for partition and wal.\n- Directive 099: verify replication invariants alongside quorum boundaries for compaction and wal.\n- Directive 100: verify wal invariants alongside partition boundaries for heartbeat and wal.\n- Directive 101: verify partition invariants alongside replication boundaries for snapshot and wal.\n- Directive 102: verify heartbeat invariants alongside snapshot boundaries for quorum and wal.\n- Directive 103: verify quorum invariants alongside shard boundaries for consensus and wal.\n- Directive 104: verify checkpoint invariants alongside checkpoint boundaries for checkpoint and wal.\n- Directive 105: verify failover invariants alongside heartbeat boundaries for replication and wal.\n- Directive 106: verify shard invariants alongside wal boundaries for failover and wal.\n- Directive 107: verify compaction invariants alongside consensus boundaries for wal and wal.\n- Directive 108: verify snapshot invariants alongside compaction boundaries for shard and wal.\n- Directive 109: verify consensus invariants alongside failover boundaries for partition and wal.\n- Directive 110: verify replication invariants alongside quorum boundaries for compaction and wal.\n- Directive 111: verify wal invariants alongside partition boundaries for heartbeat and wal.\n- Directive 112: verify partition invariants alongside replication boundaries for snapshot and wal.\n- Directive 113: verify heartbeat invariants alongside snapshot boundaries for quorum and wal.\n- Directive 114: verify quorum invariants alongside shard boundaries for consensus and wal.\n- Directive 115: verify checkpoint invariants alongside checkpoint boundaries for checkpoint and wal.\n- Directive 116: verify failover invariants alongside heartbeat boundaries for replication and wal.\n- Directive 117: verify shard invariants alongside wal boundaries for failover and wal.\n- Directive 118: verify compaction invariants alongside consensus boundaries for wal and wal.\n- Directive 119: verify snapshot invariants alongside compaction boundaries for shard and wal.\n- Directive 120: verify consensus invariants alongside failover boundaries for partition and wal.\n- Directive 121: verify replication invariants alongside quorum boundaries for compaction and wal.\n- Directive 122: verify wal invariants alongside partition boundaries for heartbeat and wal.\n- Directive 123: verify partition invariants alongside replication boundaries for snapshot and wal.\n- Directive 124: verify heartbeat invariants alongside snapshot boundaries for quorum and wal.\n- Final note 125: alpha_replication_alpha_replication_alpha_replication_alpha\n",
+          "frontmatter" : {
+            "trigger" : "always_on"
+          },
+          "imports" : [
+
+          ],
+          "wasTruncated" : true
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "feafc58b0a2680ef249a4b7c1fa117439bc191392ac06386a212d674f34d571d",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "6df419e6a25b84719e012d2490d16dca080bbb96c2bbb2afef1c3e655ff492b7",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/cascade-app/.windsurf/rules/under-12k.md",
+      "realPath" : "<HOME>/repos/cascade-app/.windsurf/rules/under-12k.md"
+    },
+    "name" : "under-12k.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 11950,
+          "characterCount" : 11950,
+          "content" : "\n# Workspace Rule Under 12000 Characters\n\n- Directive 001: verify accrual invariants alongside remittance boundaries for amortization and accrual.\n- Directive 002: verify remittance invariants alongside ledger boundaries for clearing and accrual.\n- Directive 003: verify amortization invariants alongside clearing boundaries for settlement and accrual.\n- Directive 004: verify settlement invariants alongside escrow boundaries for custody and accrual.\n- Directive 005: verify journal invariants alongside journal boundaries for journal and accrual.\n- Directive 006: verify invoice invariants alongside amortization boundaries for ledger and accrual.\n- Directive 007: verify escrow invariants alongside accrual boundaries for invoice and accrual.\n- Directive 008: verify reconciliation invariants alongside custody boundaries for accrual and accrual.\n- Directive 009: verify clearing invariants alongside reconciliation boundaries for escrow and accrual.\n- Directive 010: verify custody invariants alongside invoice boundaries for remittance and accrual.\n- Directive 011: verify ledger invariants alongside settlement boundaries for reconciliation and accrual.\n- Directive 012: verify accrual invariants alongside remittance boundaries for amortization and accrual.\n- Directive 013: verify remittance invariants alongside ledger boundaries for clearing and accrual.\n- Directive 014: verify amortization invariants alongside clearing boundaries for settlement and accrual.\n- Directive 015: verify settlement invariants alongside escrow boundaries for custody and accrual.\n- Directive 016: verify journal invariants alongside journal boundaries for journal and accrual.\n- Directive 017: verify invoice invariants alongside amortization boundaries for ledger and accrual.\n- Directive 018: verify escrow invariants alongside accrual boundaries for invoice and accrual.\n- Directive 019: verify reconciliation invariants alongside custody boundaries for accrual and accrual.\n- Directive 020: verify clearing invariants alongside reconciliation boundaries for escrow and accrual.\n- Directive 021: verify custody invariants alongside invoice boundaries for remittance and accrual.\n- Directive 022: verify ledger invariants alongside settlement boundaries for reconciliation and accrual.\n- Directive 023: verify accrual invariants alongside remittance boundaries for amortization and accrual.\n- Directive 024: verify remittance invariants alongside ledger boundaries for clearing and accrual.\n- Directive 025: verify amortization invariants alongside clearing boundaries for settlement and accrual.\n- Directive 026: verify settlement invariants alongside escrow boundaries for custody and accrual.\n- Directive 027: verify journal invariants alongside journal boundaries for journal and accrual.\n- Directive 028: verify invoice invariants alongside amortization boundaries for ledger and accrual.\n- Directive 029: verify escrow invariants alongside accrual boundaries for invoice and accrual.\n- Directive 030: verify reconciliation invariants alongside custody boundaries for accrual and accrual.\n- Directive 031: verify clearing invariants alongside reconciliation boundaries for escrow and accrual.\n- Directive 032: verify custody invariants alongside invoice boundaries for remittance and accrual.\n- Directive 033: verify ledger invariants alongside settlement boundaries for reconciliation and accrual.\n- Directive 034: verify accrual invariants alongside remittance boundaries for amortization and accrual.\n- Directive 035: verify remittance invariants alongside ledger boundaries for clearing and accrual.\n- Directive 036: verify amortization invariants alongside clearing boundaries for settlement and accrual.\n- Directive 037: verify settlement invariants alongside escrow boundaries for custody and accrual.\n- Directive 038: verify journal invariants alongside journal boundaries for journal and accrual.\n- Directive 039: verify invoice invariants alongside amortization boundaries for ledger and accrual.\n- Directive 040: verify escrow invariants alongside accrual boundaries for invoice and accrual.\n- Directive 041: verify reconciliation invariants alongside custody boundaries for accrual and accrual.\n- Directive 042: verify clearing invariants alongside reconciliation boundaries for escrow and accrual.\n- Directive 043: verify custody invariants alongside invoice boundaries for remittance and accrual.\n- Directive 044: verify ledger invariants alongside settlement boundaries for reconciliation and accrual.\n- Directive 045: verify accrual invariants alongside remittance boundaries for amortization and accrual.\n- Directive 046: verify remittance invariants alongside ledger boundaries for clearing and accrual.\n- Directive 047: verify amortization invariants alongside clearing boundaries for settlement and accrual.\n- Directive 048: verify settlement invariants alongside escrow boundaries for custody and accrual.\n- Directive 049: verify journal invariants alongside journal boundaries for journal and accrual.\n- Directive 050: verify invoice invariants alongside amortization boundaries for ledger and accrual.\n- Directive 051: verify escrow invariants alongside accrual boundaries for invoice and accrual.\n- Directive 052: verify reconciliation invariants alongside custody boundaries for accrual and accrual.\n- Directive 053: verify clearing invariants alongside reconciliation boundaries for escrow and accrual.\n- Directive 054: verify custody invariants alongside invoice boundaries for remittance and accrual.\n- Directive 055: verify ledger invariants alongside settlement boundaries for reconciliation and accrual.\n- Directive 056: verify accrual invariants alongside remittance boundaries for amortization and accrual.\n- Directive 057: verify remittance invariants alongside ledger boundaries for clearing and accrual.\n- Directive 058: verify amortization invariants alongside clearing boundaries for settlement and accrual.\n- Directive 059: verify settlement invariants alongside escrow boundaries for custody and accrual.\n- Directive 060: verify journal invariants alongside journal boundaries for journal and accrual.\n- Directive 061: verify invoice invariants alongside amortization boundaries for ledger and accrual.\n- Directive 062: verify escrow invariants alongside accrual boundaries for invoice and accrual.\n- Directive 063: verify reconciliation invariants alongside custody boundaries for accrual and accrual.\n- Directive 064: verify clearing invariants alongside reconciliation boundaries for escrow and accrual.\n- Directive 065: verify custody invariants alongside invoice boundaries for remittance and accrual.\n- Directive 066: verify ledger invariants alongside settlement boundaries for reconciliation and accrual.\n- Directive 067: verify accrual invariants alongside remittance boundaries for amortization and accrual.\n- Directive 068: verify remittance invariants alongside ledger boundaries for clearing and accrual.\n- Directive 069: verify amortization invariants alongside clearing boundaries for settlement and accrual.\n- Directive 070: verify settlement invariants alongside escrow boundaries for custody and accrual.\n- Directive 071: verify journal invariants alongside journal boundaries for journal and accrual.\n- Directive 072: verify invoice invariants alongside amortization boundaries for ledger and accrual.\n- Directive 073: verify escrow invariants alongside accrual boundaries for invoice and accrual.\n- Directive 074: verify reconciliation invariants alongside custody boundaries for accrual and accrual.\n- Directive 075: verify clearing invariants alongside reconciliation boundaries for escrow and accrual.\n- Directive 076: verify custody invariants alongside invoice boundaries for remittance and accrual.\n- Directive 077: verify ledger invariants alongside settlement boundaries for reconciliation and accrual.\n- Directive 078: verify accrual invariants alongside remittance boundaries for amortization and accrual.\n- Directive 079: verify remittance invariants alongside ledger boundaries for clearing and accrual.\n- Directive 080: verify amortization invariants alongside clearing boundaries for settlement and accrual.\n- Directive 081: verify settlement invariants alongside escrow boundaries for custody and accrual.\n- Directive 082: verify journal invariants alongside journal boundaries for journal and accrual.\n- Directive 083: verify invoice invariants alongside amortization boundaries for ledger and accrual.\n- Directive 084: verify escrow invariants alongside accrual boundaries for invoice and accrual.\n- Directive 085: verify reconciliation invariants alongside custody boundaries for accrual and accrual.\n- Directive 086: verify clearing invariants alongside reconciliation boundaries for escrow and accrual.\n- Directive 087: verify custody invariants alongside invoice boundaries for remittance and accrual.\n- Directive 088: verify ledger invariants alongside settlement boundaries for reconciliation and accrual.\n- Directive 089: verify accrual invariants alongside remittance boundaries for amortization and accrual.\n- Directive 090: verify remittance invariants alongside ledger boundaries for clearing and accrual.\n- Directive 091: verify amortization invariants alongside clearing boundaries for settlement and accrual.\n- Directive 092: verify settlement invariants alongside escrow boundaries for custody and accrual.\n- Directive 093: verify journal invariants alongside journal boundaries for journal and accrual.\n- Directive 094: verify invoice invariants alongside amortization boundaries for ledger and accrual.\n- Directive 095: verify escrow invariants alongside accrual boundaries for invoice and accrual.\n- Directive 096: verify reconciliation invariants alongside custody boundaries for accrual and accrual.\n- Directive 097: verify clearing invariants alongside reconciliation boundaries for escrow and accrual.\n- Directive 098: verify custody invariants alongside invoice boundaries for remittance and accrual.\n- Directive 099: verify ledger invariants alongside settlement boundaries for reconciliation and accrual.\n- Directive 100: verify accrual invariants alongside remittance boundaries for amortization and accrual.\n- Directive 101: verify remittance invariants alongside ledger boundaries for clearing and accrual.\n- Directive 102: verify amortization invariants alongside clearing boundaries for settlement and accrual.\n- Directive 103: verify settlement invariants alongside escrow boundaries for custody and accrual.\n- Directive 104: verify journal invariants alongside journal boundaries for journal and accrual.\n- Directive 105: verify invoice invariants alongside amortization boundaries for ledger and accrual.\n- Directive 106: verify escrow invariants alongside accrual boundaries for invoice and accrual.\n- Directive 107: verify reconciliation invariants alongside custody boundaries for accrual and accrual.\n- Directive 108: verify clearing invariants alongside reconciliation boundaries for escrow and accrual.\n- Directive 109: verify custody invariants alongside invoice boundaries for remittance and accrual.\n- Directive 110: verify ledger invariants alongside settlement boundaries for reconciliation and accrual.\n- Directive 111: verify accrual invariants alongside remittance boundaries for amortization and accrual.\n- Directive 112: verify remittance invariants alongside ledger boundaries for clearing and accrual.\n- Directive 113: verify amortization invariants alongside clearing boundaries for settlement and accrual.\n- Directive 114: verify settlement invariants alongside escrow boundaries for custody and accrual.\n- Directive 115: verify journal invariants alongside journal boundaries for journal and accrual.\n- Directive 116: verify invoice invariants alongside amortization boundaries for ledger and accrual.\n- Final note 117: alpha_ledger_alpha_ledger_alpha_ledger_alpha_ledger_alpha_ledger_alpha_led\n",
+          "frontmatter" : {
+            "trigger" : "always_on"
+          },
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "aff080d6a135d3d70136da845f616f9f646d10b2b6bbf578541f0c47dd3e3885",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "2d89c471ab753546f1ea8bcd078f33ef69c391dd3d15aa8eace71d68bcbb773a",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/cascade-app/.windsurf/rules/under-6k.md",
+      "realPath" : "<HOME>/repos/cascade-app/.windsurf/rules/under-6k.md"
+    },
+    "name" : "under-6k.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 5950,
+          "characterCount" : 5950,
+          "content" : "\n# Workspace Rule Under 6000 Characters\n\n- Directive 001: verify elevation invariants alongside viewport boundaries for motion and elevation.\n- Directive 002: verify viewport invariants alongside typography boundaries for focusring and elevation.\n- Directive 003: verify motion invariants alongside focusring boundaries for kerning and elevation.\n- Directive 004: verify kerning invariants alongside iconography boundaries for spacing and elevation.\n- Directive 005: verify contrast invariants alongside contrast boundaries for contrast and elevation.\n- Directive 006: verify gridline invariants alongside motion boundaries for typography and elevation.\n- Directive 007: verify iconography invariants alongside elevation boundaries for gridline and elevation.\n- Directive 008: verify palette invariants alongside spacing boundaries for elevation and elevation.\n- Directive 009: verify focusring invariants alongside palette boundaries for iconography and elevation.\n- Directive 010: verify spacing invariants alongside gridline boundaries for viewport and elevation.\n- Directive 011: verify typography invariants alongside kerning boundaries for palette and elevation.\n- Directive 012: verify elevation invariants alongside viewport boundaries for motion and elevation.\n- Directive 013: verify viewport invariants alongside typography boundaries for focusring and elevation.\n- Directive 014: verify motion invariants alongside focusring boundaries for kerning and elevation.\n- Directive 015: verify kerning invariants alongside iconography boundaries for spacing and elevation.\n- Directive 016: verify contrast invariants alongside contrast boundaries for contrast and elevation.\n- Directive 017: verify gridline invariants alongside motion boundaries for typography and elevation.\n- Directive 018: verify iconography invariants alongside elevation boundaries for gridline and elevation.\n- Directive 019: verify palette invariants alongside spacing boundaries for elevation and elevation.\n- Directive 020: verify focusring invariants alongside palette boundaries for iconography and elevation.\n- Directive 021: verify spacing invariants alongside gridline boundaries for viewport and elevation.\n- Directive 022: verify typography invariants alongside kerning boundaries for palette and elevation.\n- Directive 023: verify elevation invariants alongside viewport boundaries for motion and elevation.\n- Directive 024: verify viewport invariants alongside typography boundaries for focusring and elevation.\n- Directive 025: verify motion invariants alongside focusring boundaries for kerning and elevation.\n- Directive 026: verify kerning invariants alongside iconography boundaries for spacing and elevation.\n- Directive 027: verify contrast invariants alongside contrast boundaries for contrast and elevation.\n- Directive 028: verify gridline invariants alongside motion boundaries for typography and elevation.\n- Directive 029: verify iconography invariants alongside elevation boundaries for gridline and elevation.\n- Directive 030: verify palette invariants alongside spacing boundaries for elevation and elevation.\n- Directive 031: verify focusring invariants alongside palette boundaries for iconography and elevation.\n- Directive 032: verify spacing invariants alongside gridline boundaries for viewport and elevation.\n- Directive 033: verify typography invariants alongside kerning boundaries for palette and elevation.\n- Directive 034: verify elevation invariants alongside viewport boundaries for motion and elevation.\n- Directive 035: verify viewport invariants alongside typography boundaries for focusring and elevation.\n- Directive 036: verify motion invariants alongside focusring boundaries for kerning and elevation.\n- Directive 037: verify kerning invariants alongside iconography boundaries for spacing and elevation.\n- Directive 038: verify contrast invariants alongside contrast boundaries for contrast and elevation.\n- Directive 039: verify gridline invariants alongside motion boundaries for typography and elevation.\n- Directive 040: verify iconography invariants alongside elevation boundaries for gridline and elevation.\n- Directive 041: verify palette invariants alongside spacing boundaries for elevation and elevation.\n- Directive 042: verify focusring invariants alongside palette boundaries for iconography and elevation.\n- Directive 043: verify spacing invariants alongside gridline boundaries for viewport and elevation.\n- Directive 044: verify typography invariants alongside kerning boundaries for palette and elevation.\n- Directive 045: verify elevation invariants alongside viewport boundaries for motion and elevation.\n- Directive 046: verify viewport invariants alongside typography boundaries for focusring and elevation.\n- Directive 047: verify motion invariants alongside focusring boundaries for kerning and elevation.\n- Directive 048: verify kerning invariants alongside iconography boundaries for spacing and elevation.\n- Directive 049: verify contrast invariants alongside contrast boundaries for contrast and elevation.\n- Directive 050: verify gridline invariants alongside motion boundaries for typography and elevation.\n- Directive 051: verify iconography invariants alongside elevation boundaries for gridline and elevation.\n- Directive 052: verify palette invariants alongside spacing boundaries for elevation and elevation.\n- Directive 053: verify focusring invariants alongside palette boundaries for iconography and elevation.\n- Directive 054: verify spacing invariants alongside gridline boundaries for viewport and elevation.\n- Directive 055: verify typography invariants alongside kerning boundaries for palette and elevation.\n- Directive 056: verify elevation invariants alongside viewport boundaries for motion and elevation.\n- Directive 057: verify viewport invariants alongside typography boundaries for focusring and elevation.\n- Final note 058: alpha_typography_\n",
+          "frontmatter" : {
+            "trigger" : "always_on"
+          },
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "475c6847960e7c3d7847f0e495e8745de0e9dfadda80ce564b6e1c52a10e0753",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "f20914aa41c0c60e4932511660d90394d745f3225de4d950af94eb5e20ac251e",
+    "kind" : "rules",
+    "loadMode" : {
+      "conditional" : {
+        "globs" : [
+          "web/**"
+        ]
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/cascade-app/web/AGENTS.md",
+      "realPath" : "<HOME>/repos/cascade-app/web/AGENTS.md"
+    },
+    "name" : "web/AGENTS.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 93,
+          "characterCount" : 93,
+          "content" : "# Cascade Web Client Guidelines\n\n- Keep client route bundles lazy-loaded at page boundaries.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 3
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "599815bd3551bd505c0aff36b9efa6b0d48cd29288d9f4fdc92513d47a1ff1d0",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "d55700d147fb551f4d20c4d37502cca46e52730c646da7d4a76db3932c3ad33a",
+    "kind" : "command",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/cascade-app/.windsurf/workflows/ship-check.md",
+      "realPath" : "<HOME>/repos/cascade-app/.windsurf/workflows/ship-check.md"
+    },
+    "name" : "ship-check",
+    "payload" : {
+      "command" : {
+        "_0" : {
+          "body" : "\n1. Run `swift test --parallel` and frontend Vitest checks.\n2. Verify OpenAPI schema compatibility and migration dry-run.\n",
+          "description" : "Workspace pre-release verification workflow overriding global ship-check",
+          "name" : "ship-check"
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "windsurf",
+    "contentHash" : "1563ea16ad1f10f1b25eca2df75389059da947898a2463319c1a8d35c8d5e2ae",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "78aeec4b46847977076e078d91d4ab6c6c52c0526f986b5e4f5abf5de3727936",
+    "kind" : "ignoreFile",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/cascade-app/.codeiumignore",
+      "realPath" : "<HOME>/repos/cascade-app/.codeiumignore"
+    },
+    "name" : ".codeiumignore",
+    "payload" : {
+      "other" : {
+
+      }
+    },
+    "scope" : 2
+  }
+]

@@ -1,0 +1,641 @@
+[
+  {
+    "agent" : "cursor",
+    "contentHash" : "bddcec0f5b739a3e5fcfa7558900ca242e5983ad912f323136060449e519186f",
+    "diagnostics" : [
+
+    ],
+    "enabled" : false,
+    "id" : "605475f76edaa24210c1538c6653858804b2cd3147121fdf0498337ee93f4949",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "archived-mcp"
+      ],
+      "path" : "<HOME>/.cursor/mcp.json",
+      "realPath" : "<HOME>/.cursor/mcp.json"
+    },
+    "name" : "archived-mcp",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : true,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "mcp-archived"
+              ],
+              "command" : "uvx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "bddcec0f5b739a3e5fcfa7558900ca242e5983ad912f323136060449e519186f",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "c29fc79da52497a567a3ab9ce29cbcd7a2c5515d7359c29441ebaadf1a123733",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "figma"
+      ],
+      "path" : "<HOME>/.cursor/mcp.json",
+      "realPath" : "<HOME>/.cursor/mcp.json"
+    },
+    "name" : "figma",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+            "FIGMA_ACCESS_TOKEN"
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "figma-developer-mcp",
+                "--personal"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "bddcec0f5b739a3e5fcfa7558900ca242e5983ad912f323136060449e519186f",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "c747b3d3a8ade890605a91e9f514d29b0578fe624b2007f37cbf82638cf2b6a1",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "linear"
+      ],
+      "path" : "<HOME>/.cursor/mcp.json",
+      "realPath" : "<HOME>/.cursor/mcp.json"
+    },
+    "name" : "linear",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "sse" : {
+              "url" : "https://mcp.linear.example.test/sse"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "5a918c48d8b872f9169ebc2d6747e4073d96f014a366bac1b075e43e62ee4423",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "8fad6a337321877276ea819ddf96d85746a301d8e2973b6b924d520e2990ef3f",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.cursor/skills/component-audit/SKILL.md",
+      "realPath" : "<HOME>/.cursor/skills/component-audit/SKILL.md"
+    },
+    "name" : "component-audit",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "\nCheck accessibility roles and keyboard focus states.\n",
+          "description" : "Personal baseline component audit shadowed by workspace component-audit",
+          "frontmatter" : {
+            "description" : "Personal baseline component audit shadowed by workspace component-audit",
+            "name" : "component-audit"
+          },
+          "name" : "component-audit",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "3408fde26183bb33f7bab1e71073bd7d013fdcb8da5360a43f78ea3021567dab",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "93db2b576c3f863db620645990195afb40eabe966878e6eed0e366250090e8e7",
+    "kind" : "subagent",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.cursor/agents/accessibility-checker.md",
+      "realPath" : "<HOME>/.cursor/agents/accessibility-checker.md"
+    },
+    "name" : "accessibility-checker",
+    "payload" : {
+      "subagent" : {
+        "_0" : {
+          "body" : "\nInspect interactive controls for accessible names and keyboard operability.\n",
+          "description" : "Reviews WCAG 2.2 contrast and ARIA semantics",
+          "frontmatter" : {
+            "description" : "Reviews WCAG 2.2 contrast and ARIA semantics",
+            "model" : "claude-sonnet-4",
+            "name" : "accessibility-checker"
+          },
+          "model" : "claude-sonnet-4",
+          "name" : "accessibility-checker"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "7e7c6ff2cbdf1581be66a9b1ca439c6c5cc0f533d15ffc1480d2e7be71aba05a",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "dea038760176b799e63ddc58301bc638ad798c6be0cdfb1ad0eb7f6610e22f6e",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/design-system/AGENTS.md",
+      "realPath" : "<HOME>/repos/design-system/AGENTS.md"
+    },
+    "name" : "AGENTS.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 147,
+          "characterCount" : 147,
+          "content" : "# Design System Agent Instructions\n\n- Run `pnpm test` and `pnpm typecheck` before completing tasks.\n- Never modify generated icon output directly.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "ac1dc3e4061972ffe67e14b76c300999166f04da93d7aeff43cf70c71bb3ee8d",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "74416c673a09c0d37f4b791cb9d7bc2ade4af1c29c287d79055445073f89765d",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/design-system/.cursorrules",
+      "realPath" : "<HOME>/repos/design-system/.cursorrules"
+    },
+    "name" : ".cursorrules",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 85,
+          "characterCount" : 85,
+          "content" : "# Legacy Cursor Rules\n\n- Keep bundle size per component package under 10 KB gzipped.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "9cbd49d3cffb3dd3770a8e5e5e351a12e3a9d453ec8288bc9ead38be3bfd951a",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "39a1fdba2b9bde96a5c10002bd223346514d9048311bf73130498ae44da532ac",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/design-system/.cursor/rules/core-style.mdc",
+      "realPath" : "<HOME>/repos/design-system/.cursor/rules/core-style.mdc"
+    },
+    "name" : "core-style.mdc",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 222,
+          "characterCount" : 222,
+          "content" : "\n- Export named TypeScript interfaces for every component prop bag.\n- Reference semantic CSS custom properties instead of raw hex colors.\n",
+          "frontmatter" : {
+            "alwaysApply" : true,
+            "description" : "Core TypeScript and design token conventions"
+          },
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "85f1a135aad7b56a23bff6b11e4ae003d2d8d63eb78517020827113682cd851e",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "115ebf174d1e122a941e285235eae080e7fc62ec3c6613462de2df588384a9b4",
+    "kind" : "rules",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/design-system/.cursor/rules/migration-guide.mdc",
+      "realPath" : "<HOME>/repos/design-system/.cursor/rules/migration-guide.mdc"
+    },
+    "name" : "migration-guide.mdc",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 227,
+          "characterCount" : 227,
+          "content" : "\n- Replace legacy `$spacing-*` SASS variables with `--ds-space-*` tokens.\n- Verify dark-mode surface contrast before removing deprecated classes.\n",
+          "frontmatter" : {
+            "description" : "Apply when migrating legacy CSS modules to v3 design tokens"
+          },
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "779eb234ed9faf9a44088fa3bb75876afb7301eaa34c6132b47e90ffbc3f782b",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "cd81704207e2b54b18746bc8352385a49e506295a0a0f406e742aab83985b4b2",
+    "kind" : "rules",
+    "loadMode" : {
+      "conditional" : {
+        "globs" : [
+          "packages/ui/**/*.tsx",
+          "packages/ui/**/*.ts"
+        ]
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/design-system/.cursor/rules/react-components.mdc",
+      "realPath" : "<HOME>/repos/design-system/.cursor/rules/react-components.mdc"
+    },
+    "name" : "react-components.mdc",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 248,
+          "characterCount" : 248,
+          "content" : "\n- Forward refs on all primitive interactive components.\n- Colocate Storybook stories alongside component source files.\n",
+          "frontmatter" : {
+            "alwaysApply" : false,
+            "description" : "React UI component patterns",
+            "globs" : [
+              "packages/ui/**/*.tsx",
+              "packages/ui/**/*.ts"
+            ]
+          },
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "5f24bedcd9989f311cb22d8210d05fbf2634c1964766178166510e9e8dda9436",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "2352a5b68a9f40f00b1d73e95126a4f50ccbf2d9044493ec86b71760be2741cd",
+    "kind" : "rules",
+    "loadMode" : {
+      "conditional" : {
+        "globs" : [
+          "packages/icons/**"
+        ]
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/design-system/packages/icons/AGENTS.md",
+      "realPath" : "<HOME>/repos/design-system/packages/icons/AGENTS.md"
+    },
+    "name" : "packages/icons/AGENTS.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 110,
+          "characterCount" : 110,
+          "content" : "# Icons Package Guidelines\n\n- Optimize SVG sources with SVGO using `currentColor` stroke and fill attributes.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 3
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "1312515bd7e66fac7671a2f29037dedf9c8e92235741af4c68215f90ad6f11f8",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "ee532b2caaebdd8cce29d7a476be54df4e500d4ac1020298e283de550506c44d",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "figma"
+      ],
+      "path" : "<HOME>/repos/design-system/.cursor/mcp.json",
+      "realPath" : "<HOME>/repos/design-system/.cursor/mcp.json"
+    },
+    "name" : "figma",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+            "FIGMA_ACCESS_TOKEN"
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "figma-developer-mcp",
+                "--design-system"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "1312515bd7e66fac7671a2f29037dedf9c8e92235741af4c68215f90ad6f11f8",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "faac7f34549444026427e19e2fcd2ae7a4b1fee79c9698bedf94e00963effa85",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "storybook"
+      ],
+      "path" : "<HOME>/repos/design-system/.cursor/mcp.json",
+      "realPath" : "<HOME>/repos/design-system/.cursor/mcp.json"
+    },
+    "name" : "storybook",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@storybook/mcp"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "cb3f1e93e9a59d878f01cfce37144046a9bc7da848b82e8cc962f34c6d6981db",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "271532e057c447638b747336d4a0c5fb1c5159ed366a3dc6385510baa3274d0e",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/design-system/.cursor/skills/component-audit/SKILL.md",
+      "realPath" : "<HOME>/repos/design-system/.cursor/skills/component-audit/SKILL.md"
+    },
+    "name" : "component-audit",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "\n1. Run Axe accessibility checks across light and dark themes.\n2. Verify token usage and keyboard navigation order.\n",
+          "description" : "Workspace component audit overriding personal component-audit",
+          "frontmatter" : {
+            "description" : "Workspace component audit overriding personal component-audit",
+            "name" : "component-audit"
+          },
+          "name" : "component-audit",
+          "supportingFiles" : [
+
+          ]
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "9a3f2abb836721ff20e4c09ae3eedc7f8ce707e355e5bc29829ed928cfdfcf51",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "db86f1b126cba983693787b5bdd508c0cf0012cf8a2fadb91ba79ae3f7cd9897",
+    "kind" : "subagent",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/design-system/.cursor/agents/visual-regression.md",
+      "realPath" : "<HOME>/repos/design-system/.cursor/agents/visual-regression.md"
+    },
+    "name" : "visual-regression",
+    "payload" : {
+      "subagent" : {
+        "_0" : {
+          "body" : "\nCompare baseline and candidate screenshots across desktop and mobile viewports.\n",
+          "description" : "Inspects Playwright visual snapshot diffs across breakpoints",
+          "frontmatter" : {
+            "description" : "Inspects Playwright visual snapshot diffs across breakpoints",
+            "model" : "claude-sonnet-4",
+            "name" : "visual-regression"
+          },
+          "model" : "claude-sonnet-4",
+          "name" : "visual-regression"
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "690ac1c8e7715437c15c5ef7f19accfdd71baf33e18cee4fd78ce92b67233a3b",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "2f1b3156045002e7359a3a9f02fc50dcfcb1685772b7938f9471b43c5d1aee2d",
+    "kind" : "ignoreFile",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/design-system/.cursorignore",
+      "realPath" : "<HOME>/repos/design-system/.cursorignore"
+    },
+    "name" : ".cursorignore",
+    "payload" : {
+      "other" : {
+
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "cursor",
+    "contentHash" : "88ad5421051049f5e394c2c22ff38f90bda4890d62760af227c3c89a7ac16d7a",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "512c445dc78ebab2273f7af34ad964efa7a915cb67a8a208f8fecaba4d0e5077",
+    "kind" : "ignoreFile",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/design-system/.cursorindexingignore",
+      "realPath" : "<HOME>/repos/design-system/.cursorindexingignore"
+    },
+    "name" : ".cursorindexingignore",
+    "payload" : {
+      "other" : {
+
+      }
+    },
+    "scope" : 2
+  }
+]

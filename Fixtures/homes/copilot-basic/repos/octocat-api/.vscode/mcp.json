@@ -1,0 +1,13 @@
+{
+  "servers": {
+    "observability": {
+      "type": "http",
+      "url": "https://telemetry.vscode-fallback.example.test/mcp"
+    },
+    "openapi-preview": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@acme/openapi-mcp"]
+    }
+  }
+}
