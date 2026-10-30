@@ -1,0 +1,6 @@
+model = "gpt-5-codex"
+
+[mcp_servers.docs]
+command = "npx"
+args = ["-y", "@acme/docs-mcp"]
+enabled = true

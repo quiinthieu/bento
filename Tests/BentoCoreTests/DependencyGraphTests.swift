@@ -221,7 +221,7 @@ enum PackageManifestParser {
 
             let bodyStart = stripped.index(after: openParenIndex)
             let body = String(stripped[bodyStart..<closeParenIndex])
-            if let name = extractTargetName(from: body) {
+            if let name = extractTargetName(from: body), !isTestSupportTarget(body: body) {
                 let deps = extractInternalDependencies(from: body)
                 result[name] = deps
             }
@@ -229,6 +229,13 @@ enum PackageManifestParser {
         }
 
         return result
+    }
+
+    private static func isTestSupportTarget(body: String) -> Bool {
+        guard let pathRange = body.range(of: "path:") else { return false }
+        let afterPath = String(body[pathRange.upperBound...])
+        guard let targetPath = firstQuotedString(in: afterPath) else { return false }
+        return targetPath.hasPrefix("Tests/")
     }
 
     private static func extractTargetName(from targetBody: String) -> String? {

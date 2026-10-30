@@ -102,9 +102,15 @@ let package = Package(
             path: "Sources/BentoApp",
             exclude: ["README.md"]
         ),
+        .target(
+            name: "BentoTestSupport",
+            dependencies: ["BentoCore"],
+            path: "Tests/BentoTestSupport"
+        ),
         .testTarget(
             name: "BentoCoreTests",
-            dependencies: ["BentoCore"]
+            dependencies: ["BentoCore", "BentoTestSupport"],
+            exclude: ["__golden__"]
         ),
         .testTarget(
             name: "BentoUITests",
