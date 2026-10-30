@@ -1,0 +1,690 @@
+[
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "496561952135459d7838aa694d5970ba8076f4ec46ce16f82e0dcbec54c148cb",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "774d228e0d6b5b326ecc3c568db14e9a66388bd0d2b4b2b4372c2cbea46a4eb3",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/settings.json",
+      "realPath" : "<HOME>/.claude/settings.json"
+    },
+    "name" : "settings.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "env" : {
+              "ANTHROPIC_API_KEY" : "«redacted»"
+            },
+            "hooks" : {
+              "PreToolUse" : [
+                {
+                  "hooks" : [
+                    {
+                      "command" : "~/.claude/hooks/check-bash.sh",
+                      "timeout" : 15,
+                      "type" : "command"
+                    }
+                  ],
+                  "matcher" : "Bash"
+                }
+              ]
+            },
+            "model" : "claude-sonnet-4-5",
+            "permissions" : {
+              "allow" : [
+                "Read",
+                "Grep",
+                "Glob"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "496561952135459d7838aa694d5970ba8076f4ec46ce16f82e0dcbec54c148cb",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "299aa904ec7c8b49aa8a768fa44f499835bfaa5b7c18f37878b1adfa95b0fd49",
+    "kind" : "hook",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "hooks",
+        "PreToolUse",
+        "0",
+        "hooks",
+        "0"
+      ],
+      "path" : "<HOME>/.claude/settings.json",
+      "realPath" : "<HOME>/.claude/settings.json"
+    },
+    "name" : "PreToolUse (Bash)",
+    "payload" : {
+      "hook" : {
+        "_0" : {
+          "command" : "~/.claude/hooks/check-bash.sh",
+          "event" : "PreToolUse",
+          "matcher" : "Bash",
+          "timeoutSeconds" : 15
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "ca90188e8306a5e4f5138b7437ffba2d729d6cbb9c8aa003e5a3b1955c5aa817",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "c726524cda96321f7b8647d38f8ae3cc4572ee20f01f8c6c4cc00d6bc73e708b",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "docs-search"
+      ],
+      "path" : "<HOME>/.claude.json",
+      "realPath" : "<HOME>/.claude.json"
+    },
+    "name" : "docs-search",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+            "DOCS_ACCESS_TOKEN"
+          ],
+          "transport" : {
+            "http" : {
+              "url" : "https://docs.example.test/mcp"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "ca90188e8306a5e4f5138b7437ffba2d729d6cbb9c8aa003e5a3b1955c5aa817",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "9b837e23d20b7c28a7121cd70d24041ca041934727bfc32cafb41913d471e7e0",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "memory"
+      ],
+      "path" : "<HOME>/.claude.json",
+      "realPath" : "<HOME>/.claude.json"
+    },
+    "name" : "memory",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+            "MEMORY_STORAGE_PATH"
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@modelcontextprotocol/server-memory"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "8ba8ef747e748b5675d369fabadba1889b0b75df38954f54f76f591d520a4d66",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "4fce622d1c78c08649fd48dd4432d32d59b56fcc041b39c3ec3bd511aea7d375",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/CLAUDE.md",
+      "realPath" : "<HOME>/.claude/CLAUDE.md"
+    },
+    "name" : "CLAUDE.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 162,
+          "characterCount" : 162,
+          "content" : "# Personal Claude Memory\n\n- Prefer concise explanations with direct file references.\n- Run tests before proposing final commits.\n\n@~/.claude/shared-guidelines.md\n",
+          "imports" : [
+            "~/.claude/shared-guidelines.md"
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "423bf660ff7ae0ee2b24e8530b9085c543520e9a81175ed72f9fb7156c8e0df0",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "54f544c5adbcad03e2d3d765bb47546829a71dacf84d227aeb7b49279b67cca2",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/shared-guidelines.md",
+      "realPath" : "<HOME>/.claude/shared-guidelines.md"
+    },
+    "name" : "shared-guidelines.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 149,
+          "characterCount" : 149,
+          "content" : "## Shared Engineering Guidelines\n\n- Keep functions small and focused on one responsibility.\n- Never commit secrets or credentials to source control.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "d0dde44f110bf7156748ee20ef06febe69b7eb29b245df8a5343bf67ec1ad212",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "8f48bb69252c3276e0e2bc98ce496311e320928d6516483b146e066eef1bfa87",
+    "kind" : "skill",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/skills/commit-helper/SKILL.md",
+      "realPath" : "<HOME>/.claude/skills/commit-helper/SKILL.md"
+    },
+    "name" : "commit-helper",
+    "payload" : {
+      "skill" : {
+        "_0" : {
+          "body" : "\nInspect staged changes and draft a concise Conventional Commit message under 72 characters.\n",
+          "description" : "Draft Conventional Commit messages from staged diffs.",
+          "frontmatter" : {
+            "description" : "Draft Conventional Commit messages from staged diffs.",
+            "name" : "commit-helper"
+          },
+          "name" : "commit-helper",
+          "supportingFiles" : [
+            "scripts/format-msg.sh"
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "8aae5118d9f45d9d14bc68a9e95ae315be717cf3a012f8d7dccf3324b0a66777",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "3c97d31681b583e487d3fcff104862b82a771e648cd1d36f244fd844b8630160",
+    "kind" : "subagent",
+    "loadMode" : {
+      "frontmatterOnly" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/agents/code-reviewer.md",
+      "realPath" : "<HOME>/.claude/agents/code-reviewer.md"
+    },
+    "name" : "code-reviewer",
+    "payload" : {
+      "subagent" : {
+        "_0" : {
+          "body" : "\nYou are a meticulous code reviewer focused on thread safety, input validation, and test coverage.\n",
+          "description" : "Review pull request diffs for concurrency and security defects.",
+          "frontmatter" : {
+            "description" : "Review pull request diffs for concurrency and security defects.",
+            "model" : "sonnet",
+            "name" : "code-reviewer",
+            "tools" : "Read, Grep, Glob"
+          },
+          "model" : "sonnet",
+          "name" : "code-reviewer",
+          "tools" : [
+            "Read",
+            "Grep",
+            "Glob"
+          ]
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "1b3a7992778406fc5bf0508cfc90804d2ec0a65ec6284479ef790f2f2467d976",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "d0c40c5f6708b0f83c6cc47883951bc24e19950c20fbffb238591e811622e6a7",
+    "kind" : "command",
+    "loadMode" : {
+      "onInvoke" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/.claude/commands/standup.md",
+      "realPath" : "<HOME>/.claude/commands/standup.md"
+    },
+    "name" : "standup",
+    "payload" : {
+      "command" : {
+        "_0" : {
+          "argumentHint" : "[days]",
+          "body" : "\nSummarize commits from the past $ARGUMENTS day(s) grouped by feature and bug fix.\n",
+          "description" : "Summarize recent commits for daily standup notes.",
+          "name" : "standup"
+        }
+      }
+    },
+    "scope" : 4
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "41ab1e99cfefcf64ee0fcd528a55b8aa974e4b462e9d186fa4255e9c0c52453d",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "380f1b797df21de9d6f6d78c90a9cdcf7ac6a6726757f7b3525a6c6099a776b9",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/webapp/.claude/settings.json",
+      "realPath" : "<HOME>/repos/webapp/.claude/settings.json"
+    },
+    "name" : "settings.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "permissions" : {
+              "allow" : [
+                "Bash(npm test)"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "ef6d6901563bc41b9221f3ad9411460f36289c00e64c78b353f8428928022cae",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "c70a7045c67f2b994f0bb578df6b18b0d58a134061f27acc312a55ce577a91fe",
+    "kind" : "settings",
+    "loadMode" : {
+      "never" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/webapp/.claude/settings.local.json",
+      "realPath" : "<HOME>/repos/webapp/.claude/settings.local.json"
+    },
+    "name" : "settings.local.json",
+    "payload" : {
+      "settings" : {
+        "_0" : {
+          "format" : "json",
+          "tree" : {
+            "enabledMcpjsonServers" : [
+              "postgres"
+            ]
+          }
+        }
+      }
+    },
+    "scope" : 1
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "97fa1dbcd3b0f0719c7d7cbe4ab80e5f0e9b82548b5f2c3fbabbef89ad277aec",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "7447c1cc4dca277cbbbb8970709600c90f8751f5fccf6e6acc0c3d3527344f13",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "postgres"
+      ],
+      "path" : "<HOME>/repos/webapp/.mcp.json",
+      "realPath" : "<HOME>/repos/webapp/.mcp.json"
+    },
+    "name" : "postgres",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+            "PGPASSWORD"
+          ],
+          "transport" : {
+            "stdio" : {
+              "args" : [
+                "-y",
+                "@modelcontextprotocol/server-postgres"
+              ],
+              "command" : "npx"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "97fa1dbcd3b0f0719c7d7cbe4ab80e5f0e9b82548b5f2c3fbabbef89ad277aec",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "86862cffeb8397703a50fae8602c22152705f8efbd0849e364d1acd1dc73565e",
+    "kind" : "mcpServer",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "keyPath" : [
+        "mcpServers",
+        "unapproved-analytics"
+      ],
+      "path" : "<HOME>/repos/webapp/.mcp.json",
+      "realPath" : "<HOME>/repos/webapp/.mcp.json"
+    },
+    "name" : "unapproved-analytics",
+    "payload" : {
+      "mcpServer" : {
+        "_0" : {
+          "disabled" : false,
+          "envKeys" : [
+
+          ],
+          "transport" : {
+            "sse" : {
+              "url" : "https://analytics.example.test/sse"
+            }
+          }
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "64cca2ae634839e9b97f41392f6b8a9d80b8a3f4acde88ef23988c3d458c8019",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "5b22ccf43e6376ff29e025c89a9b3e5b1bd56b26d54c4cf549d337ace205915b",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/webapp/CLAUDE.md",
+      "realPath" : "<HOME>/repos/webapp/CLAUDE.md"
+    },
+    "name" : "CLAUDE.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 119,
+          "characterCount" : 119,
+          "content" : "# WebApp Project Rules\n\n- Use TypeScript strict mode across all packages.\n- Validate API inputs at the route boundary.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "5ec71bc51ce714e92f0cc67819977e5608c3d2b3d6b83c91f69f6833b3952113",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "01d49423405164a104989db56e714470bf754dbf47dd41ce69dc7ed5b581e6a8",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/webapp/CLAUDE.local.md",
+      "realPath" : "<HOME>/repos/webapp/CLAUDE.local.md"
+    },
+    "name" : "CLAUDE.local.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 75,
+          "characterCount" : 75,
+          "content" : "# Local Developer Notes\n\n- Local Postgres test database runs on port 5439.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 1
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "5be13b9f7d506fdc1e889da951a823f1e07ef035dc329da4e06aa53cdcad993d",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "1b9fe8d001d39fc84108d30f7d1e8a9e54b543387087613d2e973f68a6f7fec4",
+    "kind" : "rules",
+    "loadMode" : {
+      "always" : {
+
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/webapp/.claude/rules/general.md",
+      "realPath" : "<HOME>/repos/webapp/.claude/rules/general.md"
+    },
+    "name" : "general.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 87,
+          "characterCount" : 87,
+          "content" : "# General Repository Hygiene\n\n- Keep pull requests focused on a single vertical slice.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "4940e8b970187bbf2c69bcedc4c115bcfa1dbe97180181f7e5c188e05c0ed18a",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "6a60bda2e1c2552659ab8a94250cf07c92bbac7148c84f8f10879f4d894d4e10",
+    "kind" : "rules",
+    "loadMode" : {
+      "conditional" : {
+        "globs" : [
+          "Sources/**/*.swift",
+          "Tests/**/*.swift"
+        ]
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/webapp/.claude/rules/swift-style.md",
+      "realPath" : "<HOME>/repos/webapp/.claude/rules/swift-style.md"
+    },
+    "name" : "swift-style.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 170,
+          "characterCount" : 170,
+          "content" : "\n# Swift Concurrency Rules\n\n- Enable Swift 6 strict concurrency and avoid unchecked Sendable conformances.\n",
+          "frontmatter" : {
+            "paths" : [
+              "Sources/**/*.swift",
+              "Tests/**/*.swift"
+            ]
+          },
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 2
+  },
+  {
+    "agent" : "claudeCode",
+    "contentHash" : "9050b46935927531d6765933cd36cc1ed14f4d285041f1c33c2995baf1aecd20",
+    "diagnostics" : [
+
+    ],
+    "enabled" : true,
+    "id" : "58e417762b5e3ca33a5f4d6125d520d586b8f81a6bbbdf7279de018a4243e148",
+    "kind" : "rules",
+    "loadMode" : {
+      "conditional" : {
+        "globs" : [
+          "packages/ui/**"
+        ]
+      }
+    },
+    "location" : {
+      "path" : "<HOME>/repos/webapp/packages/ui/CLAUDE.md",
+      "realPath" : "<HOME>/repos/webapp/packages/ui/CLAUDE.md"
+    },
+    "name" : "CLAUDE.md",
+    "payload" : {
+      "rules" : {
+        "_0" : {
+          "byteCount" : 97,
+          "characterCount" : 97,
+          "content" : "# UI Package Rules\n\n- Components in `packages/ui` must remain accessible and keyboard-navigable.\n",
+          "imports" : [
+
+          ],
+          "wasTruncated" : false
+        }
+      }
+    },
+    "scope" : 3
+  }
+]

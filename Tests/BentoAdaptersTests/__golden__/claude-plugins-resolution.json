@@ -1,0 +1,115 @@
+{
+  "agent" : "claudeCode",
+  "folder" : "<HOME>/repos/service",
+  "ordered" : [
+    {
+      "artifactID" : "774d228e0d6b5b326ecc3c568db14e9a66388bd0d2b4b2b4372c2cbea46a4eb3",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "user ~/.claude/settings.json"
+    },
+    {
+      "artifactID" : "73b6c307dfd1349c91f6bb880851ae192b207738473a87cf808ce482213c1d36",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "disabled via enabledPlugins setting"
+    },
+    {
+      "artifactID" : "3c619c99b104cd8d5ddb3c1fb2080e40cff5cbd29e7ccf209abb619d73642b65",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "enabled plugin manifest (team-toolkit)"
+    },
+    {
+      "artifactID" : "fe4b15dfc658f9013836067884880ce8352658ef348a3cc11c9d89681d77e17e",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "project shared memory"
+    },
+    {
+      "artifactID" : "e412d1e8ccdb81c6367f31c0f6651f166538c791ba82398bda2fb81d45154a0d",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "active MCP server from plugin .mcp.json"
+    },
+    {
+      "artifactID" : "62aeeb4afd7caa225ded7f5a6fa62b6b5ba9598c61891a6320f6f8bcd10241fb",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "disabled skill from plugin SKILL.md"
+    },
+    {
+      "artifactID" : "c2398e4cb2e33e8609736003c4d66bb24222e3c2977d1967dbbb0526b5358a9e",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "active skill from plugin SKILL.md"
+    },
+    {
+      "artifactID" : "cc867c1e25b7c3ceaeed9d873e08c9b5df4255500da5339b8670891c2259d516",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "active skill from project SKILL.md"
+    },
+    {
+      "artifactID" : "aa1ad0c9560366d5563b0dc3e93e51afd4d61020b2bc3666b6e3bfdb5e0dfa36",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "active subagent from plugin security-auditor.md"
+    },
+    {
+      "artifactID" : "8949d5a0ed607bfe49c2b4c2906ce91abf858d81d0adffc0450f26ec06d9c152",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "active command from plugin changelog.md"
+    },
+    {
+      "artifactID" : "e263e07d149af453d8579fcd158a7c3e6c7701c82fcbb5d7468d091f9e925849",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "lifecycle hook from plugin hooks.json"
+    }
+  ],
+  "shadowed" : [
+    {
+      "reason" : "Skill 'release-notes' in plugin SKILL.md is shadowed by project SKILL.md",
+      "shadowedArtifactID" : "a742329ab1dca09f43b59945010c84d8b13b2c3407b4d598f571610c9c509e79",
+      "winningArtifactID" : "cc867c1e25b7c3ceaeed9d873e08c9b5df4255500da5339b8670891c2259d516"
+    }
+  ],
+  "warnings" : [
+
+  ]
+}

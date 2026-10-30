@@ -1,0 +1,191 @@
+{
+  "agent" : "claudeCode",
+  "folder" : "<HOME>/repos/webapp",
+  "ordered" : [
+    {
+      "artifactID" : "774d228e0d6b5b326ecc3c568db14e9a66388bd0d2b4b2b4372c2cbea46a4eb3",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "user ~/.claude/settings.json; keys [permissions] overridden by higher-precedence settings"
+    },
+    {
+      "artifactID" : "380f1b797df21de9d6f6d78c90a9cdcf7ac6a6726757f7b3525a6c6099a776b9",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : ".claude/settings.json"
+    },
+    {
+      "artifactID" : "c70a7045c67f2b994f0bb578df6b18b0d58a134061f27acc312a55ce577a91fe",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : ".claude/settings.local.json"
+    },
+    {
+      "artifactID" : "4fce622d1c78c08649fd48dd4432d32d59b56fcc041b39c3ec3bd511aea7d375",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "user global memory"
+    },
+    {
+      "artifactID" : "54f544c5adbcad03e2d3d765bb47546829a71dacf84d227aeb7b49279b67cca2",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "user global memory"
+    },
+    {
+      "artifactID" : "5b22ccf43e6376ff29e025c89a9b3e5b1bd56b26d54c4cf549d337ace205915b",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "project shared memory"
+    },
+    {
+      "artifactID" : "01d49423405164a104989db56e714470bf754dbf47dd41ce69dc7ed5b581e6a8",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "project-local personal memory"
+    },
+    {
+      "artifactID" : "1b9fe8d001d39fc84108d30f7d1e8a9e54b543387087613d2e973f68a6f7fec4",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "project modular rule"
+    },
+    {
+      "artifactID" : "6a60bda2e1c2552659ab8a94250cf07c92bbac7148c84f8f10879f4d894d4e10",
+      "effectiveLoadMode" : {
+        "conditional" : {
+          "globs" : [
+            "Sources/**/*.swift",
+            "Tests/**/*.swift"
+          ]
+        }
+      },
+      "reason" : "project modular rule scoped to paths [Sources/**/*.swift, Tests/**/*.swift]"
+    },
+    {
+      "artifactID" : "58e417762b5e3ca33a5f4d6125d520d586b8f81a6bbbdf7279de018a4243e148",
+      "effectiveLoadMode" : {
+        "conditional" : {
+          "globs" : [
+            "packages/ui/**"
+          ]
+        }
+      },
+      "reason" : "child directory memory loaded on demand for packages/ui/**"
+    },
+    {
+      "artifactID" : "c726524cda96321f7b8647d38f8ae3cc4572ee20f01f8c6c4cc00d6bc73e708b",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "active MCP server from user ~/.claude.json"
+    },
+    {
+      "artifactID" : "9b837e23d20b7c28a7121cd70d24041ca041934727bfc32cafb41913d471e7e0",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "active MCP server from user ~/.claude.json"
+    },
+    {
+      "artifactID" : "7447c1cc4dca277cbbbb8970709600c90f8751f5fccf6e6acc0c3d3527344f13",
+      "effectiveLoadMode" : {
+        "always" : {
+
+        }
+      },
+      "reason" : "project .mcp.json, approved in .claude/settings.local.json"
+    },
+    {
+      "artifactID" : "86862cffeb8397703a50fae8602c22152705f8efbd0849e364d1acd1dc73565e",
+      "effectiveLoadMode" : {
+        "never" : {
+
+        }
+      },
+      "reason" : "project .mcp.json, pending approval (not in enabledMcpjsonServers)"
+    },
+    {
+      "artifactID" : "8f48bb69252c3276e0e2bc98ce496311e320928d6516483b146e066eef1bfa87",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "active skill from user ~/.claude/SKILL.md"
+    },
+    {
+      "artifactID" : "3c97d31681b583e487d3fcff104862b82a771e648cd1d36f244fd844b8630160",
+      "effectiveLoadMode" : {
+        "frontmatterOnly" : {
+
+        }
+      },
+      "reason" : "active subagent from user ~/.claude/code-reviewer.md"
+    },
+    {
+      "artifactID" : "d0c40c5f6708b0f83c6cc47883951bc24e19950c20fbffb238591e811622e6a7",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "active command from user ~/.claude/standup.md"
+    },
+    {
+      "artifactID" : "299aa904ec7c8b49aa8a768fa44f499835bfaa5b7c18f37878b1adfa95b0fd49",
+      "effectiveLoadMode" : {
+        "onInvoke" : {
+
+        }
+      },
+      "reason" : "lifecycle hook from user ~/.claude/settings.json"
+    }
+  ],
+  "shadowed" : [
+
+  ],
+  "warnings" : [
+    {
+      "code" : "mcp.unapproved",
+      "location" : {
+        "keyPath" : [
+          "mcpServers",
+          "unapproved-analytics"
+        ],
+        "path" : "<HOME>/repos/webapp/.mcp.json",
+        "realPath" : "<HOME>/repos/webapp/.mcp.json"
+      },
+      "message" : "Project MCP server 'unapproved-analytics' is not approved in local or user settings",
+      "severity" : "warning"
+    }
+  ]
+}

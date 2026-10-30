@@ -36,14 +36,20 @@ public struct FixtureHome: Sendable {
     }
 
     /// Builds an isolated `AgentEnvironment` rooted at this fixture home.
+    /// Injects `BENTO_SYSTEM_ROOT` pointing at the fixture home unless explicitly overridden,
+    /// ensuring system-managed paths (`/Library/...`, `/etc/...`) never leak from the host OS.
     public func makeEnvironment(
         env: [String: String] = [:],
         fileSystem: any ReadOnlyFileSystem = LocalReadOnlyFileSystem(),
         now: Date = Self.defaultTimestamp
     ) -> AgentEnvironment {
-        AgentEnvironment(
+        var mergedEnv = ["BENTO_SYSTEM_ROOT": url.path]
+        for (key, value) in env {
+            mergedEnv[key] = value
+        }
+        return AgentEnvironment(
             home: url,
-            env: env,
+            env: mergedEnv,
             fileSystem: fileSystem,
             now: { now }
         )

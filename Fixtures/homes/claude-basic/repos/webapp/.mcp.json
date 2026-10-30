@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "PGPASSWORD": "TEST_SYNTHETIC_DB_PASS_PLACEHOLDER"
+      }
+    },
+    "unapproved-analytics": {
+      "type": "sse",
+      "url": "https://analytics.example.test/sse"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "acme-tracker": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/tracker.js"],
+      "env": {
+        "ACME_TRACKER_SECRET": "TEST_SYNTHETIC_PLUGIN_SECRET"
+      }
+    }
+  }
+}

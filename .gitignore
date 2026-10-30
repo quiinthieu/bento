@@ -5,13 +5,13 @@
 ._*
 
 # Swift Package Manager
-.build/
-.swiftpm/
-Packages/
+/.build/
+/.swiftpm/
+/Packages/
 
 # Xcode & XcodeGen
-DerivedData/
-build/
+/DerivedData/
+/build/
 *.xcodeproj/
 *.xcworkspace/
 xcuserdata/
@@ -43,4 +43,9 @@ Config/Signing.xcconfig
 *.dmg
 *.pkg
 *.app/
-dist/
+/dist/
+
+# Synthetic test fixtures must override global/repo agent ignore rules (e.g. settings.local.json, .env)
+!Fixtures/**
+Fixtures/**/.DS_Store
+Fixtures/**/._*
