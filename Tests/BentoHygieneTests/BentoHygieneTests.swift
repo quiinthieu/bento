@@ -503,6 +503,116 @@ struct BentoHygieneTests {
         #expect(roFindings.map(\.id) == findings.map(\.id))
     }
 
+    @Test("Multi-worktree snapshot with 80 repos and 5,600 rule units audits in under 1 second without LSH explosion")
+    func multiWorktreeScaleAuditCompletesUnderOneSecond() throws {
+        let repoCount = 80
+        let homePath = "/virtual/home"
+        var sharedLines: [String] = []
+        for idx in 1...32 {
+            sharedLines.append(
+                "- Shared architectural rule \(idx): validate incoming request payloads with strict typed decoders before mutating domain state in service handlers."
+            )
+        }
+
+        let agentsContent =
+            (["# Shared Worktree Rules", ""] + sharedLines + [
+                "- Use spaces for indentation.",
+                "- Always verify database migration rollback scripts in staging environments before promoting production container images to regional clusters across every deployment pipeline."
+            ]).joined(separator: "\n")
+
+        let claudeContent =
+            (["# Claude Worktree Rules", ""] + sharedLines + [
+                "- Use tabs for indentation.",
+                "- Always verify database migration rollback scripts in staging environments before promoting production container images to regional clusters across every deployment pipelines."
+            ]).joined(separator: "\n")
+
+        let agentsHash = ContentHasher.sha256NormalizedText(agentsContent)
+        let claudeHash = ContentHasher.sha256NormalizedText(claudeContent)
+
+        var repos: [DiscoveredRepo] = []
+        var artifacts: [Artifact] = []
+        repos.reserveCapacity(repoCount)
+        artifacts.reserveCapacity(repoCount * 2)
+
+        for idx in 0..<repoCount {
+            let repoPath = "\(homePath)/orca/worktree-\(String(format: "%02d", idx))"
+            repos.append(
+                DiscoveredRepo(
+                    path: repoPath,
+                    realPath: repoPath,
+                    displayName: "worktree-\(String(format: "%02d", idx))",
+                    sources: [.shallowScan]
+                )
+            )
+
+            let agentsPath = "\(repoPath)/AGENTS.md"
+            artifacts.append(
+                Artifact(
+                    id: ArtifactID(agent: .codex, kind: .rules, scope: .project, path: agentsPath),
+                    agent: .codex,
+                    kind: .rules,
+                    scope: .project,
+                    name: "AGENTS.md",
+                    location: SourceLocation(path: agentsPath, realPath: agentsPath),
+                    contentHash: agentsHash,
+                    enabled: true,
+                    loadMode: .always,
+                    payload: .rules(
+                        RulesDoc(
+                            content: agentsContent,
+                            byteCount: agentsContent.utf8.count,
+                            characterCount: agentsContent.count
+                        )
+                    )
+                )
+            )
+
+            let claudePath = "\(repoPath)/CLAUDE.md"
+            artifacts.append(
+                Artifact(
+                    id: ArtifactID(agent: .claudeCode, kind: .rules, scope: .project, path: claudePath),
+                    agent: .claudeCode,
+                    kind: .rules,
+                    scope: .project,
+                    name: "CLAUDE.md",
+                    location: SourceLocation(path: claudePath, realPath: claudePath),
+                    contentHash: claudeHash,
+                    enabled: true,
+                    loadMode: .always,
+                    payload: .rules(
+                        RulesDoc(
+                            content: claudeContent,
+                            byteCount: claudeContent.utf8.count,
+                            characterCount: claudeContent.count
+                        )
+                    )
+                )
+            )
+        }
+
+        let clock = ContinuousClock()
+        var findings: [Finding] = []
+        let elapsed = try clock.measure {
+            findings = try HygieneEngine().audit(
+                artifacts: artifacts,
+                repos: repos,
+                homePath: homePath,
+                fixSupports: Self.defaultFixSupports()
+            )
+        }
+
+        let conflicts = findings.filter { $0.kind == .conflict }
+        let nearDupes = findings.filter { $0.kind == .nearDuplicate && $0.suggestedFixes.isEmpty }
+        let blockImports = findings.filter { $0.suggestedFixes.contains(.replaceDuplicateRulesWithImport) }
+        let exactDupes = findings.filter { $0.kind == .exactDuplicate && $0.suggestedFixes.isEmpty }
+
+        #expect(conflicts.count == repoCount)
+        #expect(nearDupes.count == repoCount)
+        #expect(blockImports.count == repoCount)
+        #expect(exactDupes.count == repoCount * 32)
+        #expect(elapsed < .seconds(1), "Expected 80-worktree hygiene audit under 1s, took \(elapsed)")
+    }
+
     private static func setWritableRecursively(at root: URL, writable: Bool) {
         let fm = FileManager.default
         var urls: [URL] = [root.standardizedFileURL]

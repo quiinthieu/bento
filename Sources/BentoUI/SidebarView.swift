@@ -109,7 +109,7 @@ struct SidebarView: View {
         case .findings:
             return model.allFindings.count
         case .usage:
-            return model.globalUsageItems.filter { $0.costTimesUnusedScore > 0 }.count
+            return model.unusedGlobalUsageCount
         case .fixHistory:
             return model.fixHistory.count
         case .settings:

@@ -77,6 +77,15 @@ struct ConflictDetector: Sendable {
         "html": "html"
     ]
 
+    private static let cachedDefaultDetector: Result<ConflictDetector, any Error> = Result {
+        let catalog = try ConflictCatalog.loadDefault()
+        return ConflictDetector(catalog: catalog)
+    }
+
+    static func defaultShared() throws -> ConflictDetector {
+        try cachedDefaultDetector.get()
+    }
+
     private let compiledRules: [CompiledRule]
 
     init(catalog: ConflictCatalogDocument) {

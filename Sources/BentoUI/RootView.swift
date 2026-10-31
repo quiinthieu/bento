@@ -151,6 +151,20 @@ private struct BannersHeaderView: View {
 
     var body: some View {
         VStack(spacing: 6) {
+            if model.isRefreshing {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Scanning and auditing agent configurations…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.accentColor.opacity(0.08))
+            }
+
             ForEach(model.tccNotices) { notice in
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "hand.raised.fill")

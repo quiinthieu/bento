@@ -8,16 +8,27 @@ struct HygieneTabView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
+            LazyVStack(alignment: .leading, spacing: 14) {
                 let findings = model.currentRepoFindings
                 if findings.isEmpty {
-                    ContentUnavailableView(
-                        "No Hygiene Findings",
-                        systemImage: "checkmark.seal",
-                        description: Text(
-                            "No duplicate rules, opposing directives, size limits, broken imports, or unused artifacts detected for \(model.selectedRepoAgent.displayName) in \(repo.displayName)."
+                    if model.isRefreshing {
+                        HStack(spacing: 10) {
+                            ProgressView()
+                            Text("Auditing rules and configurations for \(repo.displayName)…")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 36)
+                    } else {
+                        ContentUnavailableView(
+                            "No Hygiene Findings",
+                            systemImage: "checkmark.seal",
+                            description: Text(
+                                "No duplicate rules, opposing directives, size limits, broken imports, or unused artifacts detected for \(model.selectedRepoAgent.displayName) in \(repo.displayName)."
+                            )
                         )
-                    )
+                    }
                 } else {
                     ForEach(findings) { finding in
                         FindingCardView(finding: finding, model: model)
@@ -47,13 +58,14 @@ struct FindingsView: View {
 
     var body: some View {
         @Bindable var bindableModel = model
+        let findings = filteredFindings
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            LazyVStack(alignment: .leading, spacing: 16) {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Rules & Configuration Hygiene")
                             .font(.title2.weight(.bold))
-                        Text("\(filteredFindings.count) active finding(s) across discovered agents and repositories")
+                        Text("\(findings.count) active finding(s) across discovered agents and repositories")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -76,14 +88,25 @@ struct FindingsView: View {
                     .frame(width: 150)
                 }
 
-                if filteredFindings.isEmpty {
-                    ContentUnavailableView(
-                        "No Matching Findings",
-                        systemImage: "checkmark.shield",
-                        description: Text("Your agent rules and configurations look clean for the active filter.")
-                    )
+                if findings.isEmpty {
+                    if model.isRefreshing {
+                        HStack(spacing: 10) {
+                            ProgressView()
+                            Text("Auditing rules and configurations across discovered repositories…")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 44)
+                    } else {
+                        ContentUnavailableView(
+                            "No Matching Findings",
+                            systemImage: "checkmark.shield",
+                            description: Text("Your agent rules and configurations look clean for the active filter.")
+                        )
+                    }
                 } else {
-                    ForEach(filteredFindings) { finding in
+                    ForEach(findings) { finding in
                         FindingCardView(finding: finding, model: model)
                     }
                 }
@@ -99,7 +122,12 @@ struct FindingCardView: View {
     let model: BentoAppModel
 
     var body: some View {
-        let excerpts = model.spanExcerpts(for: finding)
+        let inlineLimit = BentoAppModel.defaultInlineSpanLimit
+        let showAllLocations = model.isFindingSpansExpanded(finding.id)
+        let excerpts = model.spanExcerpts(
+            for: finding,
+            maxSpans: showAllLocations ? nil : inlineLimit
+        )
 
         GroupBox {
             VStack(alignment: .leading, spacing: 10) {
@@ -109,6 +137,22 @@ struct FindingCardView: View {
 
                 if !excerpts.isEmpty {
                     SideBySideSpansView(excerpts: excerpts, model: model)
+                }
+
+                if finding.spans.count > inlineLimit {
+                    let hiddenCount = max(0, finding.spans.count - excerpts.count)
+                    Button {
+                        model.toggleFindingSpansExpanded(finding.id)
+                    } label: {
+                        Label(
+                            showAllLocations
+                                ? "Show fewer locations"
+                                : "Show all \(finding.spans.count) locations (\(hiddenCount) more)",
+                            systemImage: showAllLocations ? "chevron.up" : "chevron.down"
+                        )
+                        .font(.caption)
+                    }
+                    .buttonStyle(.borderless)
                 }
 
                 if !finding.suggestedFixes.isEmpty {
@@ -183,64 +227,87 @@ struct SideBySideSpansView: View {
     let model: BentoAppModel
 
     var body: some View {
-        let columns: [GridItem] =
-            excerpts.count >= 2
-            ? [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
-            : [GridItem(.flexible())]
-
-        LazyVGrid(columns: columns, alignment: .leading, spacing: 10) {
-            ForEach(excerpts) { excerpt in
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Text("\(excerpt.displayPath) (\(excerpt.lineRangeLabel))")
-                            .font(.caption.monospaced().weight(.semibold))
-                            .lineLimit(1)
-                        Spacer()
-                        Button {
-                            model.revealPathInFinder(excerpt.location.path)
-                        } label: {
-                            Image(systemName: "folder")
-                                .font(.caption2)
-                        }
-                        .buttonStyle(.borderless)
-                        .help("Reveal in Finder")
-
-                        Button {
-                            model.openPathInEditor(excerpt.location.path)
-                        } label: {
-                            Image(systemName: "square.and.pencil")
-                                .font(.caption2)
-                        }
-                        .buttonStyle(.borderless)
-                        .help("Open in editor")
-                    }
-
-                    VStack(alignment: .leading, spacing: 1) {
-                        ForEach(excerpt.lines) { line in
-                            HStack(alignment: .top, spacing: 8) {
-                                Text("\(line.lineNumber)")
-                                    .font(.caption2.monospaced())
-                                    .foregroundStyle(.secondary)
-                                    .frame(width: 30, alignment: .trailing)
-                                Text(line.text.isEmpty ? " " : line.text)
-                                    .font(.caption.monospaced())
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .textSelection(.enabled)
-                            }
-                            .padding(.vertical, 1)
-                            .padding(.horizontal, 4)
-                            .background(
-                                line.isHighlighted ? Color.yellow.opacity(0.16) : Color.clear
-                            )
+        if excerpts.count <= 1 {
+            if let first = excerpts.first {
+                excerptCard(first)
+            }
+        } else {
+            let rowStarts = Array(stride(from: 0, to: excerpts.count, by: 2))
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(rowStarts, id: \.self) { startIndex in
+                    HStack(alignment: .top, spacing: 10) {
+                        excerptCard(excerpts[startIndex])
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
+                        if startIndex + 1 < excerpts.count {
+                            excerptCard(excerpts[startIndex + 1])
+                                .frame(maxWidth: .infinity, alignment: .topLeading)
+                        } else {
+                            Color.clear
+                                .frame(maxWidth: .infinity, maxHeight: 1)
                         }
                     }
-                    .padding(6)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func excerptCard(_ excerpt: SpanExcerpt) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Text("\(excerpt.displayPath) (\(excerpt.lineRangeLabel))")
+                    .font(.caption.monospaced().weight(.semibold))
+                    .lineLimit(1)
+                Spacer()
+                Button {
+                    model.revealPathInFinder(excerpt.location.path)
+                } label: {
+                    Image(systemName: "folder")
+                        .font(.caption2)
+                }
+                .buttonStyle(.borderless)
+                .help("Reveal in Finder")
+
+                Button {
+                    model.openPathInEditor(excerpt.location.path)
+                } label: {
+                    Image(systemName: "square.and.pencil")
+                        .font(.caption2)
+                }
+                .buttonStyle(.borderless)
+                .help("Open in editor")
+            }
+
+            VStack(alignment: .leading, spacing: 1) {
+                ForEach(excerpt.lines) { line in
+                    HStack(alignment: .top, spacing: 8) {
+                        Text(line.isOmissionMarker ? "⋯" : "\(line.lineNumber)")
+                            .font(.caption2.monospaced())
+                            .foregroundStyle(.secondary)
+                            .frame(width: 30, alignment: .trailing)
+                        if line.isOmissionMarker {
+                            Text(line.text)
+                                .font(.caption2.italic())
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        } else {
+                            Text(line.text.isEmpty ? " " : line.text)
+                                .font(.caption.monospaced())
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    .padding(.vertical, 1)
+                    .padding(.horizontal, 4)
                     .background(
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(Color.primary.opacity(0.04))
+                        line.isHighlighted ? Color.yellow.opacity(0.16) : Color.clear
                     )
                 }
             }
+            .padding(6)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(Color.primary.opacity(0.04))
+            )
         }
     }
 }
