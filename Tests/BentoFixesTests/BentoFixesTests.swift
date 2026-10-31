@@ -825,7 +825,7 @@ struct BentoFixesTests {
                 fixSupports: supports
             )
             Issue.record("Expected BentoFixesError.nonIdenticalSkills")
-        } catch let BentoFixesError.nonIdenticalSkills(_, diff) {
+        } catch BentoFixesError.nonIdenticalSkills(_, let diff) {
             #expect(diff.contains("-description: Version A"))
             #expect(diff.contains("+description: Version B"))
         }
