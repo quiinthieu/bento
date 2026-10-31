@@ -385,6 +385,72 @@ struct BentoCLITests {
         #expect(resetObj["eventsInserted"] as? Int == 14)
     }
 
+    @Test(
+        "bentoctx budget --json includes measuredFirstTurnInput and bentoctx usage --json joins artifacts and flags unused items"
+    )
+    func cliBudgetIncludesMeasuredFirstTurnInputAndUsageReportsUnusedFindings() throws {
+        let fixture = try FixtureHome(scenario: "usage-join")
+        let appRepoPath = fixture.url.appendingPathComponent("repos/app").standardizedFileURL.path
+        let protoRepoPath = fixture.url.appendingPathComponent("repos/new-prototype").standardizedFileURL.path
+        let fixedNowEnv = ["BENTO_NOW_ISO8601": "2026-10-31T00:00:00Z"]
+
+        // 1. bentoctx budget --json includes measuredFirstTurnInput (T12 AC)
+        let budgetOut = try runCLI(
+            [
+                "budget",
+                "--home", fixture.url.path,
+                "--repo", appRepoPath,
+                "--agent", "claudeCode",
+                "--json"
+            ],
+            extraEnv: fixedNowEnv
+        )
+        #expect(budgetOut.exitCode == 0)
+        let budgets = try decodeField([Budget].self, key: "budgets", in: budgetOut.stdout)
+        let claudeBudget = try #require(budgets.first)
+        #expect(claudeBudget.measuredFirstTurnInput == 18_590)
+
+        let rawBudgetObj = try parseJSONObject(budgetOut.stdout)
+        let rawBudgetsArray = try #require(rawBudgetObj["budgets"] as? [[String: Any]])
+        #expect(rawBudgetsArray.first?["measuredFirstTurnInput"] as? Int == 18_590)
+
+        // 2. bentoctx usage --days 30 --repo <app> --json emits cost*unused artifactUsage and unusedFindings
+        let usageOut = try runCLI(
+            [
+                "usage",
+                "--home", fixture.url.path,
+                "--repo", appRepoPath,
+                "--days", "30",
+                "--json"
+            ],
+            extraEnv: fixedNowEnv
+        )
+        #expect(usageOut.exitCode == 0)
+        let artifactUsage = try decodeField([ArtifactUsageJoin].self, key: "artifactUsage", in: usageOut.stdout)
+        #expect(!artifactUsage.isEmpty)
+        #expect(artifactUsage.first?.name == "unused-analytics")
+        #expect(artifactUsage.first?.costTimesUnusedScore == 7_200)
+
+        let unusedFindings = try decodeField([Finding].self, key: "unusedFindings", in: usageOut.stdout)
+        #expect(unusedFindings.count == 3)
+        #expect(unusedFindings.allSatisfy { $0.kind == .unused })
+
+        // 3. Low-session repo (< 5 sessions) emits 0 unusedFindings
+        let protoUsageOut = try runCLI(
+            [
+                "usage",
+                "--home", fixture.url.path,
+                "--repo", protoRepoPath,
+                "--days", "30",
+                "--json"
+            ],
+            extraEnv: fixedNowEnv
+        )
+        #expect(protoUsageOut.exitCode == 0)
+        let protoFindings = try decodeField([Finding].self, key: "unusedFindings", in: protoUsageOut.stdout)
+        #expect(protoFindings.isEmpty)
+    }
+
     // MARK: - Helpers
 
     private struct CLIResult {
@@ -399,7 +465,7 @@ struct BentoCLITests {
         var data = Data()
     }
 
-    private func runCLI(_ arguments: [String]) throws -> CLIResult {
+    private func runCLI(_ arguments: [String], extraEnv: [String: String] = [:]) throws -> CLIResult {
         let binary = try Self.locateBuiltCLIBinary()
         let process = Process()
         process.executableURL = binary
@@ -411,11 +477,15 @@ struct BentoCLITests {
         } else {
             homePath = FileManager.default.temporaryDirectory.path
         }
-        process.environment = [
+        var envDict: [String: String] = [
             "HOME": homePath,
             "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
             "BENTO_SYSTEM_ROOT": homePath
         ]
+        for (key, value) in extraEnv {
+            envDict[key] = value
+        }
+        process.environment = envDict
 
         let inPipe = Pipe()
         let outPipe = Pipe()

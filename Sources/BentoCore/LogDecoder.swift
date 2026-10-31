@@ -14,6 +14,10 @@ public protocol LogDecoder: Sendable {
     /// Latest model identifier observed per `sessionID` during decoding.
     var observedModelsBySession: [String: String] { get }
 
+    /// Character count (length only — never text) of the first user turn per `sessionID`, used to subtract
+    /// user-prompt length when fitting pre-prompt calibration factors (`PLAN.md` §6.3).
+    var firstUserMessageCharCountsBySession: [String: Int] { get }
+
     /// Serializes per-file incremental decoder state so subsequent `offset_consumed` reads retain session context.
     func exportResumeState() -> Data?
 
@@ -56,6 +60,8 @@ extension LogDecoder {
     public var errorCount: Int { 0 }
 
     public var observedModelsBySession: [String: String] { [:] }
+
+    public var firstUserMessageCharCountsBySession: [String: Int] { [:] }
 
     public func exportResumeState() -> Data? { nil }
 

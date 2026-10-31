@@ -16,6 +16,8 @@ public struct SessionRecord: Sendable, Codable, Hashable {
     public var model: String?
     /// Total input tokens recorded on the session's first assistant turn (`turnIndex == 0`).
     public var firstTurnInput: Int?
+    /// Privacy-safe character length (never text!) of the session's first user message, if logged (`PLAN.md` §6.3).
+    public var firstUserMessageCharCount: Int?
 
     /// Creates a session record.
     public init(
@@ -25,7 +27,8 @@ public struct SessionRecord: Sendable, Codable, Hashable {
         cwd: String? = nil,
         repoID: String? = nil,
         model: String? = nil,
-        firstTurnInput: Int? = nil
+        firstTurnInput: Int? = nil,
+        firstUserMessageCharCount: Int? = nil
     ) {
         self.agent = agent
         self.sessionID = sessionID
@@ -34,6 +37,7 @@ public struct SessionRecord: Sendable, Codable, Hashable {
         self.repoID = repoID
         self.model = model
         self.firstTurnInput = firstTurnInput
+        self.firstUserMessageCharCount = firstUserMessageCharCount
     }
 }
 

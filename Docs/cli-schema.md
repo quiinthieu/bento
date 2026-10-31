@@ -91,10 +91,10 @@ bentoctx resolve [--home PATH] [--db PATH] --repo PATH --agent AGENT --json
 
 ## `budget --json`
 
-Computes pre-prompt and deferred/on-invoke/conditional context token `Budget` breakdowns across all budget-capable agents (`claudeCode`, `codex`, `gemini`, `copilot`), or for a single `--agent`, when launched in `--repo`. Passing `--probe-mcp <NAME>` (repeatable or comma-separated; `'*'` for all active servers) grants explicit consent for the named server(s), probes them over a scrubbed 15 s stdio/HTTP session, and caches schemas in SQLite by `server_config_hash`.
+Computes pre-prompt and deferred/on-invoke/conditional context token `Budget` breakdowns across all budget-capable agents (`claudeCode`, `codex`, `gemini`, `copilot`), or for a single `--agent`, when launched in `--repo`. Automatically applies fitted least-squares log calibrations (`calibration` table) when at least 3 session samples exist and attaches `measuredFirstTurnInput` (median logged first-turn input tokens for `(agent, repo)`). Passing `--probe-mcp <NAME>` (repeatable or comma-separated; `'*'` for all active servers) grants explicit consent for the named server(s), probes them over a scrubbed 15 s stdio/HTTP session, and caches schemas in SQLite by `server_config_hash`. Passing `--api anthropic|gemini` opts into exact provider token-count APIs using keys stored in macOS Keychain.
 
 ```bash
-bentoctx budget [--home PATH] [--db PATH] --repo PATH [--agent AGENT] [--model MODEL] [--probe-mcp NAME]... --json
+bentoctx budget [--home PATH] [--db PATH] --repo PATH [--agent AGENT] [--model MODEL] [--probe-mcp NAME]... [--api PROVIDER]... --json
 ```
 
 ### Top-Level Fields
@@ -143,10 +143,10 @@ bentoctx ingest [--home PATH] [--db PATH] [--agent AGENT] [--reset] --json
 
 ## `usage --json`
 
-Aggregates privacy-safe `session` and `usage_event` records over a rolling `--days` lookback window (default `30`), optionally filtered by `--repo` and/or `--agent`.
+Aggregates privacy-safe `session` and `usage_event` records over a rolling `--days` lookback window (default `30`), optionally filtered by `--repo` and/or `--agent`, joins active resolved artifacts ranked by `"cost × unused"`, and emits `Finding.Kind.unused` records for 0-invocation skills, MCP servers, and subagents in repositories with at least `--min-sessions` (default `5`) sessions.
 
 ```bash
-bentoctx usage [--home PATH] [--db PATH] [--days N] [--repo PATH] [--agent AGENT] --json
+bentoctx usage [--home PATH] [--db PATH] [--days N] [--min-sessions M] [--repo PATH] [--agent AGENT] --json
 ```
 
 ### Top-Level Fields
@@ -157,6 +157,7 @@ bentoctx usage [--home PATH] [--db PATH] [--days N] [--repo PATH] [--agent AGENT
 | `command` | `String` | Always `"usage"`. |
 | `generatedAt` | `String` | ISO-8601 UTC timestamp when the response was emitted. |
 | `days` | `Int` | Lookback window in days. |
+| `minimumSessions` | `Int` | Minimum session threshold (`--min-sessions`, default `5`) required before flagging 0-invocation items as `unused`. |
 | `since` | `String` | ISO-8601 UTC window start timestamp. |
 | `until` | `String` | ISO-8601 UTC window end timestamp. |
 | `agentFilter` | `String?` | Canonical `AgentID` raw value when `--agent` was specified; omitted otherwise. |
@@ -165,6 +166,8 @@ bentoctx usage [--home PATH] [--db PATH] [--days N] [--repo PATH] [--agent AGENT
 | `eventCount` | `Int` | Matching `usage_event` count across the selected window and filters. |
 | `tokenTotals` | `UsageTokenTotals` | Aggregate `inputTokens`, `cachedInputTokens`, `outputTokens`, and `turnCount`. |
 | `byAgent` | `Array<AgentUsageSummary>` | Per-agent breakdowns (`sessionCount`, `turnCount`, token sums, `firstTurnMedianInput`, and `skills` / `mcpTools` / `subagents` / `commands` / `builtinTools` invocation summaries). |
+| `artifactUsage` | `Array<ArtifactUsageJoin>` | Active resolved invokable artifacts (`.mcpServer`, `.skill`, `.subagent`, `.command`) joined with `tokensCostPerSession`, `invocationCount`, `lastUsedAt`, and `costTimesUnusedScore`, sorted descending by `"cost × unused"`. |
+| `unusedFindings` | `Array<Finding>` | Deterministic `Finding` records (`kind == "unused"`) for 0-invocation pre-prompt-cost-bearing items in repositories with `>= minimumSessions` sessions. |
 
 ---
 

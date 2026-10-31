@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "unused-analytics": {
+      "command": "npx",
+      "args": ["-y", "@acme/unused-analytics-mcp"]
+    }
+  }
+}

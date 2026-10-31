@@ -14,6 +14,7 @@ public struct GeminiLogDecoder: LogDecoder, Sendable {
         var activeCwd: String?
         var activeModel: String?
         var observedModels: [String: String]
+        var firstUserCharCounts: [String: Int]?
         var emittedSessionStarts: Set<String>
         var seenUsageMessageIDs: Set<String>
         var seenToolCallIDs: Set<String>
@@ -24,6 +25,7 @@ public struct GeminiLogDecoder: LogDecoder, Sendable {
     private var activeCwd: String?
     private var activeModel: String?
     private var observedModels: [String: String] = [:]
+    private var firstUserCharCounts: [String: Int] = [:]
     private var emittedSessionStarts: Set<String> = []
     private var seenUsageMessageIDs: Set<String> = []
     private var seenToolCallIDs: Set<String> = []
@@ -41,12 +43,17 @@ public struct GeminiLogDecoder: LogDecoder, Sendable {
         observedModels
     }
 
+    public var firstUserMessageCharCountsBySession: [String: Int] {
+        firstUserCharCounts
+    }
+
     public func exportResumeState() -> Data? {
         let state = ResumeState(
             activeSessionID: activeSessionID,
             activeCwd: activeCwd,
             activeModel: activeModel,
             observedModels: observedModels,
+            firstUserCharCounts: firstUserCharCounts,
             emittedSessionStarts: emittedSessionStarts,
             seenUsageMessageIDs: seenUsageMessageIDs,
             seenToolCallIDs: seenToolCallIDs,
@@ -63,6 +70,7 @@ public struct GeminiLogDecoder: LogDecoder, Sendable {
         activeCwd = state.activeCwd
         activeModel = state.activeModel
         observedModels = state.observedModels
+        firstUserCharCounts = state.firstUserCharCounts ?? [:]
         emittedSessionStarts = state.emittedSessionStarts
         seenUsageMessageIDs = state.seenUsageMessageIDs
         seenToolCallIDs = state.seenToolCallIDs
@@ -218,6 +226,11 @@ public struct GeminiLogDecoder: LogDecoder, Sendable {
                 contentsOf: decodeMessageRecord(obj, sessionID: sessionID, cwd: cwd, fallbackTS: timestamp)
             )
 
+        case "user":
+            if firstUserCharCounts[sessionID] == nil, let text = obj["content"] as? String, !text.isEmpty {
+                firstUserCharCounts[sessionID] = text.count
+            }
+
         default:
             break
         }
@@ -232,7 +245,13 @@ public struct GeminiLogDecoder: LogDecoder, Sendable {
         fallbackTS: Date
     ) -> [UsageEvent] {
         let msgType = (msg["type"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        if msgType == "user" || msgType == "info" || msgType == "error" {
+        if msgType == "user" {
+            if firstUserCharCounts[sessionID] == nil, let text = msg["content"] as? String, !text.isEmpty {
+                firstUserCharCounts[sessionID] = text.count
+            }
+            return []
+        }
+        if msgType == "info" || msgType == "error" {
             return []
         }
 

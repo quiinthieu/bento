@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "active-docs": {
+      "command": "npx",
+      "args": ["-y", "@acme/active-docs-mcp"]
+    }
+  }
+}
