@@ -1,9 +1,10 @@
 import BentoCore
 import BentoTestSupport
-import BentoTokenizer
 import Foundation
 import Synchronization
 import Testing
+
+@testable import BentoTokenizer
 
 struct BentoTokenizerTests {
     private struct ReferenceVector: Decodable {
@@ -87,6 +88,13 @@ struct BentoTokenizerTests {
 
         #expect(o200kMismatches == 0)
         #expect(cl100kMismatches == 0)
+
+        // Verify zero-copy ASCII pre-tokenizer matches ICU NSRegularExpression across all ASCII bytes & edge cases.
+        var allASCIISample = String((1...127).compactMap { UnicodeScalar($0).map(Character.init) })
+        allASCIISample += "\n   hello  \r\n\n  world //\n/foo 'sap 's 'S USA'S USA's "
+        allASCIISample += "HTTPServer fooBar 12345\t\u{0B}\u{0C}   "
+        #expect(o200k.encode(allASCIISample) == o200k.encodeForcingUnicodeRegex(allASCIISample))
+        #expect(cl100k.encode(allASCIISample) == cl100k.encodeForcingUnicodeRegex(allASCIISample))
     }
 
     @Test("BPETokenizer throughput exceeds 5 MB/s on a >= 5 MB realistic mixed corpus")

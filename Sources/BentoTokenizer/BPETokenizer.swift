@@ -58,32 +58,87 @@ public final class BPETokenizer: TokenCounter, Sendable {
 
     /// Encodes `text` as ordinary text (no special-token interception) into exact BPE token ranks.
     public func encode(_ text: String) -> [Int] {
-        guard !text.isEmpty, let regex = threadLocalRegex() else { return [] }
+        guard !text.isEmpty else { return [] }
+        var contiguous = text
+        contiguous.makeContiguousUTF8()
 
-        var tokens: [Int] = []
-        tokens.reserveCapacity(max(8, text.utf8.count / 3))
+        return contiguous.withUTF8 { utf8Buf in
+            guard !utf8Buf.isEmpty, let base = utf8Buf.baseAddress else { return [] }
+            let chunks = Self.computeChunkRanges(base: base, total: utf8Buf.count)
+            var tokens: [Int] = []
+            tokens.reserveCapacity(max(8, utf8Buf.count / 3))
+            var mergeParts: [(start: Int, rank: Int32)] = []
+            mergeParts.reserveCapacity(128)
 
-        forEachChunk(of: text) { chunk in
-            encodeChunk(chunk, regex: regex, into: &tokens)
+            for range in chunks {
+                let len = range.count
+                guard len > 0 else { continue }
+                let chunkPtr = base.advanced(by: range.lowerBound)
+                if Self.isAllASCII(ptr: chunkPtr, count: len) {
+                    encodeASCIIChunk(ptr: chunkPtr, count: len, parts: &mergeParts, into: &tokens)
+                } else if let regex = threadLocalRegex() {
+                    let slice = UnsafeBufferPointer(start: chunkPtr, count: len)
+                    let chunkStr = String(decoding: slice, as: UTF8.self)
+                    encodeUnicodeChunk(chunkStr, regex: regex, parts: &mergeParts, into: &tokens)
+                }
+            }
+            return tokens
         }
-        return tokens
+    }
+
+    /// Encodes `text` forcing the ICU `NSRegularExpression` path (exposed internally for parity verification tests).
+    func encodeForcingUnicodeRegex(_ text: String) -> [Int] {
+        guard !text.isEmpty, let regex = threadLocalRegex() else { return [] }
+        var contiguous = text
+        contiguous.makeContiguousUTF8()
+        return contiguous.withUTF8 { utf8Buf in
+            guard !utf8Buf.isEmpty, let base = utf8Buf.baseAddress else { return [] }
+            let chunks = Self.computeChunkRanges(base: base, total: utf8Buf.count)
+            var tokens: [Int] = []
+            tokens.reserveCapacity(max(8, utf8Buf.count / 3))
+            var mergeParts: [(start: Int, rank: Int32)] = []
+            mergeParts.reserveCapacity(128)
+            for range in chunks where !range.isEmpty {
+                let slice = UnsafeBufferPointer(start: base.advanced(by: range.lowerBound), count: range.count)
+                let chunkStr = String(decoding: slice, as: UTF8.self)
+                encodeUnicodeChunk(chunkStr, regex: regex, parts: &mergeParts, into: &tokens)
+            }
+            return tokens
+        }
     }
 
     /// Counts exact BPE tokens in `text`.
     public func count(_ text: String) -> Int {
-        guard !text.isEmpty, let regex = threadLocalRegex() else { return 0 }
+        guard !text.isEmpty else { return 0 }
+        var contiguous = text
+        contiguous.makeContiguousUTF8()
 
-        var localCache: [UInt64: (bytes: [UInt8], count: Int)] = [:]
-        localCache.reserveCapacity(1_024)
+        return contiguous.withUTF8 { utf8Buf in
+            guard !utf8Buf.isEmpty, let base = utf8Buf.baseAddress else { return 0 }
+            let chunks = Self.computeChunkRanges(base: base, total: utf8Buf.count)
+            if chunks.count >= 8 && utf8Buf.count >= 131_072 {
+                return countChunksParallel(base: base, chunks: chunks)
+            }
 
-        var total = 0
-        forEachChunk(of: text) { chunk in
-            total += countChunk(chunk, regex: regex, localCache: &localCache)
+            var localCache: [UInt64: (bytes: [UInt8], count: Int)] = [:]
+            localCache.reserveCapacity(1_024)
+            var mergeParts: [(start: Int, rank: Int32)] = []
+            mergeParts.reserveCapacity(128)
+
+            var total = 0
+            for range in chunks {
+                total += countSingleChunk(
+                    base: base,
+                    range: range,
+                    parts: &mergeParts,
+                    localCache: &localCache
+                )
+            }
+            return total
         }
-        return total
     }
 
-    // MARK: - Thread-Local Compiled Regex & Chunked Pre-Tokenization
+    // MARK: - Thread-Local Compiled Regex & Raw UTF-8 Chunking
 
     private func threadLocalRegex() -> NSRegularExpression? {
         let key = "BentoTokenizer.regex.\(encoding.rawValue)" as NSString
@@ -98,48 +153,380 @@ public final class BPETokenizer: TokenCounter, Sendable {
         return compiled
     }
 
-    private static let targetChunkUTF8Bytes = 32_768
+    private static let targetChunkUTF8Bytes = 256
 
-    private func forEachChunk(of text: String, body: (String) -> Void) {
-        let utf8View = text.utf8
-        guard utf8View.count > Self.targetChunkUTF8Bytes * 2 else {
-            body(text)
-            return
+    private static func computeChunkRanges(base: UnsafePointer<UInt8>, total: Int) -> [Range<Int>] {
+        guard total > targetChunkUTF8Bytes else {
+            return [0..<total]
         }
 
-        var chunkStart = text.startIndex
-        var cursor = chunkStart
-        var bytesInChunk = 0
+        var ranges: [Range<Int>] = []
+        ranges.reserveCapacity(total / targetChunkUTF8Bytes + 2)
+        var chunkStart = 0
+        var pos = targetChunkUTF8Bytes
 
-        while cursor < text.endIndex {
-            let next = utf8View.index(after: cursor)
-            let byte = utf8View[cursor]
-            bytesInChunk += 1
-
-            if bytesInChunk >= Self.targetChunkUTF8Bytes,
-                byte == UInt8(ascii: "\n"),
-                next < text.endIndex
+        while pos + 1 < total {
+            let nextByte = base[pos + 1]
+            if base[pos] == 10
+                && nextByte < 0x80
+                && !isASCIISpace(nextByte)
+                && nextByte != 47
             {
-                let nextByte = utf8View[next]
-                let isASCIIAlnum =
-                    (nextByte >= UInt8(ascii: "A") && nextByte <= UInt8(ascii: "Z"))
-                    || (nextByte >= UInt8(ascii: "a") && nextByte <= UInt8(ascii: "z"))
-                    || (nextByte >= UInt8(ascii: "0") && nextByte <= UInt8(ascii: "9"))
-                if isASCIIAlnum {
-                    body(String(text[chunkStart..<next]))
-                    chunkStart = next
-                    bytesInChunk = 0
+                let split = pos + 1
+                ranges.append(chunkStart..<split)
+                chunkStart = split
+                pos = split + targetChunkUTF8Bytes
+            } else {
+                pos += 1
+            }
+        }
+        if chunkStart < total {
+            ranges.append(chunkStart..<total)
+        }
+        return ranges
+    }
+
+    private func countChunksParallel(base: UnsafePointer<UInt8>, chunks: [Range<Int>]) -> Int {
+        let workerCount = min(chunks.count, max(2, ProcessInfo.processInfo.activeProcessorCount))
+        let partialTotals = Mutex([Int](repeating: 0, count: workerCount))
+        let addr = Int(bitPattern: base)
+
+        DispatchQueue.concurrentPerform(iterations: workerCount) { workerIdx in
+            guard let ptr = UnsafePointer<UInt8>(bitPattern: addr) else { return }
+            var localCache: [UInt64: (bytes: [UInt8], count: Int)] = [:]
+            localCache.reserveCapacity(1_024)
+            var mergeParts: [(start: Int, rank: Int32)] = []
+            mergeParts.reserveCapacity(128)
+
+            var workerSum = 0
+            var idx = workerIdx
+            while idx < chunks.count {
+                workerSum += countSingleChunk(
+                    base: ptr,
+                    range: chunks[idx],
+                    parts: &mergeParts,
+                    localCache: &localCache
+                )
+                idx += workerCount
+            }
+            partialTotals.withLock { $0[workerIdx] = workerSum }
+        }
+
+        return partialTotals.withLock { $0.reduce(0, +) }
+    }
+
+    private func countSingleChunk(
+        base: UnsafePointer<UInt8>,
+        range: Range<Int>,
+        parts: inout [(start: Int, rank: Int32)],
+        localCache: inout [UInt64: (bytes: [UInt8], count: Int)]
+    ) -> Int {
+        let len = range.count
+        guard len > 0 else { return 0 }
+        let chunkPtr = base.advanced(by: range.lowerBound)
+        if Self.isAllASCII(ptr: chunkPtr, count: len) {
+            return countASCIIChunk(ptr: chunkPtr, count: len, parts: &parts, localCache: &localCache)
+        }
+        guard let regex = threadLocalRegex() else { return 0 }
+        let slice = UnsafeBufferPointer(start: chunkPtr, count: len)
+        let chunkStr = String(decoding: slice, as: UTF8.self)
+        return countUnicodeChunk(chunkStr, regex: regex, parts: &parts, localCache: &localCache)
+    }
+
+    // MARK: - Zero-Copy ASCII Pre-Tokenizer Fast Path
+
+    @inline(__always)
+    private static func isAllASCII(ptr: UnsafePointer<UInt8>, count: Int) -> Bool {
+        var idx = 0
+        while idx < count {
+            if ptr[idx] >= 0x80 {
+                return false
+            }
+            idx += 1
+        }
+        return true
+    }
+
+    @inline(__always)
+    private static func isASCIISpace(_ b: UInt8) -> Bool {
+        b == 32 || (b >= 9 && b <= 13)
+    }
+
+    @inline(__always)
+    private static func isASCIIUpper(_ b: UInt8) -> Bool {
+        b >= 65 && b <= 90
+    }
+
+    @inline(__always)
+    private static func isASCIILower(_ b: UInt8) -> Bool {
+        b >= 97 && b <= 122
+    }
+
+    @inline(__always)
+    private static func isASCIILetter(_ b: UInt8) -> Bool {
+        (b >= 65 && b <= 90) || (b >= 97 && b <= 122)
+    }
+
+    @inline(__always)
+    private static func isASCIIDigit(_ b: UInt8) -> Bool {
+        b >= 48 && b <= 57
+    }
+
+    @inline(__always)
+    private static func isASCIIAlnum(_ b: UInt8) -> Bool {
+        isASCIILetter(b) || isASCIIDigit(b)
+    }
+
+    @inline(__always)
+    private static func isASCIIPunct(_ b: UInt8) -> Bool {
+        !isASCIISpace(b) && !isASCIIAlnum(b)
+    }
+
+    @inline(__always)
+    private static func asciiContractionLength(ptr: UnsafePointer<UInt8>, index: Int, end: Int) -> Int {
+        guard index + 1 < end, ptr[index] == 39 else { return 0 }
+        let c1 = ptr[index + 1] | 0x20
+        if c1 == 115 || c1 == 116 || c1 == 109 || c1 == 100 {
+            return 2
+        }
+        if index + 2 < end {
+            let c2 = ptr[index + 2] | 0x20
+            if (c1 == 114 && c2 == 101)
+                || (c1 == 118 && c2 == 101)
+                || (c1 == 108 && c2 == 108)
+            {
+                return 3
+            }
+        }
+        return 0
+    }
+
+    @inline(__always)
+    private static func nextASCIITokenEnd(
+        encoding: BPEEncoding,
+        ptr: UnsafePointer<UInt8>,
+        start i: Int,
+        end n: Int
+    ) -> Int {
+        let b0 = ptr[i]
+        switch encoding {
+        case .o200kBase:
+            let hasPrefix = (b0 != 10 && b0 != 13 && !isASCIIAlnum(b0))
+            let p0 = hasPrefix ? (i + 1) : i
+            if p0 < n {
+                var p = p0
+                while p < n && isASCIIUpper(ptr[p]) { p += 1 }
+                let lowerStart = p
+                while p < n && isASCIILower(ptr[p]) { p += 1 }
+                if p > lowerStart {
+                    return p + asciiContractionLength(ptr: ptr, index: p, end: n)
+                }
+                if isASCIIUpper(ptr[p0]) {
+                    var u = p0 + 1
+                    while u < n && isASCIIUpper(ptr[u]) { u += 1 }
+                    while u < n && isASCIILower(ptr[u]) { u += 1 }
+                    return u + asciiContractionLength(ptr: ptr, index: u, end: n)
                 }
             }
-            cursor = next
+            if isASCIIDigit(b0) {
+                var p = i + 1
+                if p < n && isASCIIDigit(ptr[p]) {
+                    p += 1
+                    if p < n && isASCIIDigit(ptr[p]) { p += 1 }
+                }
+                return p
+            }
+            if isASCIIPunct(b0) || (b0 == 32 && i + 1 < n && isASCIIPunct(ptr[i + 1])) {
+                var p = (b0 == 32) ? (i + 2) : (i + 1)
+                while p < n && isASCIIPunct(ptr[p]) { p += 1 }
+                while p < n && (ptr[p] == 10 || ptr[p] == 13 || ptr[p] == 47) { p += 1 }
+                return p
+            }
+
+        case .cl100kBase:
+            let cLen = asciiContractionLength(ptr: ptr, index: i, end: n)
+            if cLen > 0 {
+                return i + cLen
+            }
+            let hasPrefix = (b0 != 10 && b0 != 13 && !isASCIIAlnum(b0))
+            let p0 = hasPrefix ? (i + 1) : i
+            if p0 < n && isASCIILetter(ptr[p0]) {
+                var p = p0 + 1
+                while p < n && isASCIILetter(ptr[p]) { p += 1 }
+                return p
+            }
+            if isASCIIDigit(b0) {
+                var p = i + 1
+                if p < n && isASCIIDigit(ptr[p]) {
+                    p += 1
+                    if p < n && isASCIIDigit(ptr[p]) { p += 1 }
+                }
+                return p
+            }
+            if isASCIIPunct(b0) || (b0 == 32 && i + 1 < n && isASCIIPunct(ptr[i + 1])) {
+                var p = (b0 == 32) ? (i + 2) : (i + 1)
+                while p < n && isASCIIPunct(ptr[p]) { p += 1 }
+                while p < n && (ptr[p] == 10 || ptr[p] == 13) { p += 1 }
+                return p
+            }
         }
 
-        if chunkStart < text.endIndex {
-            body(String(text[chunkStart..<text.endIndex]))
+        // Branches 5, 6, 7: whitespace (\s*[\r\n]+ | \s+(?!\S) | \s+)
+        var p = i
+        var lastCRLF = -1
+        while p < n && isASCIISpace(ptr[p]) {
+            if ptr[p] == 10 || ptr[p] == 13 {
+                lastCRLF = p
+            }
+            p += 1
+        }
+        if lastCRLF >= i {
+            return lastCRLF + 1
+        }
+        if p == n {
+            return p
+        }
+        if p - i >= 2 {
+            return p - 1
+        }
+        return max(i + 1, p)
+    }
+
+    private func encodeASCIIChunk(
+        ptr: UnsafePointer<UInt8>,
+        count: Int,
+        parts: inout [(start: Int, rank: Int32)],
+        into output: inout [Int]
+    ) {
+        let tableMask = table.mask
+        let enc = encoding
+        table.arena.withUnsafeBufferPointer { arenaPtr in
+            table.slots.withUnsafeBufferPointer { slotsPtr in
+                guard let arenaBase = arenaPtr.baseAddress, let slotsBase = slotsPtr.baseAddress else {
+                    return
+                }
+                var cursor = 0
+                while cursor < count {
+                    let end = Self.nextASCIITokenEnd(encoding: enc, ptr: ptr, start: cursor, end: count)
+                    let tokenPtr = ptr.advanced(by: cursor)
+                    let byteLen = end - cursor
+                    let hash = BPERankTable.fnv1a64(ptr: tokenPtr, count: byteLen)
+                    if let directRank = BPERankTable.lookupRaw(
+                        queryBase: tokenPtr,
+                        len: byteLen,
+                        hash: hash,
+                        arenaBase: arenaBase,
+                        slotsBase: slotsBase,
+                        mask: tableMask
+                    ) {
+                        output.append(Int(directRank))
+                    } else {
+                        let buf = UnsafeBufferPointer(start: tokenPtr, count: byteLen)
+                        Self.bytePairEncode(buf, table: table, parts: &parts, into: &output)
+                    }
+                    cursor = end
+                }
+            }
         }
     }
 
-    private func encodeChunk(_ chunk: String, regex: NSRegularExpression, into output: inout [Int]) {
+    private func countASCIIChunk(
+        ptr: UnsafePointer<UInt8>,
+        count: Int,
+        parts: inout [(start: Int, rank: Int32)],
+        localCache: inout [UInt64: (bytes: [UInt8], count: Int)]
+    ) -> Int {
+        let tableMask = table.mask
+        let enc = encoding
+        var chunkCount = 0
+
+        table.arena.withUnsafeBufferPointer { arenaPtr in
+            table.slots.withUnsafeBufferPointer { slotsPtr in
+                guard let arenaBase = arenaPtr.baseAddress, let slotsBase = slotsPtr.baseAddress else {
+                    return
+                }
+                var cursor = 0
+                while cursor < count {
+                    let end = Self.nextASCIITokenEnd(encoding: enc, ptr: ptr, start: cursor, end: count)
+                    let tokenPtr = ptr.advanced(by: cursor)
+                    let byteLen = end - cursor
+                    cursor = end
+
+                    var hash: UInt64 = 14_695_981_039_346_656_037
+                    var hIdx = 0
+                    while hIdx < byteLen {
+                        hash ^= UInt64(tokenPtr[hIdx])
+                        hash &*= 1_099_511_628_211
+                        hIdx += 1
+                    }
+
+                    var matchedSingleToken = false
+                    if byteLen <= Int(UInt16.max) {
+                        let targetLen = UInt16(byteLen)
+                        var slotIndex = Int(truncatingIfNeeded: hash) & tableMask
+                        while true {
+                            let slot = slotsBase[slotIndex]
+                            if !slot.occupied {
+                                break
+                            }
+                            if slot.length == targetLen,
+                                memcmp(arenaBase.advanced(by: Int(slot.offset)), tokenPtr, byteLen) == 0
+                            {
+                                matchedSingleToken = true
+                                break
+                            }
+                            slotIndex = (slotIndex + 1) & tableMask
+                        }
+                    }
+                    if matchedSingleToken {
+                        chunkCount += 1
+                        continue
+                    }
+
+                    let buf = UnsafeBufferPointer(start: tokenPtr, count: byteLen)
+                    if byteLen <= 64 {
+                        if let hit = localCache[hash],
+                            hit.bytes.count == byteLen,
+                            hit.bytes.withUnsafeBufferPointer({
+                                guard let hitBase = $0.baseAddress else { return false }
+                                return memcmp(hitBase, tokenPtr, byteLen) == 0
+                            })
+                        {
+                            chunkCount += hit.count
+                            continue
+                        }
+                        if let sharedHit = pieceCountCache.lookup(buf, hash: hash) {
+                            if localCache.count < 4_096 {
+                                localCache[hash] = (Array(buf), sharedHit)
+                            }
+                            chunkCount += sharedHit
+                            continue
+                        }
+                    }
+
+                    let mergedCount = Self.bytePairCount(buf, table: table, parts: &parts)
+                    if byteLen <= 64 {
+                        let saved = Array(buf)
+                        if localCache.count < 4_096 {
+                            localCache[hash] = (saved, mergedCount)
+                        }
+                        pieceCountCache.store(saved, hash: hash, count: mergedCount)
+                    }
+                    chunkCount += mergedCount
+                }
+            }
+        }
+        return chunkCount
+    }
+
+    // MARK: - Unicode ICU Fallback Path
+
+    private func encodeUnicodeChunk(
+        _ chunk: String,
+        regex: NSRegularExpression,
+        parts: inout [(start: Int, rank: Int32)],
+        into output: inout [Int]
+    ) {
         let nsChunk = chunk as NSString
         let utf16Len = nsChunk.length
         guard utf16Len > 0 else { return }
@@ -147,8 +534,6 @@ public final class BPETokenizer: TokenCounter, Sendable {
         var utf16Buf = [UInt16](repeating: 0, count: utf16Len)
         nsChunk.getCharacters(&utf16Buf, range: NSRange(location: 0, length: utf16Len))
         var scratchUTF8 = [UInt8](repeating: 0, count: max(64, utf16Len * 3))
-        var mergeParts: [(start: Int, rank: Int32)] = []
-        mergeParts.reserveCapacity(128)
         let tableMask = table.mask
 
         utf16Buf.withUnsafeBufferPointer { utf16Ptr in
@@ -188,7 +573,7 @@ public final class BPETokenizer: TokenCounter, Sendable {
                                 output.append(Int(directRank))
                                 return
                             }
-                            Self.bytePairEncode(buf, table: table, parts: &mergeParts, into: &output)
+                            Self.bytePairEncode(buf, table: table, parts: &parts, into: &output)
                         }
                     }
                 }
@@ -196,9 +581,10 @@ public final class BPETokenizer: TokenCounter, Sendable {
         }
     }
 
-    private func countChunk(
+    private func countUnicodeChunk(
         _ chunk: String,
         regex: NSRegularExpression,
+        parts: inout [(start: Int, rank: Int32)],
         localCache: inout [UInt64: (bytes: [UInt8], count: Int)]
     ) -> Int {
         let nsChunk = chunk as NSString
@@ -208,8 +594,6 @@ public final class BPETokenizer: TokenCounter, Sendable {
         var utf16Buf = [UInt16](repeating: 0, count: utf16Len)
         nsChunk.getCharacters(&utf16Buf, range: NSRange(location: 0, length: utf16Len))
         var scratchUTF8 = [UInt8](repeating: 0, count: max(64, utf16Len * 3))
-        var mergeParts: [(start: Int, rank: Int32)] = []
-        mergeParts.reserveCapacity(128)
         let tableMask = table.mask
 
         var chunkCount = 0
@@ -271,7 +655,7 @@ public final class BPETokenizer: TokenCounter, Sendable {
                                 }
                             }
 
-                            let mergedCount = Self.bytePairCount(buf, table: table, parts: &mergeParts)
+                            let mergedCount = Self.bytePairCount(buf, table: table, parts: &parts)
                             if byteLen <= 64 {
                                 let saved = Array(buf)
                                 if localCache.count < 4_096 {
