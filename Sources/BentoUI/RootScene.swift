@@ -12,13 +12,14 @@ final class AppSceneBootstrap {
     var startupError: String?
     private var didStart = false
 
-    func startIfNeeded() async {
+    func startIfNeeded(updater: (any AppUpdaterProviding)? = nil) async {
         guard !didStart else { return }
         didStart = true
         do {
             let launch = try LaunchConfiguration.parse()
             let created = try BentoAppModel(
                 launchConfiguration: launch,
+                updater: updater,
                 enableLiveWatching: !launch.isFixtureMode
             )
             self.appModel = created
@@ -32,11 +33,16 @@ final class AppSceneBootstrap {
 /// Primary macOS window scene titled from `Product.name` (or `#if DEBUG` override).
 public struct RootScene: Scene {
     private let configuration: RootWindowConfiguration
+    private let updater: (any AppUpdaterProviding)?
     private let bootstrap = AppSceneBootstrap.shared
 
-    /// Creates the primary scene using the given window configuration.
-    public init(configuration: RootWindowConfiguration = RootWindowConfiguration()) {
+    /// Creates the primary scene using the given window configuration and optional Sparkle updater adapter.
+    public init(
+        configuration: RootWindowConfiguration = RootWindowConfiguration(),
+        updater: (any AppUpdaterProviding)? = nil
+    ) {
         self.configuration = configuration
+        self.updater = updater
     }
 
     public var body: some Scene {
@@ -61,7 +67,7 @@ public struct RootScene: Scene {
                     NSApplication.shared.terminate(nil)
                     return
                 }
-                await bootstrap.startIfNeeded()
+                await bootstrap.startIfNeeded(updater: updater)
             }
         }
         .defaultSize(width: 1280, height: 820)

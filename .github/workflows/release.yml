@@ -1,0 +1,215 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      allow_unsigned:
+        description: "Allow ad-hoc unsigned dry-run build when Developer ID secrets are not yet configured"
+        required: false
+        default: "true"
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build, Sign, Notarize & Publish Universal DMG
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      ALLOW_UNSIGNED_RELEASE: ${{ inputs.allow_unsigned || 'false' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 16
+        run: |
+          if [ -d "/Applications/Xcode_16.4.app" ]; then
+            sudo xcode-select -s "/Applications/Xcode_16.4.app"
+          elif [ -d "/Applications/Xcode_16.3.app" ]; then
+            sudo xcode-select -s "/Applications/Xcode_16.3.app"
+          elif [ -d "/Applications/Xcode_16.2.app" ]; then
+            sudo xcode-select -s "/Applications/Xcode_16.2.app"
+          fi
+          swift --version
+          xcodebuild -version
+
+      - name: Verify single-source version & git tag match
+        run: |
+          Scripts/bump-version.sh --verify
+          eval "$(Scripts/bump-version.sh --print)"
+          echo "BENTO_VERSION=${version}" >> "${GITHUB_ENV}"
+          echo "BENTO_BUILD=${build}" >> "${GITHUB_ENV}"
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            expected_tag="v${version}"
+            if [[ "${GITHUB_REF_NAME}" != "${expected_tag}" ]]; then
+              echo "ERROR: Tag '${GITHUB_REF_NAME}' does not match Config/Product.xcconfig version '${expected_tag}'." >&2
+              exit 1
+            fi
+          fi
+
+      - name: Run write-isolation lint & Swift tests
+        run: |
+          Scripts/lint-writes.sh
+          Scripts/test-lint-writes.sh
+          swift format lint --strict -r Package.swift Sources Tests XcodeApp XcodeUITests
+          swift test --no-parallel -Xswiftc -warnings-as-errors
+
+      - name: Install XcodeGen
+        run: which xcodegen >/dev/null 2>&1 || brew install xcodegen
+
+      - name: Import Developer ID certificate into ephemeral keychain (when configured)
+        env:
+          DEVELOPER_ID_CERT_P12_BASE64: ${{ secrets.DEVELOPER_ID_CERT_P12_BASE64 }}
+          DEVELOPER_ID_CERT_PASSWORD: ${{ secrets.DEVELOPER_ID_CERT_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          SPARKLE_PUBLIC_ED_KEY: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
+        run: |
+          if [[ -n "${DEVELOPER_ID_CERT_P12_BASE64}" && -n "${DEVELOPER_ID_CERT_PASSWORD}" && -n "${APPLE_TEAM_ID}" ]]; then
+            KEYCHAIN_PATH="${RUNNER_TEMP}/bento-signing.keychain-db"
+            KEYCHAIN_PASS="$(uuidgen)"
+            CERT_PATH="${RUNNER_TEMP}/developer-id.p12"
+
+            printf '%s' "${DEVELOPER_ID_CERT_P12_BASE64}" | base64 --decode > "${CERT_PATH}"
+            security create-keychain -p "${KEYCHAIN_PASS}" "${KEYCHAIN_PATH}"
+            security set-keychain-settings -lut 21600 "${KEYCHAIN_PATH}"
+            security unlock-keychain -p "${KEYCHAIN_PASS}" "${KEYCHAIN_PATH}"
+            security import "${CERT_PATH}" -P "${DEVELOPER_ID_CERT_PASSWORD}" -A -t cert -f pkcs12 -k "${KEYCHAIN_PATH}"
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${KEYCHAIN_PASS}" "${KEYCHAIN_PATH}"
+            security list-keychains -d user -s "${KEYCHAIN_PATH}" login.keychain-db
+            rm -f "${CERT_PATH}"
+
+            IDENTITY="$(security find-identity -v -p codesigning "${KEYCHAIN_PATH}" | sed -nE 's/.*"([^"]*Developer ID Application:[^"]*)".*/\1/p' | head -n 1)"
+            if [[ -z "${IDENTITY}" ]]; then
+              echo "ERROR: No 'Developer ID Application' identity found in imported certificate." >&2
+              exit 1
+            fi
+
+            cat > Config/Signing.xcconfig <<EOF
+          DEVELOPMENT_TEAM = ${APPLE_TEAM_ID}
+          CODE_SIGN_STYLE = Manual
+          CODE_SIGN_IDENTITY = ${IDENTITY}
+          SPARKLE_PUBLIC_ED_KEY = ${SPARKLE_PUBLIC_ED_KEY}
+          EOF
+
+            echo "SIGNING_ENABLED=true" >> "${GITHUB_ENV}"
+            echo "CODESIGN_IDENTITY=${IDENTITY}" >> "${GITHUB_ENV}"
+            echo "EPHEMERAL_KEYCHAIN_PATH=${KEYCHAIN_PATH}" >> "${GITHUB_ENV}"
+          else
+            if [[ "${GITHUB_REF_TYPE}" == "tag" && "${ALLOW_UNSIGNED_RELEASE}" != "true" ]]; then
+              echo "ERROR: Tagged releases require DEVELOPER_ID_CERT_P12_BASE64, DEVELOPER_ID_CERT_PASSWORD, and APPLE_TEAM_ID secrets." >&2
+              exit 1
+            fi
+            echo "WARN: Developer ID secrets not configured; building ad-hoc signed universal DMG."
+            echo "SIGNING_ENABLED=false" >> "${GITHUB_ENV}"
+          fi
+
+      - name: Build universal App + embedded CLI + DMG
+        run: Scripts/make-dmg.sh --output-dir dist
+
+      - name: Notarize, staple & validate DMG with Apple Notary Service
+        if: env.SIGNING_ENABLED == 'true'
+        env:
+          APPLE_API_KEY_BASE64: ${{ secrets.APPLE_API_KEY_BASE64 }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: |
+          DMG_FILE="$(ls dist/*.dmg | head -n 1)"
+          if [[ -n "${APPLE_API_KEY_BASE64}" && -n "${APPLE_API_KEY_ID}" && -n "${APPLE_API_ISSUER_ID}" ]]; then
+            API_KEY_FILE="${RUNNER_TEMP}/AuthKey_${APPLE_API_KEY_ID}.p8"
+            printf '%s' "${APPLE_API_KEY_BASE64}" | base64 --decode > "${API_KEY_FILE}"
+            trap 'rm -f "${API_KEY_FILE}"' EXIT
+            APPLE_API_KEY_PATH="${API_KEY_FILE}" Scripts/notarize.sh "${DMG_FILE}"
+          elif [[ -n "${APPLE_ID}" && -n "${APPLE_TEAM_ID}" && -n "${APPLE_APP_SPECIFIC_PASSWORD}" ]]; then
+            Scripts/notarize.sh "${DMG_FILE}"
+          else
+            echo "ERROR: Signing enabled, but notarization secrets (App Store Connect API Key or Apple ID + App-Specific Password) are missing." >&2
+            exit 1
+          fi
+          # Recompute SHA-256 after stapling modifies the DMG ticket header.
+          shasum -a 256 "${DMG_FILE}" > "${DMG_FILE}.sha256"
+
+      - name: Render Homebrew cask & Sparkle appcast.xml
+        env:
+          SPARKLE_EDDSA_PRIVATE_KEY: ${{ secrets.SPARKLE_EDDSA_PRIVATE_KEY }}
+        run: |
+          DMG_FILE="$(ls dist/*.dmg | head -n 1)"
+          DMG_BASENAME="$(basename "${DMG_FILE}")"
+          TAG_NAME="v${BENTO_VERSION}"
+          DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG_NAME}/${DMG_BASENAME}"
+
+          Scripts/render-cask.sh \
+            --dmg "${DMG_FILE}" \
+            --url "${DOWNLOAD_URL}" \
+            --output dist/agent-bento.rb
+
+          SIGN_UPDATE_BIN="$(find "${HOME}/Library/Developer/Xcode/DerivedData" . -type f -name sign_update 2>/dev/null | head -n 1 || true)"
+          APPCAST_EXTRA_ARGS=()
+          if [[ -n "${SPARKLE_EDDSA_PRIVATE_KEY}" && -n "${SIGN_UPDATE_BIN}" ]]; then
+            export SPARKLE_SIGN_UPDATE_BIN="${SIGN_UPDATE_BIN}"
+            APPCAST_EXTRA_ARGS+=(--require-signature)
+          fi
+          Scripts/generate-appcast.sh \
+            --dmg "${DMG_FILE}" \
+            --download-url "${DOWNLOAD_URL}" \
+            --output dist/appcast.xml \
+            ${APPCAST_EXTRA_ARGS[@]+"${APPCAST_EXTRA_ARGS[@]}"}
+
+      - name: Smoke-test rendered Homebrew cask via local tap
+        run: |
+          DMG_FILE="$(cd dist && pwd)/$(basename "$(ls dist/*.dmg | head -n 1)")"
+          TAP_NAME="local/bento-ci-test"
+          brew tap-new --no-git "${TAP_NAME}"
+          TAP_DIR="$(brew --repository "${TAP_NAME}")"
+          mkdir -p "${TAP_DIR}/Casks"
+          Scripts/render-cask.sh \
+            --dmg "${DMG_FILE}" \
+            --url "file://${DMG_FILE}" \
+            --output "${TAP_DIR}/Casks/agent-bento.rb"
+          LOCAL_APPDIR="${RUNNER_TEMP}/brew-apps"
+          mkdir -p "${LOCAL_APPDIR}"
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install --cask --appdir="${LOCAL_APPDIR}" "${TAP_NAME}/agent-bento"
+          if [[ "${SIGNING_ENABLED}" != "true" ]]; then
+            xattr -dr com.apple.quarantine "${LOCAL_APPDIR}/Bento.app"
+          fi
+          "$(brew --prefix)/bin/bentoctx" --version
+          "$(brew --prefix)/bin/bentoctx" scan --home Fixtures/homes/polyglot --json >/dev/null
+          "${LOCAL_APPDIR}/Bento.app/Contents/MacOS/Bento" -fixtureHome Fixtures/homes/polyglot -supportDir "${RUNNER_TEMP}/brew-smoke-support" -skipOnboarding --smoke-test-quit
+          HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall --cask "${TAP_NAME}/agent-bento"
+          brew untap "${TAP_NAME}"
+
+      - name: Upload workflow build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bento-${{ env.BENTO_VERSION }}-macos-universal
+          path: |
+            dist/*.dmg
+            dist/*.dmg.sha256
+            dist/agent-bento.rb
+            dist/appcast.xml
+
+      - name: Publish GitHub Release on v* tags
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            dist/*.dmg \
+            dist/*.dmg.sha256 \
+            dist/agent-bento.rb \
+            dist/appcast.xml \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes
+
+      - name: Clean up ephemeral signing keychain
+        if: always() && env.EPHEMERAL_KEYCHAIN_PATH != ''
+        run: |
+          security delete-keychain "${EPHEMERAL_KEYCHAIN_PATH}" || true
+          rm -f Config/Signing.xcconfig

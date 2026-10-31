@@ -1,5 +1,5 @@
-// Single source of truth for product naming and identifiers.
-// Keep synchronized with Sources/BentoCore/Product.swift.
+// Single source of truth for product naming, identifiers, and version metadata.
+// Keep synchronized with Sources/BentoCore/Product.swift via Scripts/bump-version.sh.
 
 BENTO_PRODUCT_NAME = Bento
 BENTO_BUNDLE_ID = com.quiinthieu.bento
@@ -13,3 +13,17 @@ PRODUCT_BUNDLE_IDENTIFIER = $(BENTO_BUNDLE_ID)
 MARKETING_VERSION = $(BENTO_VERSION)
 CURRENT_PROJECT_VERSION = $(BENTO_BUILD_NUMBER)
 MACOSX_DEPLOYMENT_TARGET = 15.0
+
+// Default ad-hoc signing for local builds and PR CI when Signing.xcconfig is absent.
+DEVELOPMENT_TEAM =
+CODE_SIGN_STYLE = Automatic
+CODE_SIGN_IDENTITY = -
+
+// Sparkle EdDSA update feed defaults (use BENTO_SLASH to avoid xcconfig '//' comment truncation).
+BENTO_SLASH = /
+BENTO_ENABLE_SPARKLE = YES
+SPARKLE_FEED_URL = https:$(BENTO_SLASH)/github.com/quiinthieu/bento/releases/latest/download/appcast.xml
+SPARKLE_PUBLIC_ED_KEY =
+
+// Optional local or CI Developer ID signing overrides (gitignored).
+#include? "Signing.xcconfig"

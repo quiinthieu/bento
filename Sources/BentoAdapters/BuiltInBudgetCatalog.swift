@@ -195,6 +195,12 @@ public enum BuiltInBudgetCatalog: Sendable {
         }
         appendCandidates(around: Bundle.main.bundleURL)
 
+        if let mainExecDir = Bundle.main.executableURL?.resolvingSymlinksInPath().deletingLastPathComponent() {
+            appendCandidates(around: mainExecDir)
+            appendCandidates(
+                around: mainExecDir.deletingLastPathComponent().appendingPathComponent("Resources", isDirectory: true)
+            )
+        }
         let executableDir = URL(fileURLWithPath: CommandLine.arguments.first ?? "")
             .resolvingSymlinksInPath()
             .deletingLastPathComponent()

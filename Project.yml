@@ -10,6 +10,9 @@ options:
 packages:
   BentoPackage:
     path: .
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.6.0"
 targets:
   BentoMacApp:
     type: application
@@ -22,6 +25,7 @@ targets:
       - path: XcodeApp
     settings:
       base:
+        ARCHS: "$(ARCHS_STANDARD)"
         PRODUCT_NAME: $(BENTO_PRODUCT_NAME)
         PRODUCT_BUNDLE_IDENTIFIER: $(BENTO_BUNDLE_ID)
         MARKETING_VERSION: $(BENTO_VERSION)
@@ -29,18 +33,35 @@ targets:
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
         ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
         CODE_SIGN_ENTITLEMENTS: Config/Bento.entitlements
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: $(BENTO_PRODUCT_NAME)
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
-        INFOPLIST_KEY_NSHumanReadableCopyright: ""
-        CODE_SIGN_IDENTITY: "-"
-        CODE_SIGN_STYLE: Automatic
+        INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2026 Uyen Thieu. Released under the MIT License."
+        INFOPLIST_KEY_SUFeedURL: $(SPARKLE_FEED_URL)
+        INFOPLIST_KEY_SUPublicEDKey: $(SPARKLE_PUBLIC_ED_KEY)
+        INFOPLIST_KEY_SUEnableAutomaticChecks: NO
+        INFOPLIST_KEY_BentoEnableSparkle: $(BENTO_ENABLE_SPARKLE)
+        DEVELOPMENT_TEAM: $(DEVELOPMENT_TEAM)
+        CODE_SIGN_IDENTITY: $(CODE_SIGN_IDENTITY)
+        CODE_SIGN_STYLE: $(CODE_SIGN_STYLE)
+      configs:
+        Debug:
+          ONLY_ACTIVE_ARCH: YES
+        Release:
+          ONLY_ACTIVE_ARCH: NO
     dependencies:
       - package: BentoPackage
         product: BentoUI
       - package: BentoPackage
         product: BentoCore
+      - package: Sparkle
+        product: Sparkle
+    postBuildScripts:
+      - name: Embed Companion CLI in Contents/Helpers
+        script: '"${SRCROOT}/Scripts/embed-cli.sh"'
+        basedOnDependencyAnalysis: false
   BentoMacAppUITests:
     type: bundle.ui-testing
     platform: macOS

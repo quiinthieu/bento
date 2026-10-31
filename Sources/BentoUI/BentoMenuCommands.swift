@@ -1,7 +1,7 @@
 import BentoCore
 import SwiftUI
 
-/// macOS menu bar commands ensuring every primary navigation and workspace action is reachable by keyboard (`PLAN.md` §6.7, §11 T15).
+/// macOS menu bar commands ensuring every primary navigation and workspace action is reachable by keyboard (`PLAN.md` §6.7, §11 T15, T16).
 public struct BentoMenuCommands: Commands {
     private let model: BentoAppModel
 
@@ -10,6 +10,15 @@ public struct BentoMenuCommands: Commands {
     }
 
     public var body: some Commands {
+        if model.isUpdaterAvailable {
+            CommandGroup(after: .appInfo) {
+                Button("Check for Updates…") {
+                    model.checkForUpdates()
+                }
+                .disabled(!model.canCheckForUpdates)
+            }
+        }
+
         CommandMenu("Navigate") {
             ForEach(Array(SidebarSection.allCases.enumerated()), id: \.element.id) { index, section in
                 Button(section.title) {
@@ -89,6 +98,12 @@ public struct BentoMenuCommands: Commands {
                 model.isInspectorPresented.toggle()
             }
             .keyboardShortcut("i", modifiers: [.command, .option])
+
+            Divider()
+
+            Button("Install Command Line Tool (\(Product.cliName))…") {
+                model.requestInstallCLI()
+            }
 
             Divider()
 

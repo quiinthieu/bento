@@ -15,12 +15,15 @@ struct ProductTests {
         #expect(!Product.cliName.isEmpty)
         #expect(!Product.supportDirName.isEmpty)
         #expect(!Product.version.isEmpty)
+        #expect(!Product.buildNumber.isEmpty)
 
         #expect(values["BENTO_PRODUCT_NAME"] == Product.name)
         #expect(values["BENTO_BUNDLE_ID"] == Product.bundleID)
         #expect(values["BENTO_CLI_NAME"] == Product.cliName)
         #expect(values["BENTO_SUPPORT_DIR_NAME"] == Product.supportDirName)
         #expect(values["BENTO_VERSION"] == Product.version)
+        #expect(values["BENTO_BUILD_NUMBER"] == Product.buildNumber)
+        #expect(contents.contains("#include? \"Signing.xcconfig\""))
     }
 
     @Test("Product display and CLI names are not hardcoded outside Product.swift")

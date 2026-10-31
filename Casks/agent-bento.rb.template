@@ -1,0 +1,22 @@
+cask "agent-bento" do
+  version "{{VERSION}}"
+  sha256 "{{SHA256}}"
+
+  url "{{DMG_URL}}"
+  name "{{PRODUCT_NAME}}"
+  desc "Audit context token budgets and rules hygiene for AI coding agents"
+  homepage "https://github.com/quiinthieu/bento"
+
+  depends_on macos: :sequoia
+
+  app "{{PRODUCT_NAME}}.app"
+  binary "#{appdir}/{{PRODUCT_NAME}}.app/Contents/Helpers/{{CLI_NAME}}"
+
+  zap trash: [
+    "~/Library/Application Support/{{SUPPORT_DIR_NAME}}",
+    "~/Library/Caches/{{BUNDLE_ID}}",
+    "~/Library/HTTPStorages/{{BUNDLE_ID}}",
+    "~/Library/Preferences/{{BUNDLE_ID}}.plist",
+    "~/Library/Saved Application State/{{BUNDLE_ID}}.savedState",
+  ]
+end

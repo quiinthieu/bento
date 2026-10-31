@@ -213,6 +213,7 @@ public final class BentoAppModel {
     private static let unusedMinSessionsSettingKey = "ui.unusedMinSessions"
     private static let anthropicAPIEnabledSettingKey = "tokenizer.api.anthropic.enabled"
     private static let geminiAPIEnabledSettingKey = "tokenizer.api.gemini.enabled"
+    private static let automaticUpdatesSettingKey = "updates.automaticallyChecks"
     private static let debugProductNameSettingKey = "debug.productNameOverride"
 
     public let environment: AgentEnvironment
@@ -222,6 +223,8 @@ public final class BentoAppModel {
     private let fixEngine: any FixApplying
     private let apiKeyStore: any APIKeyProviding
     private let externalActions: any ExternalActionHandling
+    private let updater: any AppUpdaterProviding
+    private let cliInstaller: any CLIInstalling
     private let urlSessionOverride: URLSession?
     private var mcpConsentStore: MCPConsentStore
     private var confirmedAPICounters: [AgentID: any ExactAPITokenCounting] = [:]
@@ -245,6 +248,9 @@ public final class BentoAppModel {
     public var settingsGeminiKeyDraft: String = ""
     public var isConfirmingDeleteAllData: Bool = false
     public var isSendingTokenCountPreview: Bool = false
+    public var selectedCLIInstallPreset: CLIInstallDestinationPreset = .userLocalBin
+    public var isShowingInstallCLIConfirmation: Bool = false
+    private var cliStatusRevision: Int = 0
 
     // MARK: - Modals, Banners & Alerts
 
@@ -285,6 +291,7 @@ public final class BentoAppModel {
     public var canonicalSkillsDirectory: String = ""
     public private(set) var anthropicCountAPIEnabled: Bool = false
     public private(set) var geminiCountAPIEnabled: Bool = false
+    public private(set) var automaticallyChecksForUpdates: Bool = false
     private var apiKeyPresenceVersion: Int = 0
 
     #if DEBUG
@@ -298,6 +305,8 @@ public final class BentoAppModel {
         launchConfiguration: LaunchConfiguration? = nil,
         apiKeyStore: (any APIKeyProviding)? = nil,
         externalActions: (any ExternalActionHandling)? = nil,
+        updater: (any AppUpdaterProviding)? = nil,
+        cliInstaller: (any CLIInstalling)? = nil,
         urlSessionOverride: URLSession? = nil,
         enableLiveWatching: Bool = false
     ) throws {
@@ -377,6 +386,8 @@ public final class BentoAppModel {
             fixEngine: engine,
             apiKeyStore: apiKeyStore ?? KeychainAPIKeyStore(),
             externalActions: externalActions,
+            updater: updater,
+            cliInstaller: cliInstaller,
             urlSessionOverride: urlSessionOverride,
             showOnboardingOnFirstRun: showOnboarding,
             enableLiveWatching: enableLiveWatching && !launch.isFixtureMode
@@ -391,6 +402,8 @@ public final class BentoAppModel {
         fixEngine: any FixApplying,
         apiKeyStore: any APIKeyProviding = KeychainAPIKeyStore(),
         externalActions: (any ExternalActionHandling)? = nil,
+        updater: (any AppUpdaterProviding)? = nil,
+        cliInstaller: (any CLIInstalling)? = nil,
         urlSessionOverride: URLSession? = nil,
         showOnboardingOnFirstRun: Bool = false,
         enableLiveWatching: Bool = false
@@ -401,6 +414,8 @@ public final class BentoAppModel {
         self.fixEngine = fixEngine
         self.apiKeyStore = apiKeyStore
         self.externalActions = externalActions ?? WorkspaceExternalActionHandler()
+        self.updater = updater ?? DisabledAppUpdater()
+        self.cliInstaller = cliInstaller ?? CLIInstaller()
         self.urlSessionOverride = urlSessionOverride
         self.isShowingOnboarding = showOnboardingOnFirstRun
         self.mcpConsentStore = (try? MCPConsentStore(persistence: store)) ?? (try! MCPConsentStore())
@@ -1390,6 +1405,99 @@ public final class BentoAppModel {
         statusBannerMessage = "Deleted all local \(effectiveProductName) data."
     }
 
+    // MARK: - Sparkle Application Updates (`PLAN.md` §0 Rule 5, §7, §11 T16)
+
+    public var isUpdaterAvailable: Bool {
+        updater.isUpdaterAvailable
+    }
+
+    public var canCheckForUpdates: Bool {
+        updater.canCheckForUpdates
+    }
+
+    public var updaterFeedURLString: String? {
+        updater.feedURLString
+    }
+
+    /// Enables or turns off automatic Sparkle background update checks and persists the preference.
+    public func setAutomaticallyChecksForUpdates(_ enabled: Bool) throws {
+        automaticallyChecksForUpdates = enabled
+        try store.setSetting(enabled, forKey: Self.automaticUpdatesSettingKey)
+        updater.setAutomaticallyChecksForUpdates(enabled)
+    }
+
+    /// Triggers an explicit user-requested Sparkle update check.
+    public func checkForUpdates() {
+        updater.checkForUpdates()
+    }
+
+    // MARK: - Consented Companion CLI Symlink Installer (`PLAN.md` §11 T16)
+
+    /// Returns the embedded `<App.app>/Contents/Helpers/<Product.cliName>` URL if bundled and executable.
+    public var embeddedCLIBinaryURL: URL? {
+        cliInstaller.embeddedCLIBinaryURL()
+    }
+
+    /// Resolves the target symlink URL for the active `selectedCLIInstallPreset`.
+    public func currentCLISymlinkURL() -> URL {
+        selectedCLIInstallPreset.symlinkURL(homeDirectory: environment.home)
+    }
+
+    /// Read-only inspection of the active CLI symlink destination.
+    public func currentCLIInstallStatus() -> CLIInstallStatus {
+        _ = cliStatusRevision
+        return cliInstaller.status(at: currentCLISymlinkURL())
+    }
+
+    /// Opens the explicit user-consent confirmation dialog before creating or updating a CLI symlink.
+    public func requestInstallCLI(preset: CLIInstallDestinationPreset? = nil) {
+        if let preset {
+            selectedCLIInstallPreset = preset
+        }
+        isShowingInstallCLIConfirmation = true
+    }
+
+    /// Executes the user-consented CLI symlink creation via `BentoFixes.CLIInstaller`.
+    @discardableResult
+    public func confirmInstallCLI() throws -> CLIInstallResult {
+        let destination = currentCLISymlinkURL()
+        do {
+            let result = try cliInstaller.install(
+                to: destination,
+                userConsented: true,
+                pathEnvironment: environment.env["PATH"] ?? ProcessInfo.processInfo.environment["PATH"]
+            )
+            isShowingInstallCLIConfirmation = false
+            cliStatusRevision += 1
+            let displayDest = abbreviateHomePath(result.symlinkURL.path)
+            if result.isDirectoryOnPATH {
+                statusBannerMessage = "Installed \(Product.cliName) symlink at \(displayDest)."
+            } else {
+                let binDir = abbreviateHomePath(result.symlinkURL.deletingLastPathComponent().path)
+                statusBannerMessage =
+                    "Installed \(Product.cliName) symlink at \(displayDest). Add \(binDir) to your shell PATH to run \(Product.cliName) anywhere."
+            }
+            return result
+        } catch {
+            isShowingInstallCLIConfirmation = false
+            lastErrorMessage = error.localizedDescription
+            throw error
+        }
+    }
+
+    /// Removes the installed CLI symlink after explicit user consent.
+    public func uninstallCLISymlink(userConsented: Bool) throws {
+        let destination = currentCLISymlinkURL()
+        do {
+            try cliInstaller.uninstall(at: destination, userConsented: userConsented)
+            cliStatusRevision += 1
+            statusBannerMessage = "Removed \(Product.cliName) symlink from \(abbreviateHomePath(destination.path))."
+        } catch {
+            lastErrorMessage = error.localizedDescription
+            throw error
+        }
+    }
+
     public func abbreviateHomePath(_ path: String) -> String {
         let homePath = environment.home.standardizedFileURL.path
         if path == homePath {
@@ -1429,6 +1537,9 @@ public final class BentoAppModel {
             (try? store.setting(Bool.self, forKey: Self.anthropicAPIEnabledSettingKey)) ?? false
         self.geminiCountAPIEnabled =
             (try? store.setting(Bool.self, forKey: Self.geminiAPIEnabledSettingKey)) ?? false
+        let autoUpdates = (try? store.setting(Bool.self, forKey: Self.automaticUpdatesSettingKey)) ?? false
+        self.automaticallyChecksForUpdates = autoUpdates
+        self.updater.setAutomaticallyChecksForUpdates(autoUpdates)
         #if DEBUG
             self.debugProductNameOverride =
                 (try? store.setting(String.self, forKey: Self.debugProductNameSettingKey)) ?? ""
