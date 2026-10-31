@@ -1,0 +1,29 @@
+{
+  "agent": "claudeCode",
+  "agentVersion": "Claude Code 2.1.x",
+  "defaultModel": "claude-sonnet-4-5",
+  "defaults": {
+    "builtInToolsTokens": 11800,
+    "systemPromptTokens": 4200,
+    "uncertaintyFraction": 0.15
+  },
+  "measuredOn": "2026-10-30",
+  "models": {
+    "claude-haiku-4-5": {
+      "builtInToolsTokens": 11800,
+      "systemPromptTokens": 4100,
+      "uncertaintyFraction": 0.15
+    },
+    "claude-opus-4-1": {
+      "builtInToolsTokens": 11800,
+      "systemPromptTokens": 4400,
+      "uncertaintyFraction": 0.15
+    },
+    "claude-sonnet-4-5": {
+      "builtInToolsTokens": 11800,
+      "systemPromptTokens": 4200,
+      "uncertaintyFraction": 0.15
+    }
+  },
+  "sourceNote": "Measured first-turn input overhead in a near-empty fixture repository before user artifacts (PLAN §6.3)."
+}

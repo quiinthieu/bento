@@ -42,6 +42,17 @@ enum CLIJSONOutput {
         var resolution: Resolution
     }
 
+    struct BudgetResponse: Codable, Sendable {
+        var schemaVersion: Int = CLIJSONOutput.currentSchemaVersion
+        var command: String = "budget"
+        var generatedAt: Date
+        var snapshotID: String
+        var repoPath: String
+        var agentFilter: String?
+        var modelOverride: String?
+        var budgets: [Budget]
+    }
+
     static func printJSON<T: Encodable>(_ payload: T) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]

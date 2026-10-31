@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "postToolUse": [
+      {
+        "bash": "npm test -- --bail",
+        "timeoutSec": 30
+      }
+    ]
+  }
+}

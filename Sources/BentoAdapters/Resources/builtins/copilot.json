@@ -1,0 +1,24 @@
+{
+  "agent": "copilot",
+  "agentVersion": "GitHub Copilot CLI 0.0.420",
+  "defaultModel": "claude-sonnet-4.5",
+  "defaults": {
+    "builtInToolsTokens": 7400,
+    "systemPromptTokens": 3100,
+    "uncertaintyFraction": 0.15
+  },
+  "measuredOn": "2026-10-30",
+  "models": {
+    "claude-sonnet-4.5": {
+      "builtInToolsTokens": 7400,
+      "systemPromptTokens": 3100,
+      "uncertaintyFraction": 0.15
+    },
+    "gpt-5": {
+      "builtInToolsTokens": 7400,
+      "systemPromptTokens": 3000,
+      "uncertaintyFraction": 0.15
+    }
+  },
+  "sourceNote": "Measured first-turn session-state input baseline in a near-empty repository before instructions and MCP tools (PLAN §6.3)."
+}

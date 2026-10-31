@@ -1,0 +1,99 @@
+{
+  "agent" : "codex",
+  "contextWindow" : 400000,
+  "folder" : "<HOME>/repos/demo-app",
+  "items" : [
+    {
+      "category" : "builtInSystem",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "Codex CLI system prompt",
+      "method" : "estimated (built-in, measured on 2026-10-30, codex-cli 0.165.0)",
+      "range" : [
+        2380,
+        3220
+      ],
+      "tokens" : 2800
+    },
+    {
+      "category" : "builtInTools",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "Codex CLI built-in tools",
+      "method" : "estimated (built-in, measured on 2026-10-30, codex-cli 0.165.0)",
+      "range" : [
+        2890,
+        3910
+      ],
+      "tokens" : 3400
+    },
+    {
+      "artifactID" : "0b606e4b6c4c66087cabe793c19c4504678e4ebac5d196adf2398008efb0adf1",
+      "category" : "rules",
+      "confidence" : "exact",
+      "countsTowardPrePrompt" : true,
+      "label" : "AGENTS.md",
+      "method" : "o200k_base",
+      "tokens" : 24
+    },
+    {
+      "artifactID" : "d4edb43c51a16689f103efd4f7e949d68ab3af69caf801b157614d38bd423fc9",
+      "category" : "rules",
+      "confidence" : "exact",
+      "countsTowardPrePrompt" : true,
+      "label" : "AGENTS.md",
+      "method" : "o200k_base",
+      "tokens" : 37
+    },
+    {
+      "artifactID" : "19a732a7308551be860195639f4459a7a227b19e6b1cf3b1765a44d4ce5d2328",
+      "category" : "rules",
+      "confidence" : "exact",
+      "countsTowardPrePrompt" : false,
+      "label" : "packages/api/AGENTS.md (conditional: packages/api/**)",
+      "method" : "o200k_base",
+      "tokens" : 21
+    },
+    {
+      "artifactID" : "a958c67dce6211cf88dd216dcb107ac9f661683e3734fd6de889a818a20f157b",
+      "category" : "mcpToolsLoaded",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "docs",
+      "method" : "unknown (not probed; default fallback estimate)",
+      "range" : [
+        600,
+        2160
+      ],
+      "tokens" : 1200
+    },
+    {
+      "artifactID" : "f50765db12e64f7fa2f0ddd71e6ddbce7f0a8fd8375fe1bd7f7d48074abba759",
+      "category" : "skillFrontmatter",
+      "confidence" : "exact",
+      "countsTowardPrePrompt" : true,
+      "label" : "lint-fix (frontmatter)",
+      "method" : "o200k_base",
+      "tokens" : 18
+    },
+    {
+      "artifactID" : "f50765db12e64f7fa2f0ddd71e6ddbce7f0a8fd8375fe1bd7f7d48074abba759",
+      "category" : "skillBody",
+      "confidence" : "exact",
+      "countsTowardPrePrompt" : false,
+      "label" : "lint-fix (body)",
+      "method" : "o200k_base",
+      "tokens" : 34
+    },
+    {
+      "artifactID" : "0ba2a9c724c2cb17b86227a8711385e4a12e5ba17a867251e274a009911ef690",
+      "category" : "hooks",
+      "confidence" : "measured",
+      "countsTowardPrePrompt" : false,
+      "label" : "PostToolUse (Bash)",
+      "method" : "measured-only (dynamic hook output)",
+      "tokens" : 0
+    }
+  ],
+  "model" : "gpt-5-codex"
+}

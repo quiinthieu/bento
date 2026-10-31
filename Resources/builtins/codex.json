@@ -1,0 +1,34 @@
+{
+  "agent": "codex",
+  "agentVersion": "codex-cli 0.165.0",
+  "defaultModel": "gpt-5-codex",
+  "defaults": {
+    "builtInToolsTokens": 3400,
+    "systemPromptTokens": 2800,
+    "uncertaintyFraction": 0.15
+  },
+  "measuredOn": "2026-10-30",
+  "models": {
+    "gpt-5": {
+      "builtInToolsTokens": 3400,
+      "systemPromptTokens": 2800,
+      "uncertaintyFraction": 0.15
+    },
+    "gpt-5-codex": {
+      "builtInToolsTokens": 3400,
+      "systemPromptTokens": 2800,
+      "uncertaintyFraction": 0.15
+    },
+    "o3": {
+      "builtInToolsTokens": 3200,
+      "systemPromptTokens": 2600,
+      "uncertaintyFraction": 0.15
+    },
+    "o4-mini": {
+      "builtInToolsTokens": 3200,
+      "systemPromptTokens": 2600,
+      "uncertaintyFraction": 0.15
+    }
+  },
+  "sourceNote": "Measured first-turn rollout token_count overhead in an empty workspace before AGENTS.md and MCP tools (PLAN §6.3)."
+}

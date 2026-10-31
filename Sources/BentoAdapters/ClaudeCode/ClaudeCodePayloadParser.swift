@@ -444,6 +444,19 @@ enum ClaudeCodePayloadParser {
                 continue
             }
 
+            let isDeferred =
+                boolValue(entry["deferLoading"]) == true
+                || boolValue(entry["defer_loading"]) == true
+                || stringValue(entry["loadMode"])?.lowercased() == "deferred"
+            let mcpLoadMode: LoadMode
+            if isDisabled {
+                mcpLoadMode = .never
+            } else if isDeferred {
+                mcpLoadMode = .deferred
+            } else {
+                mcpLoadMode = .always
+            }
+
             let config = MCPServerConfig(
                 transport: transport,
                 envKeys: envKeys,
@@ -461,7 +474,7 @@ enum ClaudeCodePayloadParser {
                     location: location,
                     contentHash: contentHash,
                     enabled: !isDisabled,
-                    loadMode: isDisabled ? .never : .always,
+                    loadMode: mcpLoadMode,
                     payload: .mcpServer(config)
                 )
             )
