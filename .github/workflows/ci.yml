@@ -37,7 +37,7 @@ jobs:
           Scripts/test-lint-writes.sh
 
       - name: Check Swift formatting
-        run: swift format lint --strict -r Package.swift Sources Tests XcodeApp
+        run: swift format lint --strict -r Package.swift Sources Tests XcodeApp XcodeUITests
 
       - name: Swift Package build (warnings as errors)
         run: swift build -Xswiftc -warnings-as-errors

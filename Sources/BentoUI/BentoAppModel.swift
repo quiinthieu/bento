@@ -632,7 +632,9 @@ public final class BentoAppModel {
         let fallbackEstimate = try? store.mcpFallbackEstimate()
 
         // 3. Fit calibrations from local session logs if >= 3 samples exist.
-        let uncalibratedTokenizer = try AgentTokenizerRegistry()
+        let uncalibratedTokenizer = try await Task.detached(priority: .userInitiated) {
+            try AgentTokenizerRegistry()
+        }.value
         let sessions = (try? store.calibrationSessions(agent: nil)) ?? []
         if sessions.count >= CalibrationFitter.defaultMinimumSamples {
             let fitted = await Self.fitCalibrations(
