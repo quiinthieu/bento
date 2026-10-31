@@ -1,0 +1,7 @@
+---
+description: Accessible React UI conventions
+globs: ["src/ui/**/*.tsx"]
+alwaysApply: false
+---
+
+- Ensure interactive controls expose accessible ARIA labels and keyboard focus states.

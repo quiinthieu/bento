@@ -637,7 +637,7 @@ Each task is sized for one agent session (~0.5–2 days of agent work). Tick `[x
   *AC:* in fixtures, an MCP server with 0 calls over 30 days in a repo with ≥ 5 sessions is flagged. Calibration recovers a synthetic k (generated logs with a known k=1.12) within ±0.02. Budget JSON includes `measuredFirstTurnInput`.
 
 ### M4 Hygiene, fixes & UI
-- [ ] **T13 Hygiene engine.** Normalization, exact/near-dup MinHash-LSH, `conflicts.yaml` pattern library (≥ 15 pairs), limit checks (Windsurf 6k/12k, Codex byte cap), broken imports, and CLI `hygiene --fail-on`.
+- [x] **T13 Hygiene engine.** Normalization, exact/near-dup MinHash-LSH, `conflicts.yaml` pattern library (≥ 15 pairs), limit checks (Windsurf 6k/12k, Codex byte cap), broken imports, and CLI `hygiene --fail-on`.
   *AC:* `polyglot` findings golden (exact count, spans). `windsurf-limits` flags only the over-limit files. False positives on a "clean" fixture = 0.
 - [ ] **T14 Fixes module.** FileOp model, format-preserving JSON/TOML editors, diff generator, backup manifest, atomic apply, TOCTOU guard, verify + auto-rollback, Trash, journal, undo. Implements all §6.6 fix kinds for Claude, Codex and Gemini (Copilot: MCP disable only). CLI `fix` / `undo`.
   *AC:* every fix kind round-trips apply→undo byte-identically on temp fixture copies. Comments in TOML/JSONC are preserved. The CLI refuses `--apply` without `--yes` in non-TTY. The lint confirms Fixes is the only writer.

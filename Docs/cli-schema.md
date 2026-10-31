@@ -171,6 +171,33 @@ bentoctx usage [--home PATH] [--db PATH] [--days N] [--min-sessions M] [--repo P
 
 ---
 
+## `hygiene --json`
+
+Audits rules and configuration hygiene across discovered agents and repositories (`PLAN.md` §6.5, §6.8, §11 T13): exact and MinHash-LSH near-duplicate rule units, identical non-symlinked skill directories, block-level `>= 70%` `@AGENTS.md` import suggestions, deterministic opposing-directive conflicts (`Resources/hygiene/conflicts.yaml`), size/truncation limits (Windsurf 6,000 / 12,000 character caps, Codex `project_doc_max_bytes`, `@import` max depth, and `--max-rule-tokens`), broken `@import` directives, and malformed JSON/TOML/YAML configurations. When `--fail-on warning` or `--fail-on error` is set and at least one finding reaches that severity, the CLI still prints the full JSON response to `stdout` and exits with status `1`.
+
+```bash
+bentoctx hygiene [--home PATH] [--db PATH] [--repo PATH] [--agent AGENT] [--fail-on warning|error] [--max-rule-tokens N] --json
+```
+
+### Top-Level Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `schemaVersion` | `Int` | Always `1`. |
+| `command` | `String` | Always `"hygiene"`. |
+| `generatedAt` | `String` | ISO-8601 UTC timestamp when the response was emitted. |
+| `snapshotID` | `String` | Identifier of the `Snapshot` backing this hygiene audit. |
+| `agentFilter` | `String?` | Canonical `AgentID` raw value when `--agent` was specified; omitted otherwise. |
+| `repoFilter` | `String?` | Standardized repository path when `--repo` was specified; omitted otherwise. |
+| `failOn` | `String?` | Threshold (`"warning"` or `"error"`) when `--fail-on` was specified; omitted otherwise. |
+| `findingCount` | `Int` | Total findings returned. |
+| `errorCount` | `Int` | Count of `.error`-severity findings. |
+| `warningCount` | `Int` | Count of `.warning`-severity findings. |
+| `infoCount` | `Int` | Count of `.info`-severity findings. |
+| `findings` | `Array<Finding>` | Deterministically ordered `BentoCore.Finding` records (`id`, `kind`, `severity`, `artifacts`, `spans` with 1-based `lineRange`, `message`, `suggestedFixes`). |
+
+---
+
 ## Reserved Subcommand Envelopes (M4)
 
-Upcoming commands (`hygiene`, `fix`, `undo`) share the same `"schemaVersion": 1`, `"command": "<name>"`, `"generatedAt": "<ISO-8601>"` envelope and will be documented here as tasks T13–T14 land.
+Upcoming commands (`fix`, `undo`) share the same `"schemaVersion": 1`, `"command": "<name>"`, `"generatedAt": "<ISO-8601>"` envelope and will be documented here as task T14 lands.

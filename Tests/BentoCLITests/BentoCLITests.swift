@@ -451,6 +451,72 @@ struct BentoCLITests {
         #expect(protoFindings.isEmpty)
     }
 
+    @Test("bentoctx hygiene --json conforms to schema and enforces --fail-on warning|error exit codes")
+    func cliHygieneJsonAndFailOnExitCodes() throws {
+        // 1. Clean fixture with --fail-on warning exits 0 with 0 findings.
+        let cleanFixture = try FixtureHome(scenario: "clean")
+        let cleanOut = try runCLI([
+            "hygiene",
+            "--home", cleanFixture.url.path,
+            "--fail-on", "warning",
+            "--json"
+        ])
+        #expect(cleanOut.exitCode == 0)
+        let cleanJSON = try parseJSONObject(cleanOut.stdout)
+        #expect(cleanJSON["schemaVersion"] as? Int == 1)
+        #expect(cleanJSON["command"] as? String == "hygiene")
+        #expect(cleanJSON["findingCount"] as? Int == 0)
+        let cleanFindings = try decodeField([Finding].self, key: "findings", in: cleanOut.stdout)
+        #expect(cleanFindings.isEmpty)
+
+        // 2. Polyglot fixture has 6 warning-severity findings:
+        //    --fail-on error -> exit 0; --fail-on warning -> exit 1 (while still printing valid JSON).
+        let polyglotFixture = try FixtureHome(scenario: "polyglot")
+        let demoRepoURL = polyglotFixture.url.appendingPathComponent("repos/demo-app").standardizedFileURL
+
+        let polyErrorGate = try runCLI([
+            "hygiene",
+            "--home", polyglotFixture.url.path,
+            "--fail-on", "error",
+            "--json"
+        ])
+        #expect(polyErrorGate.exitCode == 0)
+        let polyFindings = try decodeField([Finding].self, key: "findings", in: polyErrorGate.stdout)
+        #expect(polyFindings.count == 6)
+
+        let polyWarnGate = try runCLI([
+            "hygiene",
+            "--home", polyglotFixture.url.path,
+            "--repo", demoRepoURL.path,
+            "--fail-on", "warning",
+            "--json"
+        ])
+        #expect(polyWarnGate.exitCode != 0)
+        let polyWarnJSON = try parseJSONObject(polyWarnGate.stdout)
+        #expect(polyWarnJSON["command"] as? String == "hygiene")
+        #expect(polyWarnJSON["repoFilter"] as? String == demoRepoURL.path)
+
+        // 3. Broken @import triggers an .error finding so --fail-on error exits non-zero.
+        let tempHome = FileManager.default.temporaryDirectory
+            .appendingPathComponent("bento-cli-hygiene-err-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: tempHome) }
+        let brokenRepo = tempHome.appendingPathComponent("repos/broken", isDirectory: true)
+        try FileManager.default.createDirectory(at: brokenRepo, withIntermediateDirectories: true)
+        try Data("# Broken\n\n@./missing-import.md\n".utf8)
+            .write(to: brokenRepo.appendingPathComponent("CLAUDE.md"))
+
+        let brokenOut = try runCLI([
+            "hygiene",
+            "--home", tempHome.path,
+            "--repo", brokenRepo.path,
+            "--fail-on", "error",
+            "--json"
+        ])
+        #expect(brokenOut.exitCode != 0)
+        let brokenFindings = try decodeField([Finding].self, key: "findings", in: brokenOut.stdout)
+        #expect(brokenFindings.contains { $0.kind == .brokenImport && $0.severity == .error })
+    }
+
     // MARK: - Helpers
 
     private struct CLIResult {

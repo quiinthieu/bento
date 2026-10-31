@@ -14,7 +14,8 @@ struct BentoCLICommand: AsyncParsableCommand {
             ResolveCommand.self,
             BudgetCommand.self,
             IngestCommand.self,
-            UsageCommand.self
+            UsageCommand.self,
+            HygieneCommand.self
         ]
     )
 
