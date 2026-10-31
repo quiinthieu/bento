@@ -1,0 +1,52 @@
+import BentoCore
+import Foundation
+
+/// Versioned CLI JSON output envelopes (`Docs/cli-schema.md`, `"schemaVersion": 1`).
+enum CLIJSONOutput {
+    static let currentSchemaVersion = 1
+
+    struct ScanResponse: Codable, Sendable {
+        var schemaVersion: Int = CLIJSONOutput.currentSchemaVersion
+        var command: String = "scan"
+        var generatedAt: Date
+        var snapshotID: String
+        var createdAt: Date
+        var scannerVersion: String
+        var homePath: String
+        var homeHash: String
+        var detections: [String: DetectionResult]
+        var repos: [DiscoveredRepo]
+        var artifactCount: Int
+        var agentCounts: [String: Int]
+        var resolutionCount: Int
+    }
+
+    struct InventoryResponse: Codable, Sendable {
+        var schemaVersion: Int = CLIJSONOutput.currentSchemaVersion
+        var command: String = "inventory"
+        var generatedAt: Date
+        var snapshotID: String
+        var agentFilter: String?
+        var repoFilter: String?
+        var artifacts: [Artifact]
+    }
+
+    struct ResolveResponse: Codable, Sendable {
+        var schemaVersion: Int = CLIJSONOutput.currentSchemaVersion
+        var command: String = "resolve"
+        var generatedAt: Date
+        var snapshotID: String
+        var agent: String
+        var repoPath: String
+        var artifacts: [Artifact]
+        var resolution: Resolution
+    }
+
+    static func printJSON<T: Encodable>(_ payload: T) throws {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(payload)
+        print(String(decoding: data, as: UTF8.self))
+    }
+}

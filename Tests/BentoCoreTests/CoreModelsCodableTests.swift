@@ -301,6 +301,86 @@ struct CoreModelsCodableTests {
         }
     }
 
+    @Test("ScanScope, Snapshot, and SnapshotDelta round-trip deterministically")
+    func snapshotAndDeltaRoundTrip() throws {
+        let globalScope = ScanScope(agent: .claudeCode, repoPath: nil)
+        let repoScope = ScanScope(agent: .claudeCode, repoPath: "/home/repos/demo-app")
+        #expect(globalScope < repoScope)
+        #expect(try roundTrip(globalScope) == globalScope)
+        #expect(try roundTrip(repoScope) == repoScope)
+
+        let artifactID = ArtifactID(
+            agent: .claudeCode,
+            kind: .rules,
+            scope: .project,
+            path: "<HOME>/repos/demo-app/CLAUDE.md"
+        )
+        let artifact = Artifact(
+            id: artifactID,
+            agent: .claudeCode,
+            kind: .rules,
+            scope: .project,
+            name: "CLAUDE.md",
+            location: SourceLocation(
+                path: "/home/repos/demo-app/CLAUDE.md",
+                realPath: "/home/repos/demo-app/CLAUDE.md",
+                lineRange: 1...5
+            ),
+            contentHash: ContentHasher.sha256NormalizedText("# Rules"),
+            enabled: true,
+            loadMode: .always,
+            payload: .rules(RulesDoc(content: "# Rules", byteCount: 7, characterCount: 7))
+        )
+        let repo = DiscoveredRepo(
+            path: "/home/repos/demo-app",
+            realPath: "/home/repos/demo-app",
+            displayName: "demo-app",
+            sources: [.claudeLogs],
+            isPinned: true
+        )
+        let resolution = Resolution(
+            agent: .claudeCode,
+            folder: "/home/repos/demo-app",
+            ordered: [
+                ResolvedArtifact(
+                    artifactID: artifactID,
+                    effectiveLoadMode: .always,
+                    reason: "project CLAUDE.md"
+                )
+            ]
+        )
+        let snapshot = Snapshot(
+            id: "snap-001",
+            createdAt: Self.fixedDate,
+            homePath: "/home",
+            scannerVersion: "0.1.0",
+            detections: [
+                .claudeCode: DetectionResult(isDetected: true, detectedPaths: ["/home/.claude"])
+            ],
+            repos: [repo],
+            scopedArtifacts: [
+                globalScope: [],
+                repoScope: [artifact]
+            ],
+            resolutions: [resolution]
+        )
+
+        let decodedSnapshot = try roundTrip(snapshot)
+        #expect(decodedSnapshot == snapshot)
+        #expect(decodedSnapshot.artifacts == [artifact])
+        #expect(decodedSnapshot.artifacts(agent: .claudeCode, repoPath: "/home/repos/demo-app") == [artifact])
+        #expect(decodedSnapshot.resolution(for: .claudeCode, repoPath: "/home/repos/demo-app") == resolution)
+
+        let delta = SnapshotDelta(
+            snapshot: snapshot,
+            reason: .incrementalRescan,
+            rescannedScopes: [repoScope],
+            changedPaths: ["/home/repos/demo-app/CLAUDE.md"],
+            changedLogAgents: [.claudeCode]
+        )
+        #expect(try roundTrip(delta) == delta)
+    }
+
     private func roundTrip<T: Codable>(_ value: T) throws -> T {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601

@@ -15,6 +15,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
         .package(url: "https://github.com/dduan/TOMLDecoder.git", from: "0.4.5"),
+        .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "6.0.0")
     ],
     targets: [
@@ -64,7 +65,10 @@ let package = Package(
         ),
         .target(
             name: "BentoStore",
-            dependencies: ["BentoCore"],
+            dependencies: [
+                "BentoCore",
+                .product(name: "GRDB", package: "GRDB.swift")
+            ],
             exclude: ["README.md"]
         ),
         .target(
@@ -126,6 +130,25 @@ let package = Package(
             name: "BentoAdaptersTests",
             dependencies: ["BentoCore", "BentoParsing", "BentoAdapters", "BentoTestSupport"],
             exclude: ["__golden__"]
+        ),
+        .testTarget(
+            name: "BentoStoreTests",
+            dependencies: [
+                "BentoCore",
+                "BentoStore",
+                "BentoAdapters",
+                "BentoScanner",
+                "BentoTestSupport",
+                .product(name: "GRDB", package: "GRDB.swift")
+            ]
+        ),
+        .testTarget(
+            name: "BentoScannerTests",
+            dependencies: ["BentoCore", "BentoAdapters", "BentoScanner", "BentoStore", "BentoTestSupport"]
+        ),
+        .testTarget(
+            name: "BentoCLITests",
+            dependencies: ["BentoCore", "BentoStore", "BentoScanner", "BentoTestSupport"]
         ),
         .testTarget(
             name: "BentoUITests",
