@@ -2,6 +2,38 @@ import BentoAdapters
 import BentoCore
 import Foundation
 
+/// Exact artifact or probed MCP tool text unit passed to `TokenCountingProvider` during `Budget` evaluation.
+public struct TokenizableBudgetTarget: Sendable, Hashable {
+    public var artifactID: ArtifactID
+    public var artifactName: String
+    public var kind: ArtifactKind
+    public var category: BudgetCategory
+    public var label: String
+    public var text: String
+    public var cacheKey: String
+    public var effectiveModel: String?
+
+    public init(
+        artifactID: ArtifactID,
+        artifactName: String,
+        kind: ArtifactKind,
+        category: BudgetCategory,
+        label: String,
+        text: String,
+        cacheKey: String,
+        effectiveModel: String?
+    ) {
+        self.artifactID = artifactID
+        self.artifactName = artifactName
+        self.kind = kind
+        self.category = category
+        self.label = label
+        self.text = text
+        self.cacheKey = cacheKey
+        self.effectiveModel = effectiveModel
+    }
+}
+
 /// Assembles per-agent pre-prompt and deferred context `Budget` breakdowns from precedence-resolved artifacts
 /// (`PLAN.md` §4.1, §6.3, §6.4, §11 T09–T10).
 public struct BudgetEngine: Sendable {
@@ -158,6 +190,95 @@ public struct BudgetEngine: Sendable {
             measuredFirstTurnInput: measuredFirstTurnInput,
             contextWindow: contextWindow
         )
+    }
+
+    /// Collects all non-empty artifact text contributions and probed MCP tool schemas (never session logs)
+    /// along with the exact `cacheKey` and `effectiveModel` used during `computeBudget(...)`.
+    public func extractTokenizableTargets(
+        adapter: any AgentAdapter,
+        artifacts: [Artifact],
+        resolution: Resolution,
+        model: String? = nil,
+        mcpProbesByConfigHash: [String: MCPProbeRecord] = [:]
+    ) throws -> [TokenizableBudgetTarget] {
+        let agent = type(of: adapter).id
+        guard adapter.capabilities.contains(.budget) else {
+            throw BentoScannerError.budgetUnsupported(agent)
+        }
+
+        var artifactsByID: [ArtifactID: Artifact] = [:]
+        artifactsByID.reserveCapacity(artifacts.count)
+        for artifact in artifacts {
+            artifactsByID[artifact.id] = artifact
+        }
+
+        let effectiveModel = Self.resolveEffectiveModel(
+            explicitModel: model,
+            resolution: resolution,
+            artifactsByID: artifactsByID
+        )
+
+        var targets: [TokenizableBudgetTarget] = []
+        for resolved in resolution.ordered {
+            guard let artifact = artifactsByID[resolved.artifactID] else {
+                continue
+            }
+
+            if resolved.effectiveLoadMode != .never,
+                case .mcpServer(let mcpConfig) = artifact.payload
+            {
+                let configHash = MCPServerConfigHasher.hash(mcpConfig)
+                if let probe = mcpProbesByConfigHash[configHash], probe.ok {
+                    for tool in probe.activeTools(for: mcpConfig) {
+                        let json = tool.canonicalSerializationJSON()
+                        guard !json.isEmpty else { continue }
+                        let cacheKey =
+                            "mcp-budget:\(configHash):\(tool.name):\(ContentHasher.sha256Hex(Data(json.utf8)))"
+                        targets.append(
+                            TokenizableBudgetTarget(
+                                artifactID: artifact.id,
+                                artifactName: artifact.name,
+                                kind: artifact.kind,
+                                category: .mcpToolsLoaded,
+                                label: "\(artifact.name):\(tool.name)",
+                                text: json,
+                                cacheKey: cacheKey,
+                                effectiveModel: effectiveModel
+                            )
+                        )
+                    }
+                }
+                continue
+            }
+
+            let contributions = adapter.budgetContributions(for: resolved, artifact: artifact)
+            for (index, contribution) in contributions.enumerated() {
+                if contribution.category == .hooks
+                    && contribution.text == nil
+                    && (contribution.fixedTokensEstimate ?? 0) == 0
+                {
+                    continue
+                }
+                guard let text = contribution.text, !text.isEmpty else {
+                    continue
+                }
+                let cacheKey = "\(artifact.contentHash):\(contribution.category.rawValue):\(index)"
+                targets.append(
+                    TokenizableBudgetTarget(
+                        artifactID: artifact.id,
+                        artifactName: artifact.name,
+                        kind: artifact.kind,
+                        category: contribution.category,
+                        label: contribution.label,
+                        text: text,
+                        cacheKey: cacheKey,
+                        effectiveModel: effectiveModel
+                    )
+                )
+            }
+        }
+
+        return targets
     }
 
     // MARK: - MCP Server Evaluation

@@ -41,8 +41,33 @@ targets:
         product: BentoUI
       - package: BentoPackage
         product: BentoCore
+  BentoMacAppUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    deploymentTarget: "15.0"
+    configFiles:
+      Debug: Config/Product.xcconfig
+      Release: Config/Product.xcconfig
+    sources:
+      - path: XcodeUITests
+    settings:
+      base:
+        PRODUCT_NAME: $(TARGET_NAME)
+        PRODUCT_BUNDLE_IDENTIFIER: $(BENTO_BUNDLE_ID).uitests
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: BentoMacApp
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - target: BentoMacApp
 schemes:
   BentoMacApp:
     build:
       targets:
         BentoMacApp: all
+        BentoMacAppUITests: [test]
+    test:
+      targets:
+        - BentoMacAppUITests

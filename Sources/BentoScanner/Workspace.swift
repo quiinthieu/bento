@@ -305,6 +305,16 @@ public actor Workspace {
         await watcher?.stop()
     }
 
+    /// Updates repository discovery options (shallow scan roots, manual paths, hidden paths).
+    public func setRepoDiscoveryOptions(_ options: RepoDiscoveryOptions) {
+        self.repoDiscoveryOptions = options
+    }
+
+    /// Returns the configured repository discovery options.
+    public func currentRepoDiscoveryOptions() -> RepoDiscoveryOptions {
+        repoDiscoveryOptions
+    }
+
     /// Computes watched configuration and log paths for the current environment and discovered repositories (`PLAN.md` §6.1).
     public func watchTargets() -> FileWatchTargets {
         computeWatchTargets(repos: latestSnapshot?.repos ?? [])

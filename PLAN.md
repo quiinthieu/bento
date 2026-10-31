@@ -641,7 +641,7 @@ Each task is sized for one agent session (~0.5–2 days of agent work). Tick `[x
   *AC:* `polyglot` findings golden (exact count, spans). `windsurf-limits` flags only the over-limit files. False positives on a "clean" fixture = 0.
 - [x] **T14 Fixes module.** FileOp model, format-preserving JSON/TOML editors, diff generator, backup manifest, atomic apply, TOCTOU guard, verify + auto-rollback, Trash, journal, undo. Implements all §6.6 fix kinds for Claude, Codex and Gemini (Copilot: MCP disable only). CLI `fix` / `undo`.
   *AC:* every fix kind round-trips apply→undo byte-identically on temp fixture copies. Comments in TOML/JSONC are preserved. The CLI refuses `--apply` without `--yes` in non-TTY. The lint confirms Fixes is the only writer.
-- [ ] **T15 SwiftUI app.** Sidebar/navigation, Overview, Repo detail (Budget chart with confidence badges + hatching + measured marker, Resolution, Usage, Hygiene tabs), Fix sheet with diff preview and "Allow changes" gate, Fix History with Undo, Settings (Keychain API keys, probe consents, thresholds), and first-run onboarding (privacy statement).
+- [x] **T15 SwiftUI app.** Sidebar/navigation, Overview, Repo detail (Budget chart with confidence badges + hatching + measured marker, Resolution, Usage, Hygiene tabs), Fix sheet with diff preview and "Allow changes" gate, Fix History with Undo, Settings (Keychain API keys, probe consents, thresholds), and first-run onboarding (privacy statement).
   *AC:* XCUITest smoke tests pass against `-fixtureHome polyglot`. All actions are reachable by keyboard. VoiceOver reads chart segments. No writes happen when "Allow changes" is off (asserted via a Fixes spy). Optional Anthropic/Gemini count APIs show a request preview and mark items exact.
 
 ### M5 Release

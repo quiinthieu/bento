@@ -261,7 +261,16 @@ let package = Package(
         ),
         .testTarget(
             name: "BentoUITests",
-            dependencies: ["BentoCore", "BentoUI"]
+            dependencies: [
+                "BentoCore",
+                "BentoUI",
+                "BentoFixes",
+                "BentoTokenizer",
+                "BentoMCPProbe",
+                "BentoStore",
+                "BentoScanner",
+                "BentoTestSupport"
+            ]
         )
     ],
     swiftLanguageModes: [.v6]

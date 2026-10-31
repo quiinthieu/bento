@@ -190,6 +190,30 @@ extension Workspace {
         return targets
     }
 
+    /// Returns all non-empty artifact text contributions and probed MCP tool schemas (never session logs)
+    /// that `budget(for:folder:...)` tokenizes for `agent` in `folder`.
+    public func tokenizableBudgetTargets(
+        for agent: AgentID,
+        folder: URL,
+        model: String? = nil,
+        mcpProbesByConfigHash: [String: MCPProbeRecord] = [:]
+    ) async throws -> [TokenizableBudgetTarget] {
+        guard let adapter = adaptersByID[agent] else {
+            throw BentoScannerError.unknownAgent(agent)
+        }
+        guard adapter.capabilities.contains(.budget) else {
+            throw BentoScannerError.budgetUnsupported(agent)
+        }
+        let (artifacts, resolution) = try await loadArtifactsAndResolution(for: agent, folder: folder)
+        return try BudgetEngine().extractTokenizableTargets(
+            adapter: adapter,
+            artifacts: artifacts,
+            resolution: resolution,
+            model: model,
+            mcpProbesByConfigHash: mcpProbesByConfigHash
+        )
+    }
+
     private func loadArtifactsAndResolution(
         for agent: AgentID,
         folder: URL
