@@ -623,7 +623,7 @@ Each task is sized for one agent session (~0.5–2 days of agent work). Tick `[x
   *AC:* modifying a fixture file in a temp copy triggers a rescan of only that adapter scope (asserted via counters). Cold scan of `polyglot` takes under 500 ms in a test. The read-only proof test passes. CLI JSON matches `Docs/cli-schema.md`.
 
 ### M2 Context budget
-- [ ] **T08 Tokenizer.** BPE port (o200k/cl100k) with reference vectors, HeuristicCounter, the `TokenCounter` protocol, content-hash cache, and the model→counter map per agent.
+- [x] **T08 Tokenizer.** BPE port (o200k/cl100k) with reference vectors, HeuristicCounter, the `TokenCounter` protocol, content-hash cache, and the model→counter map per agent.
   *AC:* 100% match on ≥ 1,000 reference vectors. Throughput ≥ 5 MB/s. Heuristic is within ±20% of BPE on the fixture corpus.
 - [ ] **T09 Budget engine + built-ins.** `budgetContributions` for all budget-capable adapters (skills frontmatter vs body, subagent descriptions, commands, hooks, rules, conditional rules shown separately), `Resources/builtins/*.json` with provenance, and the CLI `budget`.
   *AC:* `polyglot` budget golden for each agent, with every item carrying confidence + method. The sum excludes deferred/onInvoke from pre-prompt.
