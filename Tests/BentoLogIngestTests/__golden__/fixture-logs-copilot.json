@@ -1,0 +1,72 @@
+[
+  {
+    "agent" : "copilot",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "sessionStart" : {
+        "model" : "claude-sonnet-4.5"
+      }
+    },
+    "sessionID" : "copilot-log-001",
+    "timestamp" : "2026-10-30T16:00:00Z"
+  },
+  {
+    "agent" : "copilot",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "skillInvoked" : {
+        "name" : "changelog-writer"
+      }
+    },
+    "sessionID" : "copilot-log-001",
+    "timestamp" : "2026-10-30T16:00:02Z"
+  },
+  {
+    "agent" : "copilot",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "mcpToolCalled" : {
+        "server" : "github",
+        "tool" : "get_issue"
+      }
+    },
+    "sessionID" : "copilot-log-001",
+    "timestamp" : "2026-10-30T16:00:03Z"
+  },
+  {
+    "agent" : "copilot",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "subagentInvoked" : {
+        "name" : "release-drafter"
+      }
+    },
+    "sessionID" : "copilot-log-001",
+    "timestamp" : "2026-10-30T16:00:04Z"
+  },
+  {
+    "agent" : "copilot",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "builtinToolCalled" : {
+        "name" : "bash"
+      }
+    },
+    "sessionID" : "copilot-log-001",
+    "timestamp" : "2026-10-30T16:00:05Z"
+  },
+  {
+    "agent" : "copilot",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "tokenUsage" : {
+        "cachedInput" : 7200,
+        "input" : 10400,
+        "output" : 195,
+        "turnIndex" : 0
+      }
+    },
+    "sessionID" : "copilot-log-001",
+    "timestamp" : "2026-10-30T16:00:06Z"
+  }
+]

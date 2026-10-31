@@ -214,7 +214,7 @@ public enum RepoDiscovery: Sendable {
 
     /// Decodes Claude Code's hyphen-encoded project directory name (e.g. `-repos-webapp` or
     /// `-Users-alice-Developer-org-alpha-service`) by matching real directory segments through `env.fileSystem`.
-    private static func decodeClaudeEncodedProjectDirName(
+    static func decodeClaudeEncodedProjectDirName(
         _ encodedName: String,
         in env: AgentEnvironment
     ) -> URL? {
@@ -353,6 +353,62 @@ public enum RepoDiscovery: Sendable {
     }
 
     // MARK: - (3) Gemini CLI
+
+    /// Resolves Gemini `<project-hash>` directory names under `~/.gemini/tmp/` to standardized workspace paths.
+    static func resolveGeminiProjectCwdsByHash(in env: AgentEnvironment) -> [String: String] {
+        let fs = env.fileSystem
+        let tmpRoot = GeminiPathCatalog.userLogsRootDirectory(in: env)
+        guard AdapterPathNormalizer.isEffectiveDirectory(tmpRoot, fileSystem: fs),
+            let entries = try? fs.list(tmpRoot)
+        else {
+            return [:]
+        }
+
+        var resolvedByFolderName: [String: String] = [:]
+        var targetHashes: Set<String> = []
+        for entry in entries where AdapterPathNormalizer.isEffectiveDirectory(entry, fileSystem: fs) {
+            let folderName = entry.lastPathComponent.lowercased()
+            let projectRootMarker = entry.appendingPathComponent(".project_root")
+            if AdapterPathNormalizer.isEffectiveFile(projectRootMarker, fileSystem: fs),
+                let data = try? fs.contents(at: projectRootMarker),
+                let rawPath = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
+                !rawPath.isEmpty
+            {
+                let expanded = AdapterPathNormalizer.expandHomePrefix(rawPath, in: env).standardizedFileURL
+                resolvedByFolderName[folderName] = expanded.path
+                continue
+            }
+
+            if folderName.count == 64 && folderName.allSatisfy({ $0.isHexDigit }) {
+                targetHashes.insert(folderName)
+            }
+        }
+
+        guard !targetHashes.isEmpty else { return resolvedByFolderName }
+
+        func testCandidate(_ url: URL) {
+            let std = url.standardizedFileURL
+            guard AdapterPathNormalizer.isEffectiveDirectory(std, fileSystem: fs) else { return }
+            let real = fs.resolveSymlinks(std).standardizedFileURL.path
+            let canonical = AdapterPathNormalizer.canonicalIdentityPath(for: std, in: env)
+            for repr in Set([real, std.path, canonical]) {
+                let digest = ContentHasher.sha256Hex(Data(repr.utf8))
+                if targetHashes.contains(digest) && resolvedByFolderName[digest] == nil {
+                    resolvedByFolderName[digest] = std.path
+                }
+            }
+        }
+
+        sweepHomeCandidatesForHashMatch(
+            under: env.home.standardizedFileURL,
+            currentDepth: 0,
+            maxDepth: 3,
+            fileSystem: fs,
+            shouldStop: { targetHashes.allSatisfy { resolvedByFolderName[$0] != nil } },
+            visit: testCandidate
+        )
+        return resolvedByFolderName
+    }
 
     private static func discoverGeminiRepos(
         in env: AgentEnvironment,

@@ -1,0 +1,43 @@
+{
+  "sessionId": "gemini-legacy-002",
+  "projectHash": "2d766dafdc298bfd76a341b236e0a77ca3ccb1988e708180d0bbae0d22d05ac2",
+  "startTime": "2026-10-30T15:20:00Z",
+  "cwd": "<HOME>/repos/demo-app",
+  "model": "gemini-2.5-flash",
+  "messages": [
+    {
+      "id": "lu1",
+      "timestamp": "2026-10-30T15:20:01Z",
+      "type": "user",
+      "content": "SECRET_LEGACY_USER_TEXT"
+    },
+    {
+      "id": "lg1",
+      "timestamp": "2026-10-30T15:20:05Z",
+      "type": "gemini",
+      "model": "gemini-2.5-flash",
+      "tokens": {
+        "input": 6400,
+        "output": 175,
+        "cached": 3200,
+        "total": 6575
+      },
+      "toolCalls": [
+        {
+          "id": "ltc1",
+          "name": "delegate_to_agent",
+          "args": {
+            "name": "code-investigator"
+          }
+        },
+        {
+          "id": "ltc2",
+          "name": "mcp__docs__get_reference",
+          "args": {
+            "topic": "hooks"
+          }
+        }
+      ]
+    }
+  ]
+}

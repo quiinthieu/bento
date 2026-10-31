@@ -82,3 +82,9 @@
 6. **MCP Tool Search & Deferred Loading (`ENABLE_TOOL_SEARCH`):**
    - Verified against `https://code.claude.com/docs/en/mcp` (`2026-10-31`): Claude Code's MCP Tool Search (`ENABLE_TOOL_SEARCH` in shell env or `settings.json` `"env"`, plus `enableToolSearch`) supports `true` (always defer MCP tool definitions behind a lightweight tool-search stub), `false` (force upfront `mcpToolsLoaded` loading), `auto` (default **10%** of the model's context window), and `auto:N` (custom `N%` context-window threshold).
    - Individual MCP entries with explicit `deferLoading: true` / `defer_loading: true` / `loadMode: "deferred"` defer unconditionally unless `ENABLE_TOOL_SEARCH=false`; otherwise `BudgetEngine` triggers auto-deferral once aggregate non-deferred MCP tool tokens reach the configured context-window threshold.
+
+7. **Session Log Schema (`ClaudeCodeLogDecoder`, verified `2026-10-31`):**
+   - Path: `~/.claude/projects/<encoded-cwd>/*.jsonl` (and `.jsonl.zst`), with `inferredCwd` decoded from `<encoded-cwd>` when individual lines omit `"cwd"`.
+   - Streamed assistant responses repeat identical `"message.id"` / `"requestId"` across progressive content chunks (`thinking` → `text` → `tool_use`). `ClaudeCodeLogDecoder` deduplicates `tokenUsage` by `message.id ?? requestId` and `tool_use` blocks by `tool_use.id`.
+   - Total per-turn input tokens equal `input_tokens + cache_creation_input_tokens + cache_read_input_tokens`, with `cachedInput = cache_read_input_tokens`.
+   - Tool blocks classify `Skill` (`input.skill`), `Task` / `Agent` (`input.subagent_type`), `SlashCommand` (`input.command`) and user `<command-name>/...</command-name>` tags, `mcp__<server>__<tool>`, and built-in tools. Prompt, response, thinking, and raw tool-input text are never stored.

@@ -1,0 +1,97 @@
+[
+  {
+    "agent" : "claudeCode",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "sessionStart" : {
+
+      }
+    },
+    "sessionID" : "claude-log-001",
+    "timestamp" : "2026-10-30T14:00:00Z"
+  },
+  {
+    "agent" : "claudeCode",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "commandInvoked" : {
+        "name" : "review"
+      }
+    },
+    "sessionID" : "claude-log-001",
+    "timestamp" : "2026-10-30T14:00:01Z"
+  },
+  {
+    "agent" : "claudeCode",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "tokenUsage" : {
+        "cachedInput" : 9600,
+        "input" : 12120,
+        "output" : 142,
+        "turnIndex" : 0
+      }
+    },
+    "sessionID" : "claude-log-001",
+    "timestamp" : "2026-10-30T14:00:03Z"
+  },
+  {
+    "agent" : "claudeCode",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "skillInvoked" : {
+        "name" : "commit-helper"
+      }
+    },
+    "sessionID" : "claude-log-001",
+    "timestamp" : "2026-10-30T14:00:04Z"
+  },
+  {
+    "agent" : "claudeCode",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "mcpToolCalled" : {
+        "server" : "docs",
+        "tool" : "search_docs"
+      }
+    },
+    "sessionID" : "claude-log-001",
+    "timestamp" : "2026-10-30T14:00:05Z"
+  },
+  {
+    "agent" : "claudeCode",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "subagentInvoked" : {
+        "name" : "security-reviewer"
+      }
+    },
+    "sessionID" : "claude-log-001",
+    "timestamp" : "2026-10-30T14:00:05Z"
+  },
+  {
+    "agent" : "claudeCode",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "builtinToolCalled" : {
+        "name" : "Bash"
+      }
+    },
+    "sessionID" : "claude-log-001",
+    "timestamp" : "2026-10-30T14:00:05Z"
+  },
+  {
+    "agent" : "claudeCode",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "tokenUsage" : {
+        "cachedInput" : 12120,
+        "input" : 12460,
+        "output" : 95,
+        "turnIndex" : 1
+      }
+    },
+    "sessionID" : "claude-log-001",
+    "timestamp" : "2026-10-30T14:00:09Z"
+  }
+]

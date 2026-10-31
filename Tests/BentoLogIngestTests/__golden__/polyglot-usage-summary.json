@@ -1,0 +1,130 @@
+{
+  "byAgent" : [
+    {
+      "agent" : "claudeCode",
+      "builtinTools" : [
+        {
+          "count" : 1,
+          "lastUsedAt" : "2026-10-30T10:00:03Z",
+          "name" : "Read"
+        }
+      ],
+      "cachedInputTokens" : 6400,
+      "commands" : [
+
+      ],
+      "firstTurnMedianInput" : 8480,
+      "inputTokens" : 8480,
+      "mcpTools" : [
+
+      ],
+      "outputTokens" : 95,
+      "sessionCount" : 1,
+      "skills" : [
+
+      ],
+      "subagents" : [
+        {
+          "count" : 1,
+          "lastUsedAt" : "2026-10-30T10:00:03Z",
+          "name" : "code-reviewer"
+        }
+      ],
+      "turnCount" : 1
+    },
+    {
+      "agent" : "codex",
+      "builtinTools" : [
+        {
+          "count" : 1,
+          "lastUsedAt" : "2026-10-30T10:05:03Z",
+          "name" : "exec_command"
+        }
+      ],
+      "cachedInputTokens" : 6100,
+      "commands" : [
+
+      ],
+      "firstTurnMedianInput" : 9200,
+      "inputTokens" : 9200,
+      "mcpTools" : [
+
+      ],
+      "outputTokens" : 140,
+      "sessionCount" : 1,
+      "skills" : [
+
+      ],
+      "subagents" : [
+
+      ],
+      "turnCount" : 1
+    },
+    {
+      "agent" : "gemini",
+      "builtinTools" : [
+
+      ],
+      "cachedInputTokens" : 5200,
+      "commands" : [
+
+      ],
+      "firstTurnMedianInput" : 8700,
+      "inputTokens" : 8700,
+      "mcpTools" : [
+
+      ],
+      "outputTokens" : 160,
+      "sessionCount" : 1,
+      "skills" : [
+
+      ],
+      "subagents" : [
+        {
+          "count" : 1,
+          "lastUsedAt" : "2026-10-30T10:10:04Z",
+          "name" : "perf-auditor"
+        }
+      ],
+      "turnCount" : 1
+    },
+    {
+      "agent" : "copilot",
+      "builtinTools" : [
+
+      ],
+      "cachedInputTokens" : 4900,
+      "commands" : [
+
+      ],
+      "firstTurnMedianInput" : 7850,
+      "inputTokens" : 7850,
+      "mcpTools" : [
+
+      ],
+      "outputTokens" : 110,
+      "sessionCount" : 1,
+      "skills" : [
+
+      ],
+      "subagents" : [
+        {
+          "count" : 1,
+          "lastUsedAt" : "2026-10-30T10:15:02Z",
+          "name" : "security-reviewer"
+        }
+      ],
+      "turnCount" : 1
+    }
+  ],
+  "eventCount" : 13,
+  "sessionCount" : 4,
+  "since" : "2026-10-01T00:00:00Z",
+  "tokenTotals" : {
+    "cachedInputTokens" : 22600,
+    "inputTokens" : 34230,
+    "outputTokens" : 505,
+    "turnCount" : 4
+  },
+  "until" : "2026-10-31T00:00:00Z"
+}

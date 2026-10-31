@@ -52,6 +52,7 @@ public struct CopilotAdapter: AgentAdapter, Sendable {
 
     public func logSources(in env: AgentEnvironment) throws -> [LogSource] {
         let sessionStateRoot = CopilotPathCatalog.userSessionStateDirectory(in: env)
+        let homePath = env.home.standardizedFileURL.path
         let files = AdapterPathNormalizer.collectFilesRecursively(
             under: sessionStateRoot,
             fileSystem: env.fileSystem
@@ -66,7 +67,8 @@ public struct CopilotAdapter: AgentAdapter, Sendable {
                 agent: Self.id,
                 url: fileURL,
                 isCompressed: CopilotPathCatalog.isCompressedLogFile(fileURL),
-                inferredCwd: inferredCwd
+                inferredCwd: inferredCwd,
+                homePath: homePath
             )
         }
     }

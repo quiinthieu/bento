@@ -12,7 +12,9 @@ struct BentoCLICommand: AsyncParsableCommand {
             ScanCommand.self,
             InventoryCommand.self,
             ResolveCommand.self,
-            BudgetCommand.self
+            BudgetCommand.self,
+            IngestCommand.self,
+            UsageCommand.self
         ]
     )
 

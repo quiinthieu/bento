@@ -312,7 +312,7 @@ public actor Workspace {
 
     // MARK: - Private Helpers
 
-    private func effectiveRepoDiscoveryOptions() -> RepoDiscoveryOptions {
+    func effectiveRepoDiscoveryOptions() -> RepoDiscoveryOptions {
         var options = repoDiscoveryOptions
         if let storePinned = try? store?.pinnedRepoPaths() {
             options.pinnedPaths.formUnion(storePinned)

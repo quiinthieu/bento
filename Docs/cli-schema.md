@@ -112,6 +112,62 @@ bentoctx budget [--home PATH] [--db PATH] --repo PATH [--agent AGENT] [--model M
 
 ---
 
-## Reserved Subcommand Envelopes (M2–M4)
+## `ingest --json`
 
-Upcoming commands (`usage`, `hygiene`, `fix`, `undo`, `ingest`) share the same `"schemaVersion": 1`, `"command": "<name>"`, `"generatedAt": "<ISO-8601>"` envelope and will be documented here as tasks T10–T14 land.
+Incrementally ingests local agent session logs (`.jsonl`, legacy `.json`, and Zstandard-compressed `.jsonl.zst`) into `BentoStore`, advancing `log_file.offset_consumed` past complete newlines, handling inode/truncation log rotation, and persisting privacy-safe `UsageEvent` and `SessionRecord` rows (`PLAN.md` §6.2, §6.8, §11 T11).
+
+```bash
+bentoctx ingest [--home PATH] [--db PATH] [--agent AGENT] [--reset] --json
+```
+
+### Top-Level Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `schemaVersion` | `Int` | Always `1`. |
+| `command` | `String` | Always `"ingest"`. |
+| `generatedAt` | `String` | ISO-8601 UTC timestamp when the response was emitted. |
+| `agentFilter` | `String?` | Canonical `AgentID` raw value when `--agent` was specified; omitted otherwise. |
+| `didReset` | `Bool` | `true` when `--reset` cleared previous `log_file`, `session`, and `usage_event` rows prior to ingestion. |
+| `filesDiscovered` | `Int` | Total log files discovered across matching adapters. |
+| `filesIngested` | `Int` | Number of changed or new log files read during this pass. |
+| `filesSkippedUnchanged` | `Int` | Number of unchanged log files skipped by `(offset_consumed, inode)` or `.zst` `(size, mtime, inode)` check. |
+| `bytesRead` | `Int` | Total newly consumed bytes read in this pass. |
+| `eventsDecoded` | `Int` | Total `UsageEvent` records decoded from read bytes. |
+| `eventsInserted` | `Int` | Net new `usage_event` rows inserted after deterministic `(agent, session_id, event_uid)` deduplication. |
+| `sessionsUpdated` | `Int` | Number of `session` rows created or updated. |
+| `decoderErrors` | `Int` | Count of malformed JSON lines skipped without failing the run. |
+| `diagnostics` | `Array<Diagnostic>` | Non-fatal ingestion diagnostics (`ingest.lineOversized`, `ingest.zstdTruncated`, `ingest.zstdCorrupt`). |
+
+---
+
+## `usage --json`
+
+Aggregates privacy-safe `session` and `usage_event` records over a rolling `--days` lookback window (default `30`), optionally filtered by `--repo` and/or `--agent`.
+
+```bash
+bentoctx usage [--home PATH] [--db PATH] [--days N] [--repo PATH] [--agent AGENT] --json
+```
+
+### Top-Level Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `schemaVersion` | `Int` | Always `1`. |
+| `command` | `String` | Always `"usage"`. |
+| `generatedAt` | `String` | ISO-8601 UTC timestamp when the response was emitted. |
+| `days` | `Int` | Lookback window in days. |
+| `since` | `String` | ISO-8601 UTC window start timestamp. |
+| `until` | `String` | ISO-8601 UTC window end timestamp. |
+| `agentFilter` | `String?` | Canonical `AgentID` raw value when `--agent` was specified; omitted otherwise. |
+| `repoFilter` | `String?` | Standardized repository path when `--repo` was specified; omitted otherwise. |
+| `sessionCount` | `Int` | Matching distinct sessions across the selected window and filters. |
+| `eventCount` | `Int` | Matching `usage_event` count across the selected window and filters. |
+| `tokenTotals` | `UsageTokenTotals` | Aggregate `inputTokens`, `cachedInputTokens`, `outputTokens`, and `turnCount`. |
+| `byAgent` | `Array<AgentUsageSummary>` | Per-agent breakdowns (`sessionCount`, `turnCount`, token sums, `firstTurnMedianInput`, and `skills` / `mcpTools` / `subagents` / `commands` / `builtinTools` invocation summaries). |
+
+---
+
+## Reserved Subcommand Envelopes (M4)
+
+Upcoming commands (`hygiene`, `fix`, `undo`) share the same `"schemaVersion": 1`, `"command": "<name>"`, `"generatedAt": "<ISO-8601>"` envelope and will be documented here as tasks T13–T14 land.

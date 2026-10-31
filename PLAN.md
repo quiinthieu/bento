@@ -631,7 +631,7 @@ Each task is sized for one agent session (~0.5–2 days of agent work). Tick `[x
   *AC:* tests for success, pagination, timeout (≤ 15 s +1), crash, env scrub (the server can't see unrelated env vars), and cache hit. No probe ever runs without consent (asserted).
 
 ### M3 Usage & calibration
-- [ ] **T11 LogIngest core + decoders.** Streaming line reader, CZstd target + streaming decoder, resumable offsets, rotation handling, and decoders for Claude (dedupe), Codex (token_count, session_meta, tool calls), Gemini and Copilot, writing `usage_event` + `session`. CLI `ingest` / `usage`.
+- [x] **T11 LogIngest core + decoders.** Streaming line reader, CZstd target + streaming decoder, resumable offsets, rotation handling, and decoders for Claude (dedupe), Codex (token_count, session_meta, tool calls), Gemini and Copilot, writing `usage_event` + `session`. CLI `ingest` / `usage`.
   *AC:* fixture logs yield exact expected event counts (golden). Append-then-reingest adds only the new events. A truncated .zst produces a diagnostic, not a crash. The 500 MB benchmark (opt-in) hits ≥ 150 MB/s plain.
 - [ ] **T12 Usage join + calibration.** Join usage to artifacts (skill names, `mcp__server__tool`, subagent names, per repo via cwd), "cost × unused" ranking, the `unused` finding, calibration k-factor fitting, and the measured marker in the budget.
   *AC:* in fixtures, an MCP server with 0 calls over 30 days in a repo with ≥ 5 sessions is flagged. Calibration recovers a synthetic k (generated logs with a known k=1.12) within ±0.02. Budget JSON includes `measuredFirstTurnInput`.

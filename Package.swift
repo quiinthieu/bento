@@ -55,8 +55,21 @@ let package = Package(
             ]
         ),
         .target(
+            name: "CZstd",
+            dependencies: [],
+            exclude: ["README.md", "LICENSE"],
+            publicHeadersPath: "include",
+            cSettings: [
+                .define("ZSTD_DISABLE_ASM", to: "1"),
+                .define("ZSTD_LEGACY_SUPPORT", to: "0"),
+                .headerSearchPath("."),
+                .headerSearchPath("common"),
+                .headerSearchPath("decompress")
+            ]
+        ),
+        .target(
             name: "BentoLogIngest",
-            dependencies: ["BentoCore", "BentoParsing"],
+            dependencies: ["BentoCore", "BentoParsing", "CZstd"],
             exclude: ["README.md"]
         ),
         .target(
@@ -179,6 +192,19 @@ let package = Package(
                 "BentoTokenizer",
                 "BentoTestSupport"
             ]
+        ),
+        .testTarget(
+            name: "BentoLogIngestTests",
+            dependencies: [
+                "BentoCore",
+                "BentoParsing",
+                "BentoAdapters",
+                "BentoLogIngest",
+                "BentoScanner",
+                "BentoStore",
+                "BentoTestSupport"
+            ],
+            exclude: ["__golden__"]
         ),
         .testTarget(
             name: "BentoUITests",

@@ -1,0 +1,123 @@
+[
+  {
+    "agent" : "codex",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "sessionStart" : {
+        "model" : "gpt-5-codex"
+      }
+    },
+    "sessionID" : "codex-log-001",
+    "timestamp" : "2026-10-30T14:10:00Z"
+  },
+  {
+    "agent" : "codex",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "tokenUsage" : {
+        "cachedInput" : 10500,
+        "input" : 14200,
+        "output" : 210,
+        "turnIndex" : 0
+      }
+    },
+    "sessionID" : "codex-log-001",
+    "timestamp" : "2026-10-30T14:10:02Z"
+  },
+  {
+    "agent" : "codex",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "builtinToolCalled" : {
+        "name" : "exec_command"
+      }
+    },
+    "sessionID" : "codex-log-001",
+    "timestamp" : "2026-10-30T14:10:03Z"
+  },
+  {
+    "agent" : "codex",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "mcpToolCalled" : {
+        "server" : "github",
+        "tool" : "list_pull_requests"
+      }
+    },
+    "sessionID" : "codex-log-001",
+    "timestamp" : "2026-10-30T14:10:04Z"
+  },
+  {
+    "agent" : "codex",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "skillInvoked" : {
+        "name" : "sql-helper"
+      }
+    },
+    "sessionID" : "codex-log-001",
+    "timestamp" : "2026-10-30T14:10:05Z"
+  },
+  {
+    "agent" : "codex",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "subagentInvoked" : {
+        "name" : "migration-auditor"
+      }
+    },
+    "sessionID" : "codex-log-001",
+    "timestamp" : "2026-10-30T14:10:06Z"
+  },
+  {
+    "agent" : "codex",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "tokenUsage" : {
+        "cachedInput" : 14200,
+        "input" : 15100,
+        "output" : 185,
+        "turnIndex" : 1
+      }
+    },
+    "sessionID" : "codex-log-001",
+    "timestamp" : "2026-10-30T14:10:08Z"
+  },
+  {
+    "agent" : "codex",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "sessionStart" : {
+        "model" : "o3"
+      }
+    },
+    "sessionID" : "codex-log-zst-002",
+    "timestamp" : "2026-10-30T14:20:00Z"
+  },
+  {
+    "agent" : "codex",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "tokenUsage" : {
+        "cachedInput" : 4000,
+        "input" : 9800,
+        "output" : 310,
+        "turnIndex" : 0
+      }
+    },
+    "sessionID" : "codex-log-zst-002",
+    "timestamp" : "2026-10-30T14:20:02Z"
+  },
+  {
+    "agent" : "codex",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "mcpToolCalled" : {
+        "server" : "docs",
+        "tool" : "fetch_page"
+      }
+    },
+    "sessionID" : "codex-log-zst-002",
+    "timestamp" : "2026-10-30T14:20:03Z"
+  }
+]

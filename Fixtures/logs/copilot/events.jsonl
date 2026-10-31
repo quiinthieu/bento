@@ -1,0 +1,7 @@
+{"id":"ev-start","type":"session.start","sessionId":"copilot-log-001","timestamp":"2026-10-30T16:00:00Z","cwd":"<HOME>/repos/demo-app","data":{"selectedModel":"claude-sonnet-4.5"}}
+{"id":"ev-user","type":"user.message","timestamp":"2026-10-30T16:00:01Z","data":{"content":"SECRET_COPILOT_PROMPT_DO_NOT_STORE"}}
+{"id":"ev-tool-1","type":"tool.execution_start","timestamp":"2026-10-30T16:00:02Z","data":{"toolCallId":"ct-1","toolName":"skill","arguments":{"skill":"changelog-writer"}}}
+{"id":"ev-tool-2","type":"tool.execution_start","timestamp":"2026-10-30T16:00:03Z","data":{"toolCallId":"ct-2","mcpServerName":"github","mcpToolName":"get_issue","toolName":"github-get_issue"}}
+{"id":"ev-tool-3","type":"tool.execution_start","timestamp":"2026-10-30T16:00:04Z","data":{"toolCallId":"ct-3","toolName":"agent","arguments":{"agent_type":"release-drafter"}}}
+{"id":"ev-tool-4","type":"tool.execution_start","timestamp":"2026-10-30T16:00:05Z","data":{"toolCallId":"ct-4","toolName":"bash","arguments":{"command":"git log -n 5"}}}
+{"id":"ev-usage-1","type":"assistant.usage","timestamp":"2026-10-30T16:00:06Z","data":{"model":"claude-sonnet-4.5","inputTokens":10400,"cacheReadTokens":7200,"outputTokens":195}}

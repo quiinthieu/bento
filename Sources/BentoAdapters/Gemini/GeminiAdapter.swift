@@ -61,6 +61,7 @@ public struct GeminiAdapter: AgentAdapter, Sendable {
 
     public func logSources(in env: AgentEnvironment) throws -> [LogSource] {
         let logsRoot = GeminiPathCatalog.userLogsRootDirectory(in: env)
+        let homePath = env.home.standardizedFileURL.path
         let files = AdapterPathNormalizer.collectFilesRecursively(
             under: logsRoot,
             fileSystem: env.fileSystem
@@ -68,12 +69,22 @@ public struct GeminiAdapter: AgentAdapter, Sendable {
             GeminiPathCatalog.isSessionLogFile(url)
         }
 
+        guard !files.isEmpty else { return [] }
+        let cwdsByHash = RepoDiscovery.resolveGeminiProjectCwdsByHash(in: env)
+
         return files.map { fileURL in
-            LogSource(
+            let projectHashFolder =
+                fileURL
+                .deletingLastPathComponent()
+                .deletingLastPathComponent()
+                .lastPathComponent
+                .lowercased()
+            return LogSource(
                 agent: Self.id,
                 url: fileURL,
                 isCompressed: GeminiPathCatalog.isCompressedLogFile(fileURL),
-                inferredCwd: nil
+                inferredCwd: cwdsByHash[projectHashFolder],
+                homePath: homePath
             )
         }
     }

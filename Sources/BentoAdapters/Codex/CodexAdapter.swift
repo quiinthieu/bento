@@ -60,6 +60,7 @@ public struct CodexAdapter: AgentAdapter, Sendable {
 
     public func logSources(in env: AgentEnvironment) throws -> [LogSource] {
         let logsRoot = CodexPathCatalog.userLogsDirectory(in: env)
+        let homePath = env.home.standardizedFileURL.path
         let files = AdapterPathNormalizer.collectFilesRecursively(under: logsRoot, fileSystem: env.fileSystem) { url in
             let lower = url.path.lowercased()
             return lower.hasSuffix(".jsonl") || lower.hasSuffix(".jsonl.zst")
@@ -70,7 +71,8 @@ public struct CodexAdapter: AgentAdapter, Sendable {
                 agent: Self.id,
                 url: fileURL,
                 isCompressed: fileURL.path.lowercased().hasSuffix(".zst"),
-                inferredCwd: nil
+                inferredCwd: nil,
+                homePath: homePath
             )
         }
     }

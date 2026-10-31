@@ -61,17 +61,29 @@ public struct ClaudeCodeAdapter: AgentAdapter, Sendable {
 
     public func logSources(in env: AgentEnvironment) throws -> [LogSource] {
         let logsRoot = ClaudeCodePathCatalog.userLogsDirectory(in: env)
+        let homePath = env.home.standardizedFileURL.path
         let files = AdapterPathNormalizer.collectFilesRecursively(under: logsRoot, fileSystem: env.fileSystem) { url in
             let lower = url.path.lowercased()
             return lower.hasSuffix(".jsonl") || lower.hasSuffix(".jsonl.zst")
         }
 
+        var decodedDirCache: [String: String?] = [:]
         return files.map { fileURL in
-            LogSource(
+            let encodedFolder = fileURL.deletingLastPathComponent().lastPathComponent
+            let inferredCwd: String?
+            if let cached = decodedDirCache[encodedFolder] {
+                inferredCwd = cached
+            } else {
+                let resolved = RepoDiscovery.decodeClaudeEncodedProjectDirName(encodedFolder, in: env)?.path
+                decodedDirCache[encodedFolder] = resolved
+                inferredCwd = resolved
+            }
+            return LogSource(
                 agent: Self.id,
                 url: fileURL,
                 isCompressed: fileURL.path.lowercased().hasSuffix(".zst"),
-                inferredCwd: nil
+                inferredCwd: inferredCwd,
+                homePath: homePath
             )
         }
     }

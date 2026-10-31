@@ -53,6 +53,38 @@ enum CLIJSONOutput {
         var budgets: [Budget]
     }
 
+    struct IngestResponse: Codable, Sendable {
+        var schemaVersion: Int = CLIJSONOutput.currentSchemaVersion
+        var command: String = "ingest"
+        var generatedAt: Date
+        var agentFilter: String?
+        var didReset: Bool
+        var filesDiscovered: Int
+        var filesIngested: Int
+        var filesSkippedUnchanged: Int
+        var bytesRead: Int
+        var eventsDecoded: Int
+        var eventsInserted: Int
+        var sessionsUpdated: Int
+        var decoderErrors: Int
+        var diagnostics: [Diagnostic]
+    }
+
+    struct UsageResponse: Codable, Sendable {
+        var schemaVersion: Int = CLIJSONOutput.currentSchemaVersion
+        var command: String = "usage"
+        var generatedAt: Date
+        var days: Int
+        var since: Date
+        var until: Date
+        var agentFilter: String?
+        var repoFilter: String?
+        var sessionCount: Int
+        var eventCount: Int
+        var tokenTotals: UsageTokenTotals
+        var byAgent: [AgentUsageSummary]
+    }
+
     static func printJSON<T: Encodable>(_ payload: T) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]

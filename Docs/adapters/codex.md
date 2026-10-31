@@ -66,3 +66,11 @@
 4. **Skills & Hooks:**
    - Duplicate skill names resolve by scope: `directory` > `project` (`.agents/skills` > `.codex/skills`) > `user` (`~/.agents/skills` > `~/.codex/skills`) > `builtIn` (`~/.codex/skills/.system`), plus `[[skills.config]]` `enabled = false` overrides.
    - Hooks are extracted from standalone `hooks.json` files as well as `[hooks]` tables and `notify` commands in `config.toml`. When `allow_managed_hooks_only = true` is set in managed config/requirements, non-managed hooks resolve to `effectiveLoadMode = .never`.
+
+5. **Rollout Session Log Schema (`CodexLogDecoder`, verified `2026-10-31`):**
+   - Path: `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` and `.jsonl.zst` (relocated under `$CODEX_HOME/sessions/`).
+   - Records are `{ timestamp, type, payload }` envelopes:
+     - `session_meta`: `payload.id`, `payload.cwd`, `payload.model`.
+     - `turn_context`: per-turn `payload.cwd` and `payload.model` updates.
+     - `event_msg` with `payload.type == "token_count"`: extracts `payload.info.last_token_usage` (`input_tokens`, `cached_input_tokens`, `output_tokens`) and suppresses duplicate consecutive emissions where `payload.info.total_token_usage` is unchanged.
+     - `response_item`: `function_call` / `custom_tool_call` (deduped by `call_id`, classifying `mcp__<server>__<tool>`, `use_skill`, `spawn_agent`, and built-in tools) and `mcp_tool_call` (`payload.server`, `payload.tool`). Prompt, output, and reasoning text are never stored.
