@@ -517,6 +517,96 @@ struct BentoCLITests {
         #expect(brokenFindings.contains { $0.kind == .brokenImport && $0.severity == .error })
     }
 
+    @Test("CLI fix defaults to dry-run, refuses --apply without --yes in non-TTY, and round-trips apply -> undo")
+    func cliFixDryRunNonTTYGuardApplyAndUndoRoundTrip() throws {
+        let fixture = try FixtureHome(scenario: "codex-basic")
+        let tempRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("bento-cli-fix-\(UUID().uuidString)", isDirectory: true)
+        let tempHome = tempRoot.appendingPathComponent("home", isDirectory: true)
+        let tempDBDir = tempRoot.appendingPathComponent("db", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: tempRoot) }
+
+        try FileManager.default.createDirectory(at: tempDBDir, withIntermediateDirectories: true)
+        try FileManager.default.copyItem(at: fixture.url, to: tempHome)
+
+        let configURL = tempHome.appendingPathComponent(".codex/config.toml")
+        let originalBytes = try Data(contentsOf: configURL)
+        let dbPath = tempDBDir.appendingPathComponent("bento.sqlite").path
+
+        // Find an active user MCP server name in codex-basic
+        let invOut = try runCLI([
+            "inventory",
+            "--home", tempHome.path,
+            "--agent", "codex",
+            "--json"
+        ])
+        #expect(invOut.exitCode == 0)
+        let artifacts = try decodeField([Artifact].self, key: "artifacts", in: invOut.stdout)
+        let mcpTarget = try #require(
+            artifacts.first { $0.kind == .mcpServer && $0.scope == .user && $0.enabled }
+        )
+
+        // 1. Default dry-run produces diff JSON without modifying config.toml
+        let dryOut = try runCLI([
+            "fix",
+            "disableMCPServer",
+            mcpTarget.id.rawValue,
+            "--home", tempHome.path,
+            "--db", dbPath,
+            "--json"
+        ])
+        #expect(dryOut.exitCode == 0)
+        let dryJSON = try parseJSONObject(dryOut.stdout)
+        #expect(dryJSON["schemaVersion"] as? Int == 1)
+        #expect(dryJSON["command"] as? String == "fix")
+        #expect(dryJSON["applied"] as? Bool == false)
+        #expect(try Data(contentsOf: configURL) == originalBytes)
+
+        // 2. --apply WITHOUT --yes in non-TTY subprocess MUST fail and leave config.toml untouched
+        let refusedOut = try runCLI([
+            "fix",
+            "disableMCPServer",
+            mcpTarget.id.rawValue,
+            "--home", tempHome.path,
+            "--db", dbPath,
+            "--apply",
+            "--json"
+        ])
+        #expect(refusedOut.exitCode != 0)
+        #expect(try Data(contentsOf: configURL) == originalBytes)
+
+        // 3. --apply --yes applies the fix, records journal ID, and `undo <fixID>` restores byte-for-byte
+        let applyOut = try runCLI([
+            "fix",
+            "disableMCPServer",
+            mcpTarget.id.rawValue,
+            "--home", tempHome.path,
+            "--db", dbPath,
+            "--apply",
+            "--yes",
+            "--json"
+        ])
+        #expect(applyOut.exitCode == 0, "stderr: \(String(decoding: applyOut.stderr, as: UTF8.self))")
+        let applyJSON = try parseJSONObject(applyOut.stdout)
+        #expect(applyJSON["applied"] as? Bool == true)
+        let fixID = try #require(applyJSON["fixID"] as? String)
+        #expect(try Data(contentsOf: configURL) != originalBytes)
+
+        let undoOut = try runCLI([
+            "undo",
+            fixID,
+            "--home", tempHome.path,
+            "--db", dbPath,
+            "--json"
+        ])
+        #expect(undoOut.exitCode == 0, "stderr: \(String(decoding: undoOut.stderr, as: UTF8.self))")
+        let undoJSON = try parseJSONObject(undoOut.stdout)
+        #expect(undoJSON["schemaVersion"] as? Int == 1)
+        #expect(undoJSON["command"] as? String == "undo")
+        #expect(undoJSON["status"] as? String == "undone")
+        #expect(try Data(contentsOf: configURL) == originalBytes)
+    }
+
     // MARK: - Helpers
 
     private struct CLIResult {

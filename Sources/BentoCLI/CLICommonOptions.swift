@@ -24,7 +24,11 @@ struct CLICommonOptions: ParsableArguments {
     var json = false
 
     /// Builds an isolated `AgentEnvironment` and matching `BentoStore` without touching real `$HOME` when `--home` is supplied.
-    func makeRuntime() throws -> (environment: AgentEnvironment, store: BentoStore) {
+    func makeRuntime(requirePersistentStore: Bool = false) throws -> (
+        environment: AgentEnvironment,
+        store: BentoStore,
+        supportDirectory: URL
+    ) {
         let processEnv = ProcessInfo.processInfo.environment
         let homeURL: URL
         if let rawHome = home?.trimmingCharacters(in: .whitespacesAndNewlines), !rawHome.isEmpty {
@@ -60,16 +64,27 @@ struct CLICommonOptions: ParsableArguments {
 
         let explicitDB = db?.trimmingCharacters(in: .whitespacesAndNewlines) ?? processEnv["BENTO_DB_PATH"]
         let store: BentoStore
+        let supportDir: URL
         if let explicitDB, !explicitDB.isEmpty {
             let dbURL = Self.resolvePath(explicitDB, processEnv: processEnv)
             store = try BentoStore(databaseURL: dbURL)
-        } else if home != nil {
+            supportDir = dbURL.deletingLastPathComponent().standardizedFileURL
+        } else if home != nil && !requirePersistentStore {
             store = try BentoStore.inMemory()
+            supportDir = BentoStore.defaultDatabaseURL(home: homeURL).deletingLastPathComponent()
         } else {
-            store = try BentoStore(databaseURL: BentoStore.defaultDatabaseURL(home: homeURL))
+            let defaultDB = BentoStore.defaultDatabaseURL(home: homeURL)
+            store = try BentoStore(databaseURL: defaultDB)
+            supportDir = defaultDB.deletingLastPathComponent().standardizedFileURL
         }
 
-        return (agentEnv, store)
+        return (agentEnv, store, supportDir)
+    }
+
+    /// Backwards-compatible 2-tuple overload for read-only subcommands.
+    func makeRuntime() throws -> (environment: AgentEnvironment, store: BentoStore) {
+        let (env, store, _) = try makeRuntime(requirePersistentStore: false)
+        return (env, store)
     }
 
     /// Resolves a CLI path argument against the current working directory without expanding tilde via Foundation's real-HOME APIs.

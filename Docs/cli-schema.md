@@ -198,6 +198,53 @@ bentoctx hygiene [--home PATH] [--db PATH] [--repo PATH] [--agent AGENT] [--fail
 
 ---
 
-## Reserved Subcommand Envelopes (M4)
+## `fix --json`
 
-Upcoming commands (`fix`, `undo`) share the same `"schemaVersion": 1`, `"command": "<name>"`, `"generatedAt": "<ISO-8601>"` envelope and will be documented here as task T14 lands.
+Plans, previews (`--dry-run`, the default), and optionally executes (`--apply`) one of the 7 reversible `FixKind` mutations (`disableMCPServer`, `enableMCPServer`, `disableSkill`, `enableSkill`, `consolidateSkillsViaSymlink`, `replaceDuplicateRulesWithImport`, `trashArtifact`) under an exclusive file lock (`<support>/fixes.lock`) with pre-apply TOCTOU hash checks, full backup manifests, post-apply scope verification, automatic rollback on mismatch, and secret-redacted unified diff previews (`PLAN.md` §6.6, §6.8, §7, §11 T14). Refuses `--apply` without `--yes` when `stdin`/`stdout` is not an interactive TTY.
+
+```bash
+bentoctx fix <kind> <target> [--home PATH] [--db PATH] [--agent AGENT] [--repo PATH] [--target-rules PATH] [--canonical-skills-dir PATH] [--dry-run] [--apply] [--yes] --json
+```
+
+### Top-Level Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `schemaVersion` | `Int` | Always `1`. |
+| `command` | `String` | Always `"fix"`. |
+| `generatedAt` | `String` | ISO-8601 UTC timestamp when the response was emitted. |
+| `snapshotID` | `String` | Identifier of the `Snapshot` used to plan the fix. |
+| `fixID` | `String` | Fix plan / `fix_journal` identifier (passable to `bentoctx undo <fixID>`). |
+| `kind` | `FixKind` | Executed or previewed `FixKind` raw value. |
+| `agent` | `String` | Canonical `AgentID` raw value owning the primary target. |
+| `summary` | `String` | Human-readable summary of the planned mutation. |
+| `applied` | `Bool` | `true` when `--apply` succeeded; `false` on dry-run previews. |
+| `dryRun` | `Bool` | `true` on dry-run previews; `false` when `--apply` ran. |
+| `backupDir` | `String?` | Backup directory path containing `manifest.json` when `applied == true`; omitted on dry-run. |
+| `status` | `String` | `"dry_run"` for previews, or `FixJournalStatus` (`"applied"`). |
+| `affectedPaths` | `Array<String>` | Standardized filesystem paths touched by the plan. |
+| `operations` | `Array<OperationSummary>` | Secret-free operation summaries (`kind`, `path`, `destinationPath`, `byteCount`, `newSHA256`, `expectedOldHash`). |
+| `diffs` | `Array<UnifiedDiff>` | Unified diff previews (`path`, `summary`, `patch`) with secret values redacted. |
+
+---
+
+## `undo --json`
+
+Restores every file, directory, symlink, and POSIX permission recorded in a previously applied fix's backup `manifest.json` after verifying no post-apply manual edits occurred (unless `--force` is supplied), and marks the `fix_journal` entry `"undone"` (`PLAN.md` §6.6, §6.8, §11 T14).
+
+```bash
+bentoctx undo <fix-id> [--home PATH] [--db PATH] [--force] --json
+```
+
+### Top-Level Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `schemaVersion` | `Int` | Always `1`. |
+| `command` | `String` | Always `"undo"`. |
+| `generatedAt` | `String` | ISO-8601 UTC timestamp when the response was emitted. |
+| `fixID` | `String` | Identifier of the undone `fix_journal` entry. |
+| `kind` | `FixKind` | `FixKind` raw value of the undone fix. |
+| `backupDir` | `String` | Backup directory from which files were restored. |
+| `status` | `String` | Updated `FixJournalStatus` (`"undone"`). |
+| `undoneAt` | `String?` | ISO-8601 UTC timestamp recorded on `fix_journal.undone_at`. |
