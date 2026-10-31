@@ -64,22 +64,29 @@ public final class BPETokenizer: TokenCounter, Sendable {
 
         return contiguous.withUTF8 { utf8Buf in
             guard !utf8Buf.isEmpty, let base = utf8Buf.baseAddress else { return [] }
-            let chunks = Self.computeChunkRanges(base: base, total: utf8Buf.count)
+            let chunks = Self.computeChunkSpans(base: base, startOffset: 0, endOffset: utf8Buf.count)
             var tokens: [Int] = []
             tokens.reserveCapacity(max(8, utf8Buf.count / 3))
             var mergeParts: [(start: Int, rank: Int32)] = []
             mergeParts.reserveCapacity(128)
+            var utf16Scratch: [UInt16] = []
+            var utf8Scratch: [UInt8] = []
 
-            for range in chunks {
-                let len = range.count
-                guard len > 0 else { continue }
-                let chunkPtr = base.advanced(by: range.lowerBound)
-                if Self.isAllASCII(ptr: chunkPtr, count: len) {
-                    encodeASCIIChunk(ptr: chunkPtr, count: len, parts: &mergeParts, into: &tokens)
+            for span in chunks where span.count > 0 {
+                let chunkPtr = base + span.start
+                if span.isASCII {
+                    encodeASCIIChunk(ptr: chunkPtr, count: span.count, parts: &mergeParts, into: &tokens)
                 } else if let regex = threadLocalRegex() {
-                    let slice = UnsafeBufferPointer(start: chunkPtr, count: len)
+                    let slice = UnsafeBufferPointer(start: chunkPtr, count: span.count)
                     let chunkStr = String(decoding: slice, as: UTF8.self)
-                    encodeUnicodeChunk(chunkStr, regex: regex, parts: &mergeParts, into: &tokens)
+                    encodeUnicodeChunk(
+                        chunkStr,
+                        regex: regex,
+                        parts: &mergeParts,
+                        utf16Scratch: &utf16Scratch,
+                        utf8Scratch: &utf8Scratch,
+                        into: &tokens
+                    )
                 }
             }
             return tokens
@@ -93,18 +100,32 @@ public final class BPETokenizer: TokenCounter, Sendable {
         contiguous.makeContiguousUTF8()
         return contiguous.withUTF8 { utf8Buf in
             guard !utf8Buf.isEmpty, let base = utf8Buf.baseAddress else { return [] }
-            let chunks = Self.computeChunkRanges(base: base, total: utf8Buf.count)
+            let chunks = Self.computeChunkSpans(base: base, startOffset: 0, endOffset: utf8Buf.count)
             var tokens: [Int] = []
             tokens.reserveCapacity(max(8, utf8Buf.count / 3))
             var mergeParts: [(start: Int, rank: Int32)] = []
             mergeParts.reserveCapacity(128)
-            for range in chunks where !range.isEmpty {
-                let slice = UnsafeBufferPointer(start: base.advanced(by: range.lowerBound), count: range.count)
+            var utf16Scratch: [UInt16] = []
+            var utf8Scratch: [UInt8] = []
+            for span in chunks where span.count > 0 {
+                let slice = UnsafeBufferPointer(start: base + span.start, count: span.count)
                 let chunkStr = String(decoding: slice, as: UTF8.self)
-                encodeUnicodeChunk(chunkStr, regex: regex, parts: &mergeParts, into: &tokens)
+                encodeUnicodeChunk(
+                    chunkStr,
+                    regex: regex,
+                    parts: &mergeParts,
+                    utf16Scratch: &utf16Scratch,
+                    utf8Scratch: &utf8Scratch,
+                    into: &tokens
+                )
             }
             return tokens
         }
+    }
+
+    /// Clears internal multi-byte piece caches (internal hook for cold-start throughput benchmarks).
+    func resetCachesForTesting() {
+        pieceCountCache.clear()
     }
 
     /// Counts exact BPE tokens in `text`.
@@ -115,30 +136,40 @@ public final class BPETokenizer: TokenCounter, Sendable {
 
         return contiguous.withUTF8 { utf8Buf in
             guard !utf8Buf.isEmpty, let base = utf8Buf.baseAddress else { return 0 }
-            let chunks = Self.computeChunkRanges(base: base, total: utf8Buf.count)
-            if chunks.count >= 8 && utf8Buf.count >= 131_072 {
-                return countChunksParallel(base: base, chunks: chunks)
+            if utf8Buf.count >= 65_536 {
+                return countLargeBufferParallel(base: base, total: utf8Buf.count)
             }
+            let chunks = Self.computeChunkSpans(base: base, startOffset: 0, endOffset: utf8Buf.count)
 
             var localCache: [UInt64: (bytes: [UInt8], count: Int)] = [:]
-            localCache.reserveCapacity(1_024)
+            localCache.reserveCapacity(512)
             var mergeParts: [(start: Int, rank: Int32)] = []
             mergeParts.reserveCapacity(128)
+            var utf16Scratch: [UInt16] = []
+            var utf8Scratch: [UInt8] = []
 
             var total = 0
-            for range in chunks {
+            for span in chunks {
                 total += countSingleChunk(
                     base: base,
-                    range: range,
+                    span: span,
                     parts: &mergeParts,
-                    localCache: &localCache
+                    localCache: &localCache,
+                    utf16Scratch: &utf16Scratch,
+                    utf8Scratch: &utf8Scratch
                 )
             }
             return total
         }
     }
 
-    // MARK: - Thread-Local Compiled Regex & Raw UTF-8 Chunking
+    // MARK: - Thread-Local Compiled Regex & ASCII-Isolating Line Chunking
+
+    private struct ChunkSpan: Sendable {
+        var start: Int
+        var count: Int
+        var isASCII: Bool
+    }
 
     private func threadLocalRegex() -> NSRegularExpression? {
         let key = "BentoTokenizer.regex.\(encoding.rawValue)" as NSString
@@ -153,61 +184,152 @@ public final class BPETokenizer: TokenCounter, Sendable {
         return compiled
     }
 
-    private static let targetChunkUTF8Bytes = 256
+    private static let targetASCIIChunkBytes = 4_096
 
-    private static func computeChunkRanges(base: UnsafePointer<UInt8>, total: Int) -> [Range<Int>] {
-        guard total > targetChunkUTF8Bytes else {
-            return [0..<total]
+    private static func computeChunkSpans(
+        base: UnsafePointer<UInt8>,
+        startOffset: Int,
+        endOffset: Int
+    ) -> [ChunkSpan] {
+        let sliceLen = endOffset - startOffset
+        guard sliceLen > 0 else { return [] }
+        var spans: [ChunkSpan] = []
+        spans.reserveCapacity(max(4, sliceLen / 2_048 + 2))
+        let rawBase = UnsafeRawPointer(base)
+
+        var pendingStart = startOffset
+        var segmentStart = startOffset
+        var segmentHasNonASCII = false
+        var pos = startOffset
+
+        while pos < endOffset {
+            // SWAR fast-skip: advance 8 bytes at once when all 8 bytes are ASCII (< 0x80) and none is '\n' (0x0A).
+            if pos + 8 <= endOffset {
+                let word = rawBase.loadUnaligned(fromByteOffset: pos, as: UInt64.self)
+                if (word & 0x8080_8080_8080_8080) == 0 {
+                    let xored = word ^ 0x0A0A_0A0A_0A0A_0A0A
+                    if ((xored &- 0x0101_0101_0101_0101) & 0x8080_8080_8080_8080) == 0 {
+                        pos += 8
+                        continue
+                    }
+                }
+            }
+
+            let b = base[pos]
+            if b >= 0x80 {
+                segmentHasNonASCII = true
+            } else if b == 10 && pos + 1 < endOffset {
+                let nextByte = base[pos + 1]
+                if nextByte < 0x80 && !isSpace8(nextByte) && nextByte != 47 {
+                    let split = pos + 1
+                    if segmentHasNonASCII {
+                        if segmentStart > pendingStart {
+                            spans.append(
+                                ChunkSpan(start: pendingStart, count: segmentStart - pendingStart, isASCII: true)
+                            )
+                        }
+                        spans.append(
+                            ChunkSpan(start: segmentStart, count: split - segmentStart, isASCII: false)
+                        )
+                        pendingStart = split
+                        segmentHasNonASCII = false
+                    } else if split - pendingStart >= targetASCIIChunkBytes {
+                        spans.append(
+                            ChunkSpan(start: pendingStart, count: split - pendingStart, isASCII: true)
+                        )
+                        pendingStart = split
+                    }
+                    segmentStart = split
+                }
+            }
+            pos += 1
         }
 
-        var ranges: [Range<Int>] = []
-        ranges.reserveCapacity(total / targetChunkUTF8Bytes + 2)
-        var chunkStart = 0
-        var pos = targetChunkUTF8Bytes
-
-        while pos + 1 < total {
-            let nextByte = base[pos + 1]
-            if base[pos] == 10
-                && nextByte < 0x80
-                && !isASCIISpace(nextByte)
-                && nextByte != 47
-            {
-                let split = pos + 1
-                ranges.append(chunkStart..<split)
-                chunkStart = split
-                pos = split + targetChunkUTF8Bytes
+        if pendingStart < endOffset {
+            if segmentHasNonASCII {
+                if segmentStart > pendingStart {
+                    spans.append(
+                        ChunkSpan(start: pendingStart, count: segmentStart - pendingStart, isASCII: true)
+                    )
+                }
+                spans.append(
+                    ChunkSpan(start: segmentStart, count: endOffset - segmentStart, isASCII: false)
+                )
             } else {
-                pos += 1
+                spans.append(
+                    ChunkSpan(start: pendingStart, count: endOffset - pendingStart, isASCII: true)
+                )
             }
         }
-        if chunkStart < total {
-            ranges.append(chunkStart..<total)
-        }
-        return ranges
+        return spans
     }
 
-    private func countChunksParallel(base: UnsafePointer<UInt8>, chunks: [Range<Int>]) -> Int {
-        let workerCount = min(chunks.count, max(2, ProcessInfo.processInfo.activeProcessorCount))
-        let partialTotals = Mutex([Int](repeating: 0, count: workerCount))
+    private func countLargeBufferParallel(base: UnsafePointer<UInt8>, total: Int) -> Int {
+        let workerCount = max(2, ProcessInfo.processInfo.activeProcessorCount)
+        let targetBlocks = workerCount * 4
+        var coarseBlocks: [Range<Int>] = []
+        coarseBlocks.reserveCapacity(targetBlocks)
+
+        var blockStart = 0
+        for blockIdx in 1..<targetBlocks {
+            let nominal = (total * blockIdx) / targetBlocks
+            var pos = nominal > blockStart ? nominal : blockStart
+            var splitFound: Int?
+            while pos + 1 < total {
+                if base[pos] == 10 {
+                    let nextByte = base[pos + 1]
+                    if nextByte < 0x80 && !Self.isSpace8(nextByte) && nextByte != 47 {
+                        splitFound = pos + 1
+                        break
+                    }
+                }
+                pos += 1
+            }
+            if let split = splitFound, split > blockStart {
+                coarseBlocks.append(blockStart..<split)
+                blockStart = split
+            } else {
+                break
+            }
+        }
+        if blockStart < total {
+            coarseBlocks.append(blockStart..<total)
+        }
+
+        let blocks = coarseBlocks
+        let activeWorkers = min(workerCount, blocks.count)
+        let partialTotals = Mutex([Int](repeating: 0, count: activeWorkers))
         let addr = Int(bitPattern: base)
 
-        DispatchQueue.concurrentPerform(iterations: workerCount) { workerIdx in
+        DispatchQueue.concurrentPerform(iterations: activeWorkers) { workerIdx in
             guard let ptr = UnsafePointer<UInt8>(bitPattern: addr) else { return }
             var localCache: [UInt64: (bytes: [UInt8], count: Int)] = [:]
-            localCache.reserveCapacity(1_024)
+            localCache.reserveCapacity(512)
             var mergeParts: [(start: Int, rank: Int32)] = []
             mergeParts.reserveCapacity(128)
+            var utf16Scratch: [UInt16] = []
+            var utf8Scratch: [UInt8] = []
 
             var workerSum = 0
             var idx = workerIdx
-            while idx < chunks.count {
-                workerSum += countSingleChunk(
+            while idx < blocks.count {
+                let block = blocks[idx]
+                let spans = Self.computeChunkSpans(
                     base: ptr,
-                    range: chunks[idx],
-                    parts: &mergeParts,
-                    localCache: &localCache
+                    startOffset: block.lowerBound,
+                    endOffset: block.upperBound
                 )
-                idx += workerCount
+                for span in spans {
+                    workerSum += countSingleChunk(
+                        base: ptr,
+                        span: span,
+                        parts: &mergeParts,
+                        localCache: &localCache,
+                        utf16Scratch: &utf16Scratch,
+                        utf8Scratch: &utf8Scratch
+                    )
+                }
+                idx += activeWorkers
             }
             partialTotals.withLock { $0[workerIdx] = workerSum }
         }
@@ -217,70 +339,31 @@ public final class BPETokenizer: TokenCounter, Sendable {
 
     private func countSingleChunk(
         base: UnsafePointer<UInt8>,
-        range: Range<Int>,
+        span: ChunkSpan,
         parts: inout [(start: Int, rank: Int32)],
-        localCache: inout [UInt64: (bytes: [UInt8], count: Int)]
+        localCache: inout [UInt64: (bytes: [UInt8], count: Int)],
+        utf16Scratch: inout [UInt16],
+        utf8Scratch: inout [UInt8]
     ) -> Int {
-        let len = range.count
-        guard len > 0 else { return 0 }
-        let chunkPtr = base.advanced(by: range.lowerBound)
-        if Self.isAllASCII(ptr: chunkPtr, count: len) {
-            return countASCIIChunk(ptr: chunkPtr, count: len, parts: &parts, localCache: &localCache)
+        guard span.count > 0 else { return 0 }
+        let chunkPtr = base + span.start
+        if span.isASCII {
+            return countASCIIChunk(ptr: chunkPtr, count: span.count, parts: &parts, localCache: &localCache)
         }
         guard let regex = threadLocalRegex() else { return 0 }
-        let slice = UnsafeBufferPointer(start: chunkPtr, count: len)
+        let slice = UnsafeBufferPointer(start: chunkPtr, count: span.count)
         let chunkStr = String(decoding: slice, as: UTF8.self)
-        return countUnicodeChunk(chunkStr, regex: regex, parts: &parts, localCache: &localCache)
+        return countUnicodeChunk(
+            chunkStr,
+            regex: regex,
+            parts: &parts,
+            localCache: &localCache,
+            utf16Scratch: &utf16Scratch,
+            utf8Scratch: &utf8Scratch
+        )
     }
 
     // MARK: - Zero-Copy ASCII Pre-Tokenizer Fast Path
-
-    @inline(__always)
-    private static func isAllASCII(ptr: UnsafePointer<UInt8>, count: Int) -> Bool {
-        var idx = 0
-        while idx < count {
-            if ptr[idx] >= 0x80 {
-                return false
-            }
-            idx += 1
-        }
-        return true
-    }
-
-    @inline(__always)
-    private static func isASCIISpace(_ b: UInt8) -> Bool {
-        b == 32 || (b >= 9 && b <= 13)
-    }
-
-    @inline(__always)
-    private static func isASCIIUpper(_ b: UInt8) -> Bool {
-        b >= 65 && b <= 90
-    }
-
-    @inline(__always)
-    private static func isASCIILower(_ b: UInt8) -> Bool {
-        b >= 97 && b <= 122
-    }
-
-    @inline(__always)
-    private static func isASCIILetter(_ b: UInt8) -> Bool {
-        (b >= 65 && b <= 90) || (b >= 97 && b <= 122)
-    }
-
-    @inline(__always)
-    private static func isASCIIDigit(_ b: UInt8) -> Bool {
-        b >= 48 && b <= 57
-    }
-
-    @inline(__always)
-    private static func isASCIIAlnum(_ b: UInt8) -> Bool {
-        isASCIILetter(b) || isASCIIDigit(b)
-    }
-
-    @inline(__always)
-    private static func isASCIIPunct(_ b: UInt8) -> Bool {
-        !isASCIISpace(b) && !isASCIIAlnum(b)
-    }
 
     @inline(__always)
     private static func asciiContractionLength(ptr: UnsafePointer<UInt8>, index: Int, end: Int) -> Int {
@@ -302,71 +385,111 @@ public final class BPETokenizer: TokenCounter, Sendable {
     }
 
     @inline(__always)
+    private static func isSpace8(_ b: UInt8) -> Bool {
+        b == 32 || (b >= 9 && b <= 13)
+    }
+
+    @inline(__always)
+    private static func isUpper8(_ b: UInt8) -> Bool {
+        b >= 65 && b <= 90
+    }
+
+    @inline(__always)
+    private static func isLower8(_ b: UInt8) -> Bool {
+        b >= 97 && b <= 122
+    }
+
+    @inline(__always)
+    private static func isLetter8(_ b: UInt8) -> Bool {
+        (b >= 65 && b <= 90) || (b >= 97 && b <= 122)
+    }
+
+    @inline(__always)
+    private static func isDigit8(_ b: UInt8) -> Bool {
+        b >= 48 && b <= 57
+    }
+
+    @inline(__always)
+    private static func isAlnum8(_ b: UInt8) -> Bool {
+        (b >= 65 && b <= 90) || (b >= 97 && b <= 122) || (b >= 48 && b <= 57)
+    }
+
+    @inline(__always)
+    private static func isPunct8(_ b: UInt8) -> Bool {
+        !(b == 32 || (b >= 9 && b <= 13))
+            && !((b >= 65 && b <= 90) || (b >= 97 && b <= 122) || (b >= 48 && b <= 57))
+    }
+
+    @inline(__always)
     private static func nextASCIITokenEnd(
-        encoding: BPEEncoding,
+        isO200k: Bool,
         ptr: UnsafePointer<UInt8>,
         start i: Int,
         end n: Int
     ) -> Int {
         let b0 = ptr[i]
-        switch encoding {
-        case .o200kBase:
-            let hasPrefix = (b0 != 10 && b0 != 13 && !isASCIIAlnum(b0))
-            let p0 = hasPrefix ? (i + 1) : i
+        if isO200k {
+            let p0 = (b0 != 10 && b0 != 13 && !isAlnum8(b0)) ? (i + 1) : i
             if p0 < n {
                 var p = p0
-                while p < n && isASCIIUpper(ptr[p]) { p += 1 }
+                while p < n && isUpper8(ptr[p]) { p += 1 }
                 let lowerStart = p
-                while p < n && isASCIILower(ptr[p]) { p += 1 }
+                while p < n && isLower8(ptr[p]) { p += 1 }
                 if p > lowerStart {
                     return p + asciiContractionLength(ptr: ptr, index: p, end: n)
                 }
-                if isASCIIUpper(ptr[p0]) {
+                if isUpper8(ptr[p0]) {
                     var u = p0 + 1
-                    while u < n && isASCIIUpper(ptr[u]) { u += 1 }
-                    while u < n && isASCIILower(ptr[u]) { u += 1 }
+                    while u < n && isUpper8(ptr[u]) { u += 1 }
+                    while u < n && isLower8(ptr[u]) { u += 1 }
                     return u + asciiContractionLength(ptr: ptr, index: u, end: n)
                 }
             }
-            if isASCIIDigit(b0) {
+            if isDigit8(b0) {
                 var p = i + 1
-                if p < n && isASCIIDigit(ptr[p]) {
+                if p < n && isDigit8(ptr[p]) {
                     p += 1
-                    if p < n && isASCIIDigit(ptr[p]) { p += 1 }
+                    if p < n && isDigit8(ptr[p]) { p += 1 }
                 }
                 return p
             }
-            if isASCIIPunct(b0) || (b0 == 32 && i + 1 < n && isASCIIPunct(ptr[i + 1])) {
+            if isPunct8(b0) || (b0 == 32 && i + 1 < n && isPunct8(ptr[i + 1])) {
                 var p = (b0 == 32) ? (i + 2) : (i + 1)
-                while p < n && isASCIIPunct(ptr[p]) { p += 1 }
-                while p < n && (ptr[p] == 10 || ptr[p] == 13 || ptr[p] == 47) { p += 1 }
+                while p < n && isPunct8(ptr[p]) { p += 1 }
+                while p < n {
+                    let bp = ptr[p]
+                    if bp != 10 && bp != 13 && bp != 47 { break }
+                    p += 1
+                }
                 return p
             }
-
-        case .cl100kBase:
+        } else {
             let cLen = asciiContractionLength(ptr: ptr, index: i, end: n)
             if cLen > 0 {
                 return i + cLen
             }
-            let hasPrefix = (b0 != 10 && b0 != 13 && !isASCIIAlnum(b0))
-            let p0 = hasPrefix ? (i + 1) : i
-            if p0 < n && isASCIILetter(ptr[p0]) {
+            let p0 = (b0 != 10 && b0 != 13 && !isAlnum8(b0)) ? (i + 1) : i
+            if p0 < n && isLetter8(ptr[p0]) {
                 var p = p0 + 1
-                while p < n && isASCIILetter(ptr[p]) { p += 1 }
+                while p < n && isLetter8(ptr[p]) { p += 1 }
                 return p
             }
-            if isASCIIDigit(b0) {
+            if isDigit8(b0) {
                 var p = i + 1
-                if p < n && isASCIIDigit(ptr[p]) {
+                if p < n && isDigit8(ptr[p]) {
                     p += 1
-                    if p < n && isASCIIDigit(ptr[p]) { p += 1 }
+                    if p < n && isDigit8(ptr[p]) { p += 1 }
                 }
                 return p
             }
-            if isASCIIPunct(b0) || (b0 == 32 && i + 1 < n && isASCIIPunct(ptr[i + 1])) {
+            if isPunct8(b0) || (b0 == 32 && i + 1 < n && isPunct8(ptr[i + 1])) {
                 var p = (b0 == 32) ? (i + 2) : (i + 1)
-                while p < n && isASCIIPunct(ptr[p]) { p += 1 }
-                while p < n && (ptr[p] == 10 || ptr[p] == 13) { p += 1 }
+                while p < n && isPunct8(ptr[p]) { p += 1 }
+                while p < n {
+                    let bp = ptr[p]
+                    if bp != 10 && bp != 13 { break }
+                    p += 1
+                }
                 return p
             }
         }
@@ -374,8 +497,10 @@ public final class BPETokenizer: TokenCounter, Sendable {
         // Branches 5, 6, 7: whitespace (\s*[\r\n]+ | \s+(?!\S) | \s+)
         var p = i
         var lastCRLF = -1
-        while p < n && isASCIISpace(ptr[p]) {
-            if ptr[p] == 10 || ptr[p] == 13 {
+        while p < n {
+            let bp = ptr[p]
+            if !isSpace8(bp) { break }
+            if bp == 10 || bp == 13 {
                 lastCRLF = p
             }
             p += 1
@@ -389,7 +514,7 @@ public final class BPETokenizer: TokenCounter, Sendable {
         if p - i >= 2 {
             return p - 1
         }
-        return max(i + 1, p)
+        return (p > i + 1) ? p : (i + 1)
     }
 
     private func encodeASCIIChunk(
@@ -398,33 +523,45 @@ public final class BPETokenizer: TokenCounter, Sendable {
         parts: inout [(start: Int, rank: Int32)],
         into output: inout [Int]
     ) {
-        let tableMask = table.mask
-        let enc = encoding
-        table.arena.withUnsafeBufferPointer { arenaPtr in
-            table.slots.withUnsafeBufferPointer { slotsPtr in
-                guard let arenaBase = arenaPtr.baseAddress, let slotsBase = slotsPtr.baseAddress else {
-                    return
-                }
-                var cursor = 0
-                while cursor < count {
-                    let end = Self.nextASCIITokenEnd(encoding: enc, ptr: ptr, start: cursor, end: count)
-                    let tokenPtr = ptr.advanced(by: cursor)
-                    let byteLen = end - cursor
-                    let hash = BPERankTable.fnv1a64(ptr: tokenPtr, count: byteLen)
-                    if let directRank = BPERankTable.lookupRaw(
-                        queryBase: tokenPtr,
-                        len: byteLen,
-                        hash: hash,
-                        arenaBase: arenaBase,
-                        slotsBase: slotsBase,
-                        mask: tableMask
-                    ) {
-                        output.append(Int(directRank))
-                    } else {
-                        let buf = UnsafeBufferPointer(start: tokenPtr, count: byteLen)
-                        Self.bytePairEncode(buf, table: table, parts: &parts, into: &output)
+        let isO200k = (encoding == .o200kBase)
+        table.withPointers { ptrs in
+            var cursor = 0
+            while cursor < count {
+                let end = Self.nextASCIITokenEnd(
+                    isO200k: isO200k,
+                    ptr: ptr,
+                    start: cursor,
+                    end: count
+                )
+                let tokenPtr = ptr + cursor
+                let byteLen = end - cursor
+                cursor = end
+
+                if byteLen == 1 {
+                    let r = ptrs.singleByte[Int(tokenPtr[0])]
+                    if r >= 0 {
+                        output.append(Int(r))
+                        continue
                     }
-                    cursor = end
+                } else if byteLen == 2 {
+                    let r = ptrs.twoByteASCII[(Int(tokenPtr[0]) << 7) | Int(tokenPtr[1])]
+                    if r >= 0 {
+                        output.append(Int(r))
+                        continue
+                    }
+                }
+
+                let hash = BPERankTable.fnv1a64(ptr: tokenPtr, count: byteLen)
+                if let directRank = BPERankTable.lookupRaw(
+                    queryBase: tokenPtr,
+                    len: byteLen,
+                    hash: hash,
+                    ptrs: ptrs
+                ) {
+                    output.append(Int(directRank))
+                } else {
+                    let buf = UnsafeBufferPointer(start: tokenPtr, count: byteLen)
+                    Self.bytePairEncode(buf, ptrs: ptrs, parts: &parts, into: &output)
                 }
             }
         }
@@ -436,84 +573,112 @@ public final class BPETokenizer: TokenCounter, Sendable {
         parts: inout [(start: Int, rank: Int32)],
         localCache: inout [UInt64: (bytes: [UInt8], count: Int)]
     ) -> Int {
-        let tableMask = table.mask
-        let enc = encoding
+        let isO200k = (encoding == .o200kBase)
         var chunkCount = 0
 
-        table.arena.withUnsafeBufferPointer { arenaPtr in
-            table.slots.withUnsafeBufferPointer { slotsPtr in
-                guard let arenaBase = arenaPtr.baseAddress, let slotsBase = slotsPtr.baseAddress else {
-                    return
-                }
-                var cursor = 0
-                while cursor < count {
-                    let end = Self.nextASCIITokenEnd(encoding: enc, ptr: ptr, start: cursor, end: count)
-                    let tokenPtr = ptr.advanced(by: cursor)
-                    let byteLen = end - cursor
-                    cursor = end
+        table.withPointers { ptrs in
+            let arenaBase = ptrs.arena
+            let packedBase = ptrs.packedSlots
+            let singleByteBase = ptrs.singleByte
+            let twoByteASCIIBase = ptrs.twoByteASCII
+            let tableMask = ptrs.mask
+            let mask64 = UInt64(tableMask)
 
-                    var hash: UInt64 = 14_695_981_039_346_656_037
-                    var hIdx = 0
+            var cursor = 0
+            while cursor < count {
+                let tokenStart = cursor
+                let end = Self.nextASCIITokenEnd(
+                    isO200k: isO200k,
+                    ptr: ptr,
+                    start: tokenStart,
+                    end: count
+                )
+                let tokenPtr = ptr + tokenStart
+                let byteLen = end - tokenStart
+                cursor = end
+
+                if byteLen == 1 {
+                    if singleByteBase[Int(tokenPtr[0])] >= 0 {
+                        chunkCount += 1
+                        continue
+                    }
+                } else if byteLen == 2 {
+                    if twoByteASCIIBase[(Int(tokenPtr[0]) << 7) | Int(tokenPtr[1])] >= 0 {
+                        chunkCount += 1
+                        continue
+                    }
+                }
+
+                var hash: UInt64 = 14_695_981_039_346_656_037
+                var hIdx = 0
+                if tokenStart + 8 <= count && byteLen <= 8 {
+                    var word = UInt64(littleEndian: UnsafeRawPointer(tokenPtr).loadUnaligned(as: UInt64.self))
+                    while hIdx < byteLen {
+                        hash ^= (word & 0xFF)
+                        hash &*= 1_099_511_628_211
+                        word >>= 8
+                        hIdx += 1
+                    }
+                } else {
                     while hIdx < byteLen {
                         hash ^= UInt64(tokenPtr[hIdx])
                         hash &*= 1_099_511_628_211
                         hIdx += 1
                     }
+                }
 
-                    var matchedSingleToken = false
-                    if byteLen <= Int(UInt16.max) {
-                        let targetLen = UInt16(byteLen)
-                        var slotIndex = Int(truncatingIfNeeded: hash) & tableMask
-                        while true {
-                            let slot = slotsBase[slotIndex]
-                            if !slot.occupied {
-                                break
-                            }
-                            if slot.length == targetLen,
-                                memcmp(arenaBase.advanced(by: Int(slot.offset)), tokenPtr, byteLen) == 0
-                            {
-                                matchedSingleToken = true
-                                break
-                            }
-                            slotIndex = (slotIndex + 1) & tableMask
+                var matchedSingleToken = false
+                if byteLen <= Int(UInt16.max) {
+                    var slotIndex = Int(hash & mask64)
+                    while true {
+                        let packed = packedBase[slotIndex]
+                        if packed == 0 {
+                            break
                         }
+                        if Int(packed & 0xFFFF) == byteLen,
+                            memcmp(arenaBase + Int(packed >> 16), tokenPtr, byteLen) == 0
+                        {
+                            matchedSingleToken = true
+                            break
+                        }
+                        slotIndex = (slotIndex + 1) & tableMask
                     }
-                    if matchedSingleToken {
-                        chunkCount += 1
+                }
+                if matchedSingleToken {
+                    chunkCount += 1
+                    continue
+                }
+
+                let buf = UnsafeBufferPointer(start: tokenPtr, count: byteLen)
+                if byteLen <= 64 {
+                    if let hit = localCache[hash],
+                        hit.bytes.count == byteLen,
+                        hit.bytes.withUnsafeBufferPointer({
+                            guard let hitBase = $0.baseAddress else { return false }
+                            return memcmp(hitBase, tokenPtr, byteLen) == 0
+                        })
+                    {
+                        chunkCount += hit.count
                         continue
                     }
-
-                    let buf = UnsafeBufferPointer(start: tokenPtr, count: byteLen)
-                    if byteLen <= 64 {
-                        if let hit = localCache[hash],
-                            hit.bytes.count == byteLen,
-                            hit.bytes.withUnsafeBufferPointer({
-                                guard let hitBase = $0.baseAddress else { return false }
-                                return memcmp(hitBase, tokenPtr, byteLen) == 0
-                            })
-                        {
-                            chunkCount += hit.count
-                            continue
-                        }
-                        if let sharedHit = pieceCountCache.lookup(buf, hash: hash) {
-                            if localCache.count < 4_096 {
-                                localCache[hash] = (Array(buf), sharedHit)
-                            }
-                            chunkCount += sharedHit
-                            continue
-                        }
-                    }
-
-                    let mergedCount = Self.bytePairCount(buf, table: table, parts: &parts)
-                    if byteLen <= 64 {
-                        let saved = Array(buf)
+                    if let sharedHit = pieceCountCache.lookup(buf, hash: hash) {
                         if localCache.count < 4_096 {
-                            localCache[hash] = (saved, mergedCount)
+                            localCache[hash] = (Array(buf), sharedHit)
                         }
-                        pieceCountCache.store(saved, hash: hash, count: mergedCount)
+                        chunkCount += sharedHit
+                        continue
                     }
-                    chunkCount += mergedCount
                 }
+
+                let mergedCount = Self.bytePairCount(buf, ptrs: ptrs, parts: &parts)
+                if byteLen <= 64 {
+                    let saved = Array(buf)
+                    if localCache.count < 4_096 {
+                        localCache[hash] = (saved, mergedCount)
+                    }
+                    pieceCountCache.store(saved, hash: hash, count: mergedCount)
+                }
+                chunkCount += mergedCount
             }
         }
         return chunkCount
@@ -525,56 +690,63 @@ public final class BPETokenizer: TokenCounter, Sendable {
         _ chunk: String,
         regex: NSRegularExpression,
         parts: inout [(start: Int, rank: Int32)],
+        utf16Scratch: inout [UInt16],
+        utf8Scratch: inout [UInt8],
         into output: inout [Int]
     ) {
         let nsChunk = chunk as NSString
         let utf16Len = nsChunk.length
         guard utf16Len > 0 else { return }
 
-        var utf16Buf = [UInt16](repeating: 0, count: utf16Len)
-        nsChunk.getCharacters(&utf16Buf, range: NSRange(location: 0, length: utf16Len))
-        var scratchUTF8 = [UInt8](repeating: 0, count: max(64, utf16Len * 3))
-        let tableMask = table.mask
+        if utf16Scratch.count < utf16Len {
+            utf16Scratch = [UInt16](repeating: 0, count: max(utf16Len, 256))
+        }
+        nsChunk.getCharacters(&utf16Scratch, range: NSRange(location: 0, length: utf16Len))
+        let neededUTF8 = max(64, utf16Len * 3)
+        if utf8Scratch.count < neededUTF8 {
+            utf8Scratch = [UInt8](repeating: 0, count: neededUTF8)
+        }
 
-        utf16Buf.withUnsafeBufferPointer { utf16Ptr in
-            scratchUTF8.withUnsafeMutableBufferPointer { scratchPtr in
-                table.arena.withUnsafeBufferPointer { arenaPtr in
-                    table.slots.withUnsafeBufferPointer { slotsPtr in
-                        guard let utf16Base = utf16Ptr.baseAddress,
-                            let scratchBase = scratchPtr.baseAddress,
-                            let arenaBase = arenaPtr.baseAddress,
-                            let slotsBase = slotsPtr.baseAddress
-                        else {
-                            return
-                        }
+        utf16Scratch.withUnsafeBufferPointer { utf16Ptr in
+            utf8Scratch.withUnsafeMutableBufferPointer { scratchPtr in
+                table.withPointers { ptrs in
+                    guard let utf16Base = utf16Ptr.baseAddress,
+                        let scratchBase = scratchPtr.baseAddress
+                    else {
+                        return
+                    }
 
-                        regex.enumerateMatches(
-                            in: chunk,
-                            options: [],
-                            range: NSRange(location: 0, length: utf16Len)
-                        ) { match, _, _ in
-                            guard let range = match?.range, range.length > 0 else { return }
-                            let byteLen = Self.transcodeUTF16ToUTF8(
-                                src: utf16Base.advanced(by: range.location),
-                                length: range.length,
-                                dst: scratchBase
-                            )
-                            guard byteLen > 0 else { return }
-                            let buf = UnsafeBufferPointer(start: scratchBase, count: byteLen)
-                            let hash = BPERankTable.fnv1a64(ptr: scratchBase, count: byteLen)
-                            if let directRank = BPERankTable.lookupRaw(
-                                queryBase: scratchBase,
-                                len: byteLen,
-                                hash: hash,
-                                arenaBase: arenaBase,
-                                slotsBase: slotsBase,
-                                mask: tableMask
-                            ) {
-                                output.append(Int(directRank))
+                    regex.enumerateMatches(
+                        in: chunk,
+                        options: [],
+                        range: NSRange(location: 0, length: utf16Len)
+                    ) { match, _, _ in
+                        guard let range = match?.range, range.length > 0 else { return }
+                        let byteLen = Self.transcodeUTF16ToUTF8(
+                            src: utf16Base.advanced(by: range.location),
+                            length: range.length,
+                            dst: scratchBase
+                        )
+                        guard byteLen > 0 else { return }
+                        if byteLen == 1 {
+                            let r = ptrs.singleByte[Int(scratchBase[0])]
+                            if r >= 0 {
+                                output.append(Int(r))
                                 return
                             }
-                            Self.bytePairEncode(buf, table: table, parts: &parts, into: &output)
                         }
+                        let buf = UnsafeBufferPointer(start: scratchBase, count: byteLen)
+                        let hash = BPERankTable.fnv1a64(ptr: scratchBase, count: byteLen)
+                        if let directRank = BPERankTable.lookupRaw(
+                            queryBase: scratchBase,
+                            len: byteLen,
+                            hash: hash,
+                            ptrs: ptrs
+                        ) {
+                            output.append(Int(directRank))
+                            return
+                        }
+                        Self.bytePairEncode(buf, ptrs: ptrs, parts: &parts, into: &output)
                     }
                 }
             }
@@ -585,86 +757,90 @@ public final class BPETokenizer: TokenCounter, Sendable {
         _ chunk: String,
         regex: NSRegularExpression,
         parts: inout [(start: Int, rank: Int32)],
-        localCache: inout [UInt64: (bytes: [UInt8], count: Int)]
+        localCache: inout [UInt64: (bytes: [UInt8], count: Int)],
+        utf16Scratch: inout [UInt16],
+        utf8Scratch: inout [UInt8]
     ) -> Int {
         let nsChunk = chunk as NSString
         let utf16Len = nsChunk.length
         guard utf16Len > 0 else { return 0 }
 
-        var utf16Buf = [UInt16](repeating: 0, count: utf16Len)
-        nsChunk.getCharacters(&utf16Buf, range: NSRange(location: 0, length: utf16Len))
-        var scratchUTF8 = [UInt8](repeating: 0, count: max(64, utf16Len * 3))
-        let tableMask = table.mask
+        if utf16Scratch.count < utf16Len {
+            utf16Scratch = [UInt16](repeating: 0, count: max(utf16Len, 256))
+        }
+        nsChunk.getCharacters(&utf16Scratch, range: NSRange(location: 0, length: utf16Len))
+        let neededUTF8 = max(64, utf16Len * 3)
+        if utf8Scratch.count < neededUTF8 {
+            utf8Scratch = [UInt8](repeating: 0, count: neededUTF8)
+        }
 
         var chunkCount = 0
-        utf16Buf.withUnsafeBufferPointer { utf16Ptr in
-            scratchUTF8.withUnsafeMutableBufferPointer { scratchPtr in
-                table.arena.withUnsafeBufferPointer { arenaPtr in
-                    table.slots.withUnsafeBufferPointer { slotsPtr in
-                        guard let utf16Base = utf16Ptr.baseAddress,
-                            let scratchBase = scratchPtr.baseAddress,
-                            let arenaBase = arenaPtr.baseAddress,
-                            let slotsBase = slotsPtr.baseAddress
-                        else {
+        utf16Scratch.withUnsafeBufferPointer { utf16Ptr in
+            utf8Scratch.withUnsafeMutableBufferPointer { scratchPtr in
+                table.withPointers { ptrs in
+                    guard let utf16Base = utf16Ptr.baseAddress,
+                        let scratchBase = scratchPtr.baseAddress
+                    else {
+                        return
+                    }
+
+                    regex.enumerateMatches(
+                        in: chunk,
+                        options: [],
+                        range: NSRange(location: 0, length: utf16Len)
+                    ) { match, _, _ in
+                        guard let range = match?.range, range.length > 0 else { return }
+                        let byteLen = Self.transcodeUTF16ToUTF8(
+                            src: utf16Base.advanced(by: range.location),
+                            length: range.length,
+                            dst: scratchBase
+                        )
+                        guard byteLen > 0 else { return }
+                        if byteLen == 1 && ptrs.singleByte[Int(scratchBase[0])] >= 0 {
+                            chunkCount += 1
+                            return
+                        }
+                        let hash = BPERankTable.fnv1a64(ptr: scratchBase, count: byteLen)
+                        if BPERankTable.lookupRaw(
+                            queryBase: scratchBase,
+                            len: byteLen,
+                            hash: hash,
+                            ptrs: ptrs
+                        ) != nil {
+                            chunkCount += 1
                             return
                         }
 
-                        regex.enumerateMatches(
-                            in: chunk,
-                            options: [],
-                            range: NSRange(location: 0, length: utf16Len)
-                        ) { match, _, _ in
-                            guard let range = match?.range, range.length > 0 else { return }
-                            let byteLen = Self.transcodeUTF16ToUTF8(
-                                src: utf16Base.advanced(by: range.location),
-                                length: range.length,
-                                dst: scratchBase
-                            )
-                            guard byteLen > 0 else { return }
-                            let hash = BPERankTable.fnv1a64(ptr: scratchBase, count: byteLen)
-                            if BPERankTable.lookupRaw(
-                                queryBase: scratchBase,
-                                len: byteLen,
-                                hash: hash,
-                                arenaBase: arenaBase,
-                                slotsBase: slotsBase,
-                                mask: tableMask
-                            ) != nil {
-                                chunkCount += 1
+                        let buf = UnsafeBufferPointer(start: scratchBase, count: byteLen)
+                        if byteLen <= 64 {
+                            if let hit = localCache[hash],
+                                hit.bytes.count == byteLen,
+                                hit.bytes.withUnsafeBufferPointer({
+                                    guard let hitBase = $0.baseAddress else { return false }
+                                    return memcmp(hitBase, scratchBase, byteLen) == 0
+                                })
+                            {
+                                chunkCount += hit.count
                                 return
                             }
-
-                            let buf = UnsafeBufferPointer(start: scratchBase, count: byteLen)
-                            if byteLen <= 64 {
-                                if let hit = localCache[hash],
-                                    hit.bytes.count == byteLen,
-                                    hit.bytes.withUnsafeBufferPointer({
-                                        guard let hitBase = $0.baseAddress else { return false }
-                                        return memcmp(hitBase, scratchBase, byteLen) == 0
-                                    })
-                                {
-                                    chunkCount += hit.count
-                                    return
-                                }
-                                if let sharedHit = pieceCountCache.lookup(buf, hash: hash) {
-                                    if localCache.count < 4_096 {
-                                        localCache[hash] = (Array(buf), sharedHit)
-                                    }
-                                    chunkCount += sharedHit
-                                    return
-                                }
-                            }
-
-                            let mergedCount = Self.bytePairCount(buf, table: table, parts: &parts)
-                            if byteLen <= 64 {
-                                let saved = Array(buf)
+                            if let sharedHit = pieceCountCache.lookup(buf, hash: hash) {
                                 if localCache.count < 4_096 {
-                                    localCache[hash] = (saved, mergedCount)
+                                    localCache[hash] = (Array(buf), sharedHit)
                                 }
-                                pieceCountCache.store(saved, hash: hash, count: mergedCount)
+                                chunkCount += sharedHit
+                                return
                             }
-                            chunkCount += mergedCount
                         }
+
+                        let mergedCount = Self.bytePairCount(buf, ptrs: ptrs, parts: &parts)
+                        if byteLen <= 64 {
+                            let saved = Array(buf)
+                            if localCache.count < 4_096 {
+                                localCache[hash] = (saved, mergedCount)
+                            }
+                            pieceCountCache.store(saved, hash: hash, count: mergedCount)
+                        }
+                        chunkCount += mergedCount
                     }
                 }
             }
@@ -733,17 +909,20 @@ public final class BPETokenizer: TokenCounter, Sendable {
 
     private static func bytePairEncode(
         _ piece: UnsafeBufferPointer<UInt8>,
-        table: BPERankTable,
+        ptrs: BPERankTable.Pointers,
         parts: inout [(start: Int, rank: Int32)],
         into output: inout [Int]
     ) {
-        runBytePairMerge(piece, table: table, parts: &parts)
+        runBytePairMerge(piece, ptrs: ptrs, parts: &parts)
         guard let base = piece.baseAddress else { return }
         for idx in 0..<(parts.count - 1) {
             let start = parts[idx].start
             let end = parts[idx + 1].start
-            let sub = UnsafeBufferPointer(start: base.advanced(by: start), count: end - start)
-            if let rank = table.lookup(sub) {
+            if let rank = BPERankTable.lookupFast(
+                queryBase: base.advanced(by: start),
+                len: end - start,
+                ptrs: ptrs
+            ) {
                 output.append(Int(rank))
             }
         }
@@ -751,16 +930,16 @@ public final class BPETokenizer: TokenCounter, Sendable {
 
     private static func bytePairCount(
         _ piece: UnsafeBufferPointer<UInt8>,
-        table: BPERankTable,
+        ptrs: BPERankTable.Pointers,
         parts: inout [(start: Int, rank: Int32)]
     ) -> Int {
-        runBytePairMerge(piece, table: table, parts: &parts)
+        runBytePairMerge(piece, ptrs: ptrs, parts: &parts)
         return max(0, parts.count - 1)
     }
 
     private static func runBytePairMerge(
         _ piece: UnsafeBufferPointer<UInt8>,
-        table: BPERankTable,
+        ptrs: BPERankTable.Pointers,
         parts: inout [(start: Int, rank: Int32)]
     ) {
         let count = piece.count
@@ -769,10 +948,18 @@ public final class BPETokenizer: TokenCounter, Sendable {
 
         var minRank = Int32.max
         var minIndex = 0
+        let twoByteBase = ptrs.twoByteASCII
 
         for idx in 0..<(count - 1) {
-            let pair = UnsafeBufferPointer(start: base.advanced(by: idx), count: 2)
-            let rank = table.lookup(pair) ?? Int32.max
+            let b0 = base[idx]
+            let b1 = base[idx + 1]
+            let rank: Int32
+            if (b0 | b1) < 0x80 {
+                let fast = twoByteBase[(Int(b0) << 7) | Int(b1)]
+                rank = fast >= 0 ? fast : Int32.max
+            } else {
+                rank = BPERankTable.lookupFast(queryBase: base.advanced(by: idx), len: 2, ptrs: ptrs) ?? Int32.max
+            }
             if rank < minRank {
                 minRank = rank
                 minIndex = idx
@@ -785,9 +972,9 @@ public final class BPETokenizer: TokenCounter, Sendable {
         while minRank != Int32.max {
             let i = minIndex
             if i > 0 {
-                parts[i - 1].rank = pairRank(at: i - 1, skippingNext: true, parts: parts, base: base, table: table)
+                parts[i - 1].rank = pairRank(at: i - 1, skippingNext: true, parts: parts, base: base, ptrs: ptrs)
             }
-            parts[i].rank = pairRank(at: i, skippingNext: true, parts: parts, base: base, table: table)
+            parts[i].rank = pairRank(at: i, skippingNext: true, parts: parts, base: base, ptrs: ptrs)
             parts.remove(at: i + 1)
 
             minRank = Int32.max
@@ -807,7 +994,7 @@ public final class BPETokenizer: TokenCounter, Sendable {
         skippingNext: Bool,
         parts: [(start: Int, rank: Int32)],
         base: UnsafePointer<UInt8>,
-        table: BPERankTable
+        ptrs: BPERankTable.Pointers
     ) -> Int32 {
         let endPartIndex = skippingNext ? (index + 3) : (index + 2)
         guard endPartIndex < parts.count else {
@@ -815,23 +1002,27 @@ public final class BPETokenizer: TokenCounter, Sendable {
         }
         let start = parts[index].start
         let end = parts[endPartIndex].start
-        let slice = UnsafeBufferPointer(start: base.advanced(by: start), count: end - start)
-        return table.lookup(slice) ?? Int32.max
+        return BPERankTable.lookupFast(queryBase: base.advanced(by: start), len: end - start, ptrs: ptrs) ?? Int32.max
     }
 }
 
 // MARK: - Flat Arena Open-Addressed Rank Table
 
 private struct BPERankTable: Sendable {
-    struct Slot: Sendable {
-        var offset: UInt32
-        var length: UInt16
-        var occupied: Bool
-        var rank: Int32
+    struct Pointers {
+        var arena: UnsafePointer<UInt8>
+        var packedSlots: UnsafePointer<UInt64>
+        var ranks: UnsafePointer<Int32>
+        var singleByte: UnsafePointer<Int32>
+        var twoByteASCII: UnsafePointer<Int32>
+        var mask: Int
     }
 
     let arena: [UInt8]
-    let slots: [Slot]
+    let packedSlots: [UInt64]
+    let ranks: [Int32]
+    let singleByteRanks: [Int32]
+    let twoByteASCIIRanks: [Int32]
     let mask: Int
 
     init(vocabularyData: Data, capacity: Int, encodingName: String) throws {
@@ -841,10 +1032,10 @@ private struct BPERankTable: Sendable {
 
         var builtArena: [UInt8] = []
         builtArena.reserveCapacity(vocabularyData.count)
-        var builtSlots = [Slot](
-            repeating: Slot(offset: 0, length: 0, occupied: false, rank: 0),
-            count: capacity
-        )
+        var builtPacked = [UInt64](repeating: 0, count: capacity)
+        var builtRanks = [Int32](repeating: 0, count: capacity)
+        var builtSingleByte = [Int32](repeating: -1, count: 256)
+        var builtTwoByteASCII = [Int32](repeating: -1, count: 16_384)
 
         try vocabularyData.withUnsafeBytes { rawBuffer in
             guard let ptr = rawBuffer.bindMemory(to: UInt8.self).baseAddress else { return }
@@ -897,53 +1088,77 @@ private struct BPERankTable: Sendable {
                     throw BentoTokenizerError.malformedVocabularyEntry(encoding: encodingName, line: lineNumber)
                 }
 
-                let tokenOffset = UInt32(builtArena.count)
-                let tokenLength = UInt16(decodedToken.count)
+                if decodedToken.count == 1 {
+                    builtSingleByte[Int(decodedToken[0])] = parsedRank
+                } else if decodedToken.count == 2 && (decodedToken[0] | decodedToken[1]) < 0x80 {
+                    builtTwoByteASCII[(Int(decodedToken[0]) << 7) | Int(decodedToken[1])] = parsedRank
+                }
+
+                let tokenOffset = UInt64(builtArena.count)
+                let tokenLength = UInt64(decodedToken.count)
                 builtArena.append(contentsOf: decodedToken)
 
                 let hash = decodedToken.withUnsafeBufferPointer { Self.fnv1a64($0) }
                 var slotIndex = Int(truncatingIfNeeded: hash) & tableMask
-                while builtSlots[slotIndex].occupied {
+                while builtPacked[slotIndex] != 0 {
                     slotIndex = (slotIndex + 1) & tableMask
                 }
-                builtSlots[slotIndex] = Slot(
-                    offset: tokenOffset,
-                    length: tokenLength,
-                    occupied: true,
-                    rank: parsedRank
-                )
+                builtPacked[slotIndex] = (tokenOffset << 16) | tokenLength
+                builtRanks[slotIndex] = parsedRank
             }
         }
 
         self.arena = builtArena
-        self.slots = builtSlots
+        self.packedSlots = builtPacked
+        self.ranks = builtRanks
+        self.singleByteRanks = builtSingleByte
+        self.twoByteASCIIRanks = builtTwoByteASCII
         self.mask = tableMask
     }
 
     @inline(__always)
-    func lookup(_ slice: UnsafeBufferPointer<UInt8>) -> Int32? {
-        guard let base = slice.baseAddress else { return nil }
-        return lookup(slice, precomputedHash: Self.fnv1a64(ptr: base, count: slice.count))
+    func withPointers<R>(_ body: (Pointers) -> R) -> R {
+        arena.withUnsafeBufferPointer { arenaBuf in
+            packedSlots.withUnsafeBufferPointer { packedBuf in
+                ranks.withUnsafeBufferPointer { ranksBuf in
+                    singleByteRanks.withUnsafeBufferPointer { singleBuf in
+                        twoByteASCIIRanks.withUnsafeBufferPointer { twoBuf in
+                            let ptrs = Pointers(
+                                arena: arenaBuf.baseAddress!,
+                                packedSlots: packedBuf.baseAddress!,
+                                ranks: ranksBuf.baseAddress!,
+                                singleByte: singleBuf.baseAddress!,
+                                twoByteASCII: twoBuf.baseAddress!,
+                                mask: mask
+                            )
+                            return body(ptrs)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @inline(__always)
-    func lookup(_ slice: UnsafeBufferPointer<UInt8>, precomputedHash hash: UInt64) -> Int32? {
-        guard let queryBase = slice.baseAddress else { return nil }
-        return arena.withUnsafeBufferPointer { arenaBuf in
-            slots.withUnsafeBufferPointer { slotsBuf in
-                guard let arenaBase = arenaBuf.baseAddress, let slotsBase = slotsBuf.baseAddress else {
-                    return nil
-                }
-                return Self.lookupRaw(
-                    queryBase: queryBase,
-                    len: slice.count,
-                    hash: hash,
-                    arenaBase: arenaBase,
-                    slotsBase: slotsBase,
-                    mask: mask
-                )
+    static func lookupFast(
+        queryBase: UnsafePointer<UInt8>,
+        len: Int,
+        ptrs: Pointers
+    ) -> Int32? {
+        if len == 1 {
+            let r = ptrs.singleByte[Int(queryBase[0])]
+            return r >= 0 ? r : nil
+        }
+        if len == 2 {
+            let b0 = queryBase[0]
+            let b1 = queryBase[1]
+            if (b0 | b1) < 0x80 {
+                let r = ptrs.twoByteASCII[(Int(b0) << 7) | Int(b1)]
+                return r >= 0 ? r : nil
             }
         }
+        let hash = fnv1a64(ptr: queryBase, count: len)
+        return lookupRaw(queryBase: queryBase, len: len, hash: hash, ptrs: ptrs)
     }
 
     @inline(__always)
@@ -951,26 +1166,23 @@ private struct BPERankTable: Sendable {
         queryBase: UnsafePointer<UInt8>,
         len: Int,
         hash: UInt64,
-        arenaBase: UnsafePointer<UInt8>,
-        slotsBase: UnsafePointer<Slot>,
-        mask: Int
+        ptrs: Pointers
     ) -> Int32? {
         guard len > 0, len <= Int(UInt16.max) else {
             return nil
         }
-        let targetLen = UInt16(len)
-        var slotIndex = Int(truncatingIfNeeded: hash) & mask
+        var slotIndex = Int(truncatingIfNeeded: hash) & ptrs.mask
         while true {
-            let slot = slotsBase[slotIndex]
-            if !slot.occupied {
+            let packed = ptrs.packedSlots[slotIndex]
+            if packed == 0 {
                 return nil
             }
-            if slot.length == targetLen,
-                memcmp(arenaBase.advanced(by: Int(slot.offset)), queryBase, len) == 0
+            if Int(packed & 0xFFFF) == len,
+                memcmp(ptrs.arena.advanced(by: Int(packed >> 16)), queryBase, len) == 0
             {
-                return slot.rank
+                return ptrs.ranks[slotIndex]
             }
-            slotIndex = (slotIndex + 1) & mask
+            slotIndex = (slotIndex + 1) & ptrs.mask
         }
     }
 
@@ -1074,5 +1286,9 @@ private final class PieceCountCache: Sendable {
             }
             map[hash] = (bytes, count)
         }
+    }
+
+    func clear() {
+        storage.withLock { $0.removeAll(keepingCapacity: false) }
     }
 }
