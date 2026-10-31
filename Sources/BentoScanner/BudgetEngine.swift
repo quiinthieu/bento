@@ -3,18 +3,39 @@ import BentoCore
 import Foundation
 
 /// Assembles per-agent pre-prompt and deferred context `Budget` breakdowns from precedence-resolved artifacts
-/// (`PLAN.md` §4.1, §6.3, §6.4, §11 T09).
+/// (`PLAN.md` §4.1, §6.3, §6.4, §11 T09–T10).
 public struct BudgetEngine: Sendable {
+    private static let defaultUnprobedMCPTokens = 1_200
+    private static let deferredMCPToolSearchStubTokens = 120
+    private static let defaultClaudeAutoDeferFraction = 0.10
+
+    private enum ClaudeToolSearchPolicy {
+        case forced
+        case disabled
+        case auto(thresholdFraction: Double)
+    }
+
+    private struct EvaluatedMCPServer {
+        var tokens: Int
+        var range: ClosedRange<Int>
+        var method: String
+        var explicitlyDeferred: Bool
+    }
+
     /// Creates a stateless budget computation engine.
     public init() {}
 
-    /// Computes the context token `Budget` for `adapter` using `artifacts`, `resolution`, and `tokenizer`.
+    /// Computes the context token `Budget` for `adapter` using `artifacts`, `resolution`, `tokenizer`,
+    /// optional cached `mcpProbesByConfigHash`, and optional historical `mcpFallbackEstimate`.
     public func computeBudget(
         adapter: any AgentAdapter,
         artifacts: [Artifact],
         resolution: Resolution,
         model: String? = nil,
         tokenizer: any TokenCountingProvider,
+        mcpProbesByConfigHash: [String: MCPProbeRecord] = [:],
+        mcpFallbackEstimate: MCPFallbackEstimate? = nil,
+        environment: [String: String] = [:],
         measuredFirstTurnInput: Int? = nil
     ) throws -> Budget {
         let agent = type(of: adapter).id
@@ -33,6 +54,59 @@ public struct BudgetEngine: Sendable {
             resolution: resolution,
             artifactsByID: artifactsByID
         )
+        let contextWindow = tokenizer.contextWindow(for: agent, model: effectiveModel)
+
+        // Pre-evaluate active MCP servers so adapter-level auto-defer thresholds (e.g. Claude ENABLE_TOOL_SEARCH)
+        // can inspect aggregate MCP tool schema tokens across the repository resolution.
+        var evaluatedMCPByArtifactID: [ArtifactID: EvaluatedMCPServer] = [:]
+        for resolved in resolution.ordered where resolved.effectiveLoadMode != .never {
+            guard let artifact = artifactsByID[resolved.artifactID],
+                case .mcpServer(let mcpConfig) = artifact.payload
+            else {
+                continue
+            }
+            evaluatedMCPByArtifactID[artifact.id] = evaluateMCPServer(
+                config: mcpConfig,
+                explicitlyDeferred: resolved.effectiveLoadMode == .deferred,
+                agent: agent,
+                model: effectiveModel,
+                tokenizer: tokenizer,
+                mcpProbesByConfigHash: mcpProbesByConfigHash,
+                mcpFallbackEstimate: mcpFallbackEstimate
+            )
+        }
+
+        let claudeAutoDeferTriggered: Bool
+        let claudeForceDisableDefer: Bool
+        if agent == .claudeCode {
+            let policy = Self.resolveClaudeToolSearchPolicy(
+                resolution: resolution,
+                artifactsByID: artifactsByID,
+                environment: environment
+            )
+            switch policy {
+            case .forced:
+                claudeAutoDeferTriggered = true
+                claudeForceDisableDefer = false
+            case .disabled:
+                claudeAutoDeferTriggered = false
+                claudeForceDisableDefer = true
+            case .auto(let fraction):
+                claudeForceDisableDefer = false
+                if let window = contextWindow, window > 0 {
+                    let thresholdTokens = max(1, Int((Double(window) * fraction).rounded()))
+                    let nonDeferredSum = evaluatedMCPByArtifactID.values
+                        .filter { !$0.explicitlyDeferred }
+                        .reduce(0) { $0 + $1.tokens }
+                    claudeAutoDeferTriggered = nonDeferredSum >= thresholdTokens
+                } else {
+                    claudeAutoDeferTriggered = false
+                }
+            }
+        } else {
+            claudeAutoDeferTriggered = false
+            claudeForceDisableDefer = false
+        }
 
         var items = adapter.builtInBudget(model: effectiveModel)
 
@@ -40,6 +114,27 @@ public struct BudgetEngine: Sendable {
             guard let artifact = artifactsByID[resolved.artifactID] else {
                 continue
             }
+
+            if resolved.effectiveLoadMode != .never,
+                case .mcpServer = artifact.payload,
+                let evaluated = evaluatedMCPByArtifactID[artifact.id]
+            {
+                let shouldDefer: Bool
+                if claudeForceDisableDefer {
+                    shouldDefer = false
+                } else {
+                    shouldDefer = evaluated.explicitlyDeferred || claudeAutoDeferTriggered
+                }
+                items.append(
+                    contentsOf: Self.materializeMCPItems(
+                        artifact: artifact,
+                        evaluated: evaluated,
+                        deferred: shouldDefer
+                    )
+                )
+                continue
+            }
+
             let contributions = adapter.budgetContributions(for: resolved, artifact: artifact)
             for (index, contribution) in contributions.enumerated() {
                 items.append(
@@ -55,7 +150,6 @@ public struct BudgetEngine: Sendable {
             }
         }
 
-        let contextWindow = tokenizer.contextWindow(for: agent, model: effectiveModel)
         return Budget(
             agent: agent,
             folder: resolution.folder,
@@ -66,7 +160,126 @@ public struct BudgetEngine: Sendable {
         )
     }
 
-    // MARK: - Private Helpers
+    // MARK: - MCP Server Evaluation
+
+    private func evaluateMCPServer(
+        config: MCPServerConfig,
+        explicitlyDeferred: Bool,
+        agent: AgentID,
+        model: String?,
+        tokenizer: any TokenCountingProvider,
+        mcpProbesByConfigHash: [String: MCPProbeRecord],
+        mcpFallbackEstimate: MCPFallbackEstimate?
+    ) -> EvaluatedMCPServer {
+        let configHash = MCPServerConfigHasher.hash(config)
+
+        if let probe = mcpProbesByConfigHash[configHash], probe.ok {
+            let activeTools = probe.activeTools(for: config)
+            var totalTokens = 0
+            var counterMethod: String?
+
+            for tool in activeTools {
+                let json = tool.canonicalSerializationJSON()
+                let cacheKey = "mcp-budget:\(configHash):\(tool.name):\(ContentHasher.sha256Hex(Data(json.utf8)))"
+                let estimate = tokenizer.estimateTokens(
+                    text: json,
+                    contentHash: cacheKey,
+                    agent: agent,
+                    model: model
+                )
+                totalTokens += estimate.tokens
+                if counterMethod == nil {
+                    counterMethod = estimate.method
+                }
+            }
+
+            let baseMethod =
+                counterMethod
+                ?? tokenizer.estimateTokens(text: "{}", contentHash: nil, agent: agent, model: model).method
+            let toolWord = activeTools.count == 1 ? "tool" : "tools"
+            let lo = max(0, Int((Double(totalTokens) * 0.88).rounded(.down)))
+            let hi = max(lo, Int((Double(totalTokens) * 1.12).rounded(.up)))
+
+            return EvaluatedMCPServer(
+                tokens: totalTokens,
+                range: lo...hi,
+                method: "probed (\(activeTools.count) \(toolWord), \(baseMethod))",
+                explicitlyDeferred: explicitlyDeferred
+            )
+        }
+
+        if let fallback = mcpFallbackEstimate, fallback.sampleServerCount > 0 {
+            let fallbackTokens = max(0, fallback.estimatedServerTokens(for: config))
+            let lo = max(0, Int((Double(fallbackTokens) * 0.5).rounded(.down)))
+            let hi = max(lo, Int((Double(fallbackTokens) * 1.8).rounded(.up)))
+            let serverWord = fallback.sampleServerCount == 1 ? "server" : "servers"
+            return EvaluatedMCPServer(
+                tokens: fallbackTokens,
+                range: lo...hi,
+                method: "unknown (not probed; median fallback from \(fallback.sampleServerCount) probed \(serverWord))",
+                explicitlyDeferred: explicitlyDeferred
+            )
+        }
+
+        let defaultTokens = Self.defaultUnprobedMCPTokens
+        let lo = max(0, Int((Double(defaultTokens) * 0.5).rounded(.down)))
+        let hi = max(lo, Int((Double(defaultTokens) * 1.8).rounded(.up)))
+        return EvaluatedMCPServer(
+            tokens: defaultTokens,
+            range: lo...hi,
+            method: "unknown (not probed; default fallback estimate)",
+            explicitlyDeferred: explicitlyDeferred
+        )
+    }
+
+    private static func materializeMCPItems(
+        artifact: Artifact,
+        evaluated: EvaluatedMCPServer,
+        deferred: Bool
+    ) -> [BudgetItem] {
+        if deferred {
+            let stubTokens = deferredMCPToolSearchStubTokens
+            let stubLo = max(0, Int((Double(stubTokens) * 0.75).rounded(.down)))
+            let stubHi = max(stubLo, Int((Double(stubTokens) * 1.25).rounded(.up)))
+            return [
+                BudgetItem(
+                    artifactID: artifact.id,
+                    category: .mcpToolsLoaded,
+                    label: "\(artifact.name) (tool-search stub)",
+                    tokens: stubTokens,
+                    range: stubLo...stubHi,
+                    confidence: .estimated,
+                    method: "estimated (deferred MCP tool-search stub)",
+                    countsTowardPrePrompt: true
+                ),
+                BudgetItem(
+                    artifactID: artifact.id,
+                    category: .mcpToolsDeferred,
+                    label: "\(artifact.name) (deferred tools)",
+                    tokens: evaluated.tokens,
+                    range: evaluated.range,
+                    confidence: .estimated,
+                    method: evaluated.method,
+                    countsTowardPrePrompt: false
+                )
+            ]
+        }
+
+        return [
+            BudgetItem(
+                artifactID: artifact.id,
+                category: .mcpToolsLoaded,
+                label: artifact.name,
+                tokens: evaluated.tokens,
+                range: evaluated.range,
+                confidence: .estimated,
+                method: evaluated.method,
+                countsTowardPrePrompt: true
+            )
+        ]
+    }
+
+    // MARK: - Contribution Materialization
 
     private func materializeItem(
         from contribution: BudgetContribution,
@@ -162,6 +375,67 @@ public struct BudgetEngine: Sendable {
         )
     }
 
+    // MARK: - Settings & Policy Helpers
+
+    private static func resolveClaudeToolSearchPolicy(
+        resolution: Resolution,
+        artifactsByID: [ArtifactID: Artifact],
+        environment: [String: String]
+    ) -> ClaudeToolSearchPolicy {
+        var rawDirective: String?
+
+        for resolved in resolution.ordered {
+            guard let artifact = artifactsByID[resolved.artifactID],
+                artifact.enabled,
+                case .settings(let doc) = artifact.payload
+            else {
+                continue
+            }
+            if case .bool(let flag) = doc.tree["enableToolSearch"] {
+                rawDirective = flag ? "true" : "false"
+            }
+            if case .string(let str) = doc.tree["enableToolSearch"] {
+                rawDirective = str
+            }
+            if case .object(let envObj) = doc.tree["env"],
+                case .string(let envVal) = envObj["ENABLE_TOOL_SEARCH"]
+            {
+                rawDirective = envVal
+            }
+        }
+
+        if let envOverride = environment["ENABLE_TOOL_SEARCH"],
+            !envOverride.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        {
+            rawDirective = envOverride
+        }
+
+        guard let normalized = rawDirective?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
+            !normalized.isEmpty
+        else {
+            return .auto(thresholdFraction: defaultClaudeAutoDeferFraction)
+        }
+
+        if normalized == "true" || normalized == "1" {
+            return .forced
+        }
+        if normalized == "false" || normalized == "0" {
+            return .disabled
+        }
+        if normalized == "auto" {
+            return .auto(thresholdFraction: defaultClaudeAutoDeferFraction)
+        }
+        if normalized.hasPrefix("auto:"),
+            let pct = Double(normalized.dropFirst("auto:".count)),
+            pct > 0,
+            pct <= 100
+        {
+            return .auto(thresholdFraction: pct / 100.0)
+        }
+
+        return .auto(thresholdFraction: defaultClaudeAutoDeferFraction)
+    }
+
     private static func resolveEffectiveModel(
         explicitModel: String?,
         resolution: Resolution,
@@ -171,7 +445,6 @@ public struct BudgetEngine: Sendable {
             return trimmed
         }
 
-        // Settings artifacts in `resolution.ordered` are ordered base -> override across all adapters.
         var configuredModel: String?
         for resolved in resolution.ordered {
             guard let artifact = artifactsByID[resolved.artifactID],

@@ -91,10 +91,10 @@ bentoctx resolve [--home PATH] [--db PATH] --repo PATH --agent AGENT --json
 
 ## `budget --json`
 
-Computes pre-prompt and deferred/on-invoke/conditional context token `Budget` breakdowns across all budget-capable agents (`claudeCode`, `codex`, `gemini`, `copilot`), or for a single `--agent`, when launched in `--repo`.
+Computes pre-prompt and deferred/on-invoke/conditional context token `Budget` breakdowns across all budget-capable agents (`claudeCode`, `codex`, `gemini`, `copilot`), or for a single `--agent`, when launched in `--repo`. Passing `--probe-mcp <NAME>` (repeatable or comma-separated; `'*'` for all active servers) grants explicit consent for the named server(s), probes them over a scrubbed 15 s stdio/HTTP session, and caches schemas in SQLite by `server_config_hash`.
 
 ```bash
-bentoctx budget [--home PATH] [--db PATH] --repo PATH [--agent AGENT] [--model MODEL] --json
+bentoctx budget [--home PATH] [--db PATH] --repo PATH [--agent AGENT] [--model MODEL] [--probe-mcp NAME]... --json
 ```
 
 ### Top-Level Fields

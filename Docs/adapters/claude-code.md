@@ -78,3 +78,7 @@
 5. **Hooks:**
    - Parsed from the 3-level `hooks.<Event>[i].{matcher, hooks: [{type, command, timeout}]}` schema in settings files and plugin `hooks/hooks.json`.
    - Active hooks across tiers run on lifecycle events (`LoadMode.onInvoke`), unless `disableAllHooks: true` is set by the highest-precedence settings tier defining that key (`effectiveLoadMode = .never`).
+
+6. **MCP Tool Search & Deferred Loading (`ENABLE_TOOL_SEARCH`):**
+   - Verified against `https://code.claude.com/docs/en/mcp` (`2026-10-31`): Claude Code's MCP Tool Search (`ENABLE_TOOL_SEARCH` in shell env or `settings.json` `"env"`, plus `enableToolSearch`) supports `true` (always defer MCP tool definitions behind a lightweight tool-search stub), `false` (force upfront `mcpToolsLoaded` loading), `auto` (default **10%** of the model's context window), and `auto:N` (custom `N%` context-window threshold).
+   - Individual MCP entries with explicit `deferLoading: true` / `defer_loading: true` / `loadMode: "deferred"` defer unconditionally unless `ENABLE_TOOL_SEARCH=false`; otherwise `BudgetEngine` triggers auto-deferral once aggregate non-deferred MCP tool tokens reach the configured context-window threshold.
