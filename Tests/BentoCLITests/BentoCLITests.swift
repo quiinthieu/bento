@@ -1,0 +1,276 @@
+import BentoCore
+import BentoTestSupport
+import Foundation
+import Testing
+
+struct BentoCLITests {
+    @Test("bentoctx scan, inventory, and resolve --json conform to Docs/cli-schema.md")
+    func cliJsonOutputsMatchDocumentedSchema() throws {
+        let fixture = try FixtureHome(scenario: "polyglot")
+        let repoURL = fixture.url.appendingPathComponent("repos/demo-app").standardizedFileURL
+
+        // 1. scan --home <polyglot> --json
+        let scanOut = try runCLI(["scan", "--home", fixture.url.path, "--json"])
+        #expect(scanOut.exitCode == 0)
+        let scanJSON = try parseJSONObject(scanOut.stdout)
+        #expect(scanJSON["schemaVersion"] as? Int == 1)
+        #expect(scanJSON["command"] as? String == "scan")
+        #expect((scanJSON["snapshotID"] as? String)?.isEmpty == false)
+        #expect((scanJSON["generatedAt"] as? String)?.isEmpty == false)
+        #expect((scanJSON["createdAt"] as? String)?.isEmpty == false)
+        #expect(scanJSON["scannerVersion"] as? String == Product.version)
+        #expect(scanJSON["homePath"] as? String == fixture.url.standardizedFileURL.path)
+        #expect((scanJSON["homeHash"] as? String)?.count == 64)
+        #expect((scanJSON["artifactCount"] as? Int ?? 0) > 0)
+        #expect(scanJSON["resolutionCount"] as? Int == 6)
+
+        let detections = try #require(scanJSON["detections"] as? [String: Any])
+        #expect(detections.count == 6)
+        let repos = try #require(scanJSON["repos"] as? [[String: Any]])
+        #expect(repos.count == 1)
+        #expect(repos.first?["displayName"] as? String == "demo-app")
+
+        // 2. inventory --home <polyglot> --agent claudeCode --json
+        let invOut = try runCLI([
+            "inventory",
+            "--home", fixture.url.path,
+            "--agent", "claudeCode",
+            "--json"
+        ])
+        #expect(invOut.exitCode == 0)
+        let invJSON = try parseJSONObject(invOut.stdout)
+        #expect(invJSON["schemaVersion"] as? Int == 1)
+        #expect(invJSON["command"] as? String == "inventory")
+        #expect(invJSON["agentFilter"] as? String == "claudeCode")
+        #expect(invJSON["repoFilter"] == nil)
+        let invArtifacts = try decodeField([Artifact].self, key: "artifacts", in: invOut.stdout)
+        #expect(!invArtifacts.isEmpty)
+        #expect(invArtifacts.allSatisfy { $0.agent == .claudeCode })
+
+        // 3. resolve --home <polyglot> --repo <demo-app> --agent claude-code --json
+        let resOut = try runCLI([
+            "resolve",
+            "--home", fixture.url.path,
+            "--repo", repoURL.path,
+            "--agent", "claude-code",
+            "--json"
+        ])
+        #expect(resOut.exitCode == 0)
+        let resJSON = try parseJSONObject(resOut.stdout)
+        #expect(resJSON["schemaVersion"] as? Int == 1)
+        #expect(resJSON["command"] as? String == "resolve")
+        #expect(resJSON["agent"] as? String == "claudeCode")
+        #expect(resJSON["repoPath"] as? String == repoURL.path)
+        let resolution = try decodeField(Resolution.self, key: "resolution", in: resOut.stdout)
+        #expect(resolution.agent == .claudeCode)
+        #expect(resolution.folder == repoURL.path)
+        #expect(!resolution.ordered.isEmpty)
+        let resArtifacts = try decodeField([Artifact].self, key: "artifacts", in: resOut.stdout)
+        #expect(!resArtifacts.isEmpty)
+    }
+
+    @Test("bentoctx shares persistent WAL SQLite store via --db and renders human-readable output")
+    func cliSharesSQLiteStoreAndRendersHumanOutput() throws {
+        let fixture = try FixtureHome(scenario: "polyglot")
+        let repoURL = fixture.url.appendingPathComponent("repos/demo-app").standardizedFileURL
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("bento-cli-db-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+        let dbURL = tempDir.appendingPathComponent("bento.sqlite")
+
+        let scanOut = try runCLI([
+            "scan",
+            "--home", fixture.url.path,
+            "--db", dbURL.path,
+            "--json"
+        ])
+        #expect(scanOut.exitCode == 0)
+        #expect(FileManager.default.fileExists(atPath: dbURL.path))
+        let scanJSON = try parseJSONObject(scanOut.stdout)
+        let persistedSnapshotID = try #require(scanJSON["snapshotID"] as? String)
+
+        // Subsequent inventory & resolve with the same --db reuse the persisted snapshot ID.
+        let invOut = try runCLI([
+            "inventory",
+            "--home", fixture.url.path,
+            "--db", dbURL.path,
+            "--repo", repoURL.path,
+            "--json"
+        ])
+        #expect(invOut.exitCode == 0)
+        let invJSON = try parseJSONObject(invOut.stdout)
+        #expect(invJSON["snapshotID"] as? String == persistedSnapshotID)
+        #expect(invJSON["repoFilter"] as? String == repoURL.path)
+
+        let resOut = try runCLI([
+            "resolve",
+            "--home", fixture.url.path,
+            "--db", dbURL.path,
+            "--repo", repoURL.path,
+            "--agent", "codex",
+            "--json"
+        ])
+        #expect(resOut.exitCode == 0)
+        let resJSON = try parseJSONObject(resOut.stdout)
+        #expect(resJSON["snapshotID"] as? String == persistedSnapshotID)
+
+        // Human-readable output (no --json) succeeds cleanly.
+        let humanScan = try runCLI(["scan", "--home", fixture.url.path])
+        #expect(humanScan.exitCode == 0)
+        #expect(humanScan.stdoutString.contains("demo-app"))
+    }
+
+    @Test("bentoctx runs cleanly against a chmod a-w read-only copy of polyglot without writes")
+    func cliRunsCleanlyOnReadOnlyHome() throws {
+        let fixture = try FixtureHome(scenario: "polyglot")
+        let tempCopy = try fixture.copyToTemporaryDirectory()
+        defer {
+            Self.setWritableRecursively(at: tempCopy, writable: true)
+            try? FileManager.default.removeItem(at: tempCopy)
+        }
+        Self.setWritableRecursively(at: tempCopy, writable: false)
+
+        let repoPath = tempCopy.appendingPathComponent("repos/demo-app").path
+        let scanRes = try runCLI(["scan", "--home", tempCopy.path, "--json"])
+        #expect(scanRes.exitCode == 0)
+        let invRes = try runCLI(["inventory", "--home", tempCopy.path, "--json"])
+        #expect(invRes.exitCode == 0)
+        let resRes = try runCLI([
+            "resolve",
+            "--home", tempCopy.path,
+            "--repo", repoPath,
+            "--agent", "gemini",
+            "--json"
+        ])
+        #expect(resRes.exitCode == 0)
+    }
+
+    // MARK: - Helpers
+
+    private struct CLIResult {
+        var exitCode: Int32
+        var stdout: Data
+        var stderr: Data
+
+        var stdoutString: String { String(decoding: stdout, as: UTF8.self) }
+    }
+
+    private final class DataBox: @unchecked Sendable {
+        var data = Data()
+    }
+
+    private func runCLI(_ arguments: [String]) throws -> CLIResult {
+        let binary = try Self.locateBuiltCLIBinary()
+        let process = Process()
+        process.executableURL = binary
+        process.arguments = arguments
+
+        let homePath: String
+        if let homeIndex = arguments.firstIndex(of: "--home"), homeIndex + 1 < arguments.count {
+            homePath = arguments[homeIndex + 1]
+        } else {
+            homePath = FileManager.default.temporaryDirectory.path
+        }
+        process.environment = [
+            "HOME": homePath,
+            "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+            "BENTO_SYSTEM_ROOT": homePath
+        ]
+
+        let inPipe = Pipe()
+        let outPipe = Pipe()
+        let errPipe = Pipe()
+        process.standardInput = inPipe
+        process.standardOutput = outPipe
+        process.standardError = errPipe
+
+        let exitSemaphore = DispatchSemaphore(value: 0)
+        process.terminationHandler = { _ in
+            exitSemaphore.signal()
+        }
+
+        try process.run()
+        try? inPipe.fileHandleForWriting.close()
+
+        let outBox = DataBox()
+        let errBox = DataBox()
+        let pipeGroup = DispatchGroup()
+
+        pipeGroup.enter()
+        DispatchQueue.global(qos: .userInitiated).async {
+            outBox.data = outPipe.fileHandleForReading.readDataToEndOfFile()
+            pipeGroup.leave()
+        }
+
+        pipeGroup.enter()
+        DispatchQueue.global(qos: .userInitiated).async {
+            errBox.data = errPipe.fileHandleForReading.readDataToEndOfFile()
+            pipeGroup.leave()
+        }
+
+        let waitResult = exitSemaphore.wait(timeout: .now() + .seconds(15))
+        if waitResult == .timedOut {
+            process.terminate()
+            _ = exitSemaphore.wait(timeout: .now() + .seconds(2))
+            Issue.record("CLI subprocess timed out for arguments: \(arguments)")
+        }
+        _ = pipeGroup.wait(timeout: .now() + .seconds(5))
+
+        return CLIResult(
+            exitCode: process.terminationStatus,
+            stdout: outBox.data,
+            stderr: errBox.data
+        )
+    }
+
+    private func parseJSONObject(_ data: Data) throws -> [String: Any] {
+        let raw = try JSONSerialization.jsonObject(with: data)
+        return try #require(raw as? [String: Any])
+    }
+
+    private func decodeField<T: Decodable>(_ type: T.Type, key: String, in data: Data) throws -> T {
+        let obj = try parseJSONObject(data)
+        let fieldObj = try #require(obj[key])
+        let fieldData = try JSONSerialization.data(withJSONObject: fieldObj)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(T.self, from: fieldData)
+    }
+
+    private static func locateBuiltCLIBinary() throws -> URL {
+        let bundleURL = Bundle(for: CLIBundleAnchor.self).bundleURL
+        let buildDir = bundleURL.deletingLastPathComponent()
+        let siblingBinary = buildDir.appendingPathComponent(Product.cliName)
+        if FileManager.default.isExecutableFile(atPath: siblingBinary.path) {
+            return siblingBinary
+        }
+
+        let debugBinary = FixtureHome.repositoryRoot()
+            .appendingPathComponent(".build/debug")
+            .appendingPathComponent(Product.cliName)
+        if FileManager.default.isExecutableFile(atPath: debugBinary.path) {
+            return debugBinary
+        }
+
+        throw CocoaError(.fileNoSuchFile)
+    }
+
+    private static func setWritableRecursively(at root: URL, writable: Bool) {
+        let fm = FileManager.default
+        var urls: [URL] = [root.standardizedFileURL]
+        if let enumerator = fm.enumerator(at: root.standardizedFileURL, includingPropertiesForKeys: nil) {
+            while let next = enumerator.nextObject() as? URL {
+                urls.append(next.standardizedFileURL)
+            }
+        }
+        for url in (writable ? urls : urls.reversed()) {
+            guard let attrs = try? fm.attributesOfItem(atPath: url.path) else { continue }
+            if (attrs[.type] as? FileAttributeType) == .typeSymbolicLink { continue }
+            let perms = (attrs[.posixPermissions] as? NSNumber)?.intValue ?? 0o755
+            let updated = writable ? (perms | 0o200) : (perms & ~0o222)
+            try? fm.setAttributes([.posixPermissions: updated], ofItemAtPath: url.path)
+        }
+    }
+}
+
+private final class CLIBundleAnchor {}

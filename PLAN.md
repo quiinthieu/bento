@@ -619,7 +619,7 @@ Each task is sized for one agent session (~0.5–2 days of agent work). Tick `[x
   *AC:* `codex-basic` and `gemini-basic` goldens and contract tests pass. Docs files are written.
 - [x] **T06 Copilot, Cursor, Windsurf adapters + repo discovery.** Copilot full inventory and resolution (`applyTo` → conditional). Cursor/Windsurf inventory + rules only (capabilities exclude budget/usage). Repo discovery from §5.3.
   *AC:* goldens pass. Repo discovery finds all repos referenced by fixture logs/configs, dedupes by real path and ignores missing dirs.
-- [ ] **T07 Store + Scanner + FSEvents.** GRDB migrations (§4.2), snapshot persistence, `Workspace` actor, `FileWatcher` protocol with an FSEvents implementation, incremental rescan by PathCatalog match, and CLI `scan` / `inventory` / `resolve` with `--json`.
+- [x] **T07 Store + Scanner + FSEvents.** GRDB migrations (§4.2), snapshot persistence, `Workspace` actor, `FileWatcher` protocol with an FSEvents implementation, incremental rescan by PathCatalog match, and CLI `scan` / `inventory` / `resolve` with `--json`.
   *AC:* modifying a fixture file in a temp copy triggers a rescan of only that adapter scope (asserted via counters). Cold scan of `polyglot` takes under 500 ms in a test. The read-only proof test passes. CLI JSON matches `Docs/cli-schema.md`.
 
 ### M2 Context budget
