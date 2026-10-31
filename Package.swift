@@ -46,7 +46,10 @@ let package = Package(
         .target(
             name: "BentoTokenizer",
             dependencies: ["BentoCore"],
-            exclude: ["README.md"]
+            exclude: ["README.md"],
+            resources: [
+                .copy("Resources")
+            ]
         ),
         .target(
             name: "BentoLogIngest",
@@ -149,6 +152,10 @@ let package = Package(
         .testTarget(
             name: "BentoCLITests",
             dependencies: ["BentoCore", "BentoStore", "BentoScanner", "BentoTestSupport"]
+        ),
+        .testTarget(
+            name: "BentoTokenizerTests",
+            dependencies: ["BentoCore", "BentoTokenizer", "BentoTestSupport"]
         ),
         .testTarget(
             name: "BentoUITests",
