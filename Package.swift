@@ -183,7 +183,28 @@ let package = Package(
         ),
         .testTarget(
             name: "BentoCLITests",
-            dependencies: ["BentoCore", "BentoHygiene", "BentoStore", "BentoScanner", "BentoTestSupport"]
+            dependencies: [
+                "BentoCore",
+                "BentoFixes",
+                "BentoHygiene",
+                "BentoStore",
+                "BentoScanner",
+                "BentoTestSupport"
+            ]
+        ),
+        .testTarget(
+            name: "BentoFixesTests",
+            dependencies: [
+                "BentoCore",
+                "BentoParsing",
+                "BentoFixes",
+                "BentoAdapters",
+                "BentoHygiene",
+                "BentoTokenizer",
+                "BentoScanner",
+                "BentoStore",
+                "BentoTestSupport"
+            ]
         ),
         .testTarget(
             name: "BentoHygieneTests",

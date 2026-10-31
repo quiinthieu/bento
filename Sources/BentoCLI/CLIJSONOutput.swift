@@ -1,4 +1,5 @@
 import BentoCore
+import BentoFixes
 import Foundation
 
 /// Versioned CLI JSON output envelopes (`Docs/cli-schema.md`, `"schemaVersion": 1`).
@@ -101,6 +102,35 @@ enum CLIJSONOutput {
         var warningCount: Int
         var infoCount: Int
         var findings: [Finding]
+    }
+
+    struct FixResponse: Codable, Sendable {
+        var schemaVersion: Int = CLIJSONOutput.currentSchemaVersion
+        var command: String = "fix"
+        var generatedAt: Date
+        var snapshotID: String
+        var fixID: String
+        var kind: FixKind
+        var agent: String
+        var summary: String
+        var applied: Bool
+        var dryRun: Bool
+        var backupDir: String?
+        var status: String
+        var affectedPaths: [String]
+        var operations: [PersistedFixPlanSummary.OperationSummary]
+        var diffs: [UnifiedDiff]
+    }
+
+    struct UndoResponse: Codable, Sendable {
+        var schemaVersion: Int = CLIJSONOutput.currentSchemaVersion
+        var command: String = "undo"
+        var generatedAt: Date
+        var fixID: String
+        var kind: FixKind
+        var backupDir: String
+        var status: String
+        var undoneAt: Date?
     }
 
     static func printJSON<T: Encodable>(_ payload: T) throws {
