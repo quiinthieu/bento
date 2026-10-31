@@ -168,6 +168,10 @@ public enum BentoMigrations: Sendable {
             )
         }
 
+        migrator.registerMigration("v2_log_file_decoder_state") { db in
+            try db.execute(sql: "ALTER TABLE log_file ADD COLUMN decoder_state BLOB")
+        }
+
         return migrator
     }
 }

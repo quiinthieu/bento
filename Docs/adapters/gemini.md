@@ -70,3 +70,8 @@
    - **Subagents & Commands:** `project` > `user` > `extension`. TOML commands derive their slash-command name from their relative path under `commands/` with `/` mapped to `:`.
    - **Extensions:** Loaded from `~/.gemini/extensions/*/gemini-extension.json`, respecting `~/.gemini/extensions/extension-enablement.json` and `extensions.disabled` settings.
    - **Hooks:** Extracted from `settings.json` `hooks.<Event>` arrays and extension `hooks/hooks.json`. Gemini CLI hook `timeout` values are configured in milliseconds (default `60000`) and normalized to `HookConfig.timeoutSeconds`.
+
+5. **Chat Transcript Log Schema (`GeminiLogDecoder`, verified `2026-10-31`):**
+   - Path: `~/.gemini/tmp/<project-hash>/chats/session-*.jsonl` (modern append-only JSONL), legacy `session-*.json` (`messages[]`), and `.zst` variants. `<project-hash>` resolves to workspace `inferredCwd` via `.project_root` or SHA-256 directory matching.
+   - Supports both modern records (`session_metadata`, `gemini`, `message_update` keyed by message `id`) and legacy monolithic JSON documents (`{ sessionId, projectHash, startTime, messages: [...] }`).
+   - Extracts token counts from either `tokens` (`input`, `cached`, `output`) or `usageMetadata` (`promptTokenCount`, `cachedContentTokenCount`, `candidatesTokenCount`), and classifies `toolCalls` (deduped by `id`) across `activate_skill`, `delegate_to_agent`, `mcp__<server>__<tool>` / `serverName`, and built-in tools without storing message text.

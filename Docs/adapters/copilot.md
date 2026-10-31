@@ -59,3 +59,7 @@
    - **Skills:** `<repo>/.agents/skills` > `<repo>/.github/skills` > `~/.agents/skills` > `~/.copilot/skills`.
    - **Custom Agents:** `<repo>/.github/agents` > `~/.copilot/agents`. Filenames ending in `.agent.md` strip the `.agent.md` suffix when deriving default agent names.
    - **Prompts & Hooks:** Prompt files strip `.prompt.md` for their command name and load `onInvoke`. Hooks support both Copilot CLI `{ "bash": "...", "timeoutSec": 30 }` and `{ "command": "...", "timeout": 30 }` entries.
+
+4. **Session Event Log Schema (`CopilotLogDecoder`, verified `2026-10-31`):**
+   - Path: `~/.copilot/session-state/<session-id>/events.jsonl` (and `.jsonl.zst`), with `inferredCwd` fallback read from sibling `workspace.yaml`.
+   - Decodes `session.start` (`sessionId`, `cwd`, `data.selectedModel`), `session.model_change` (`data.newModel`), `tool.execution_start` (deduped by `data.toolCallId`, classifying explicit `data.mcpServerName` + `data.mcpToolName`, `mcp__<server>__<tool>`, `skill`, `agent`, and built-in tools), and `assistant.usage` (`inputTokens`, `cacheReadTokens`, `outputTokens`). Prompt and tool-argument content is never stored.

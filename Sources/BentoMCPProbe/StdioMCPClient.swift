@@ -117,11 +117,12 @@ public struct StdioMCPClient: Sendable {
                 return
             }
 
-            // Drain stderr asynchronously into a bounded 16 KB buffer so chatty servers never block.
-            DispatchQueue.global(qos: .utility).async {
-                let handle = stderrPipe.fileHandleForReading
+            // Drain stderr on a dedicated thread into a bounded 16 KB buffer so chatty servers never block
+            // and GCD global-queue saturation under `swift test --parallel` cannot starve stderr collection.
+            let stderrHandle = stderrPipe.fileHandleForReading
+            let stderrThread = Thread {
                 while true {
-                    let chunk = handle.availableData
+                    let chunk = stderrHandle.availableData
                     if chunk.isEmpty {
                         break
                     }
@@ -129,6 +130,8 @@ public struct StdioMCPClient: Sendable {
                 }
                 stderrDone.signal()
             }
+            stderrThread.qualityOfService = .userInitiated
+            stderrThread.start()
 
             // Schedule strict wall-clock timeout killer.
             let timeoutFlag = AtomicFlag()
@@ -241,8 +244,8 @@ public struct StdioMCPClient: Sendable {
                             )
                         )
                     } else {
-                        _ = exitSemaphore.wait(timeout: .now() + .milliseconds(100))
-                        _ = stderrDone.wait(timeout: .now() + .milliseconds(100))
+                        _ = exitSemaphore.wait(timeout: .now() + .seconds(1))
+                        _ = stderrDone.wait(timeout: .now() + .seconds(2))
                         let stderrText = stderrCollector.snapshotString()
                         if !process.isRunning && process.terminationStatus != 0 {
                             gate.resume(
@@ -309,8 +312,8 @@ public struct StdioMCPClient: Sendable {
             )
         }
 
-        _ = exitSemaphore.wait(timeout: .now() + .milliseconds(250))
-        _ = stderrDone.wait(timeout: .now() + .milliseconds(200))
+        _ = exitSemaphore.wait(timeout: .now() + .seconds(1))
+        _ = stderrDone.wait(timeout: .now() + .seconds(2))
         let stderrText = stderrCollector.snapshotString()
 
         if !process.isRunning {

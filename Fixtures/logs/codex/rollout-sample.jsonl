@@ -1,0 +1,8 @@
+{"timestamp":"2026-10-30T14:10:00Z","type":"session_meta","payload":{"id":"codex-log-001","cwd":"<HOME>/repos/demo-app","model":"gpt-5-codex"}}
+{"timestamp":"2026-10-30T14:10:02Z","type":"event_msg","payload":{"type":"token_count","info":{"last_token_usage":{"input_tokens":14200,"cached_input_tokens":10500,"output_tokens":210},"total_token_usage":{"input_tokens":14200,"cached_input_tokens":10500,"output_tokens":210}}}}
+{"timestamp":"2026-10-30T14:10:02Z","type":"event_msg","payload":{"type":"token_count","info":{"last_token_usage":{"input_tokens":14200,"cached_input_tokens":10500,"output_tokens":210},"total_token_usage":{"input_tokens":14200,"cached_input_tokens":10500,"output_tokens":210}}}}
+{"timestamp":"2026-10-30T14:10:03Z","type":"response_item","payload":{"type":"function_call","call_id":"call_1","name":"exec_command","arguments":"{\"cmd\":\"SECRET_CMD_DO_NOT_STORE\"}"}}
+{"timestamp":"2026-10-30T14:10:04Z","type":"response_item","payload":{"type":"function_call","call_id":"call_2","name":"mcp__github__list_pull_requests","arguments":"{\"repo\":\"bento\"}"}}
+{"timestamp":"2026-10-30T14:10:05Z","type":"response_item","payload":{"type":"function_call","call_id":"call_3","name":"use_skill","arguments":"{\"skill\":\"sql-helper\"}"}}
+{"timestamp":"2026-10-30T14:10:06Z","type":"response_item","payload":{"type":"function_call","call_id":"call_4","name":"spawn_agent","arguments":"{\"agent\":\"migration-auditor\"}"}}
+{"timestamp":"2026-10-30T14:10:08Z","type":"event_msg","payload":{"type":"token_count","info":{"last_token_usage":{"input_tokens":15100,"cached_input_tokens":14200,"output_tokens":185},"total_token_usage":{"input_tokens":29300,"cached_input_tokens":24700,"output_tokens":395}}}}

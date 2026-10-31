@@ -290,6 +290,101 @@ struct BentoCLITests {
         #expect(spawnLines.count == 1)
     }
 
+    @Test("bentoctx ingest and usage subcommands support incremental offsets, --reset, and Docs/cli-schema.md JSON")
+    func cliIngestAndUsageSubcommandsSupportIncrementalResetAndJSONSchema() throws {
+        let polyglot = try FixtureHome(scenario: "polyglot")
+        let tempCopy = try polyglot.copyToTemporaryDirectory()
+        let dbDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("bento-cli-ingest-db-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: dbDir, withIntermediateDirectories: true)
+        defer {
+            try? FileManager.default.removeItem(at: tempCopy)
+            try? FileManager.default.removeItem(at: dbDir)
+        }
+
+        let dbPath = dbDir.appendingPathComponent("bento.sqlite").path
+        let demoRepoPath = tempCopy.appendingPathComponent("repos/demo-app").standardizedFileURL.path
+
+        // 1. Initial ingest into shared --db
+        let ingest1 = try runCLI([
+            "ingest",
+            "--home", tempCopy.path,
+            "--db", dbPath,
+            "--json"
+        ])
+        #expect(ingest1.exitCode == 0)
+        let ingestObj1 = try parseJSONObject(ingest1.stdout)
+        #expect(ingestObj1["schemaVersion"] as? Int == 1)
+        #expect(ingestObj1["command"] as? String == "ingest")
+        #expect(ingestObj1["didReset"] as? Bool == false)
+        #expect(ingestObj1["filesDiscovered"] as? Int == 4)
+        #expect(ingestObj1["filesIngested"] as? Int == 4)
+        #expect(ingestObj1["eventsInserted"] as? Int == 13)
+        #expect(ingestObj1["sessionsUpdated"] as? Int == 4)
+
+        // 2. Append 1 new function_call line to Codex rollout log and re-ingest -> only 1 new event inserted!
+        let codexRollout = tempCopy.appendingPathComponent(
+            ".codex/sessions/2026/10/30/rollout-2026-10-30T10-05-00-poly.jsonl"
+        )
+        let appendedLine =
+            "{\"timestamp\":\"2026-10-30T10:05:10Z\",\"type\":\"response_item\",\"payload\":{\"type\":\"function_call\",\"call_id\":\"poly_call_2\",\"name\":\"mcp__docs__search\",\"arguments\":\"{}\"}}\n"
+        let handle = try FileHandle(forWritingTo: codexRollout)
+        try handle.seekToEnd()
+        try handle.write(contentsOf: Data(appendedLine.utf8))
+        try handle.close()
+
+        let ingest2 = try runCLI([
+            "ingest",
+            "--home", tempCopy.path,
+            "--db", dbPath,
+            "--json"
+        ])
+        #expect(ingest2.exitCode == 0)
+        let ingestObj2 = try parseJSONObject(ingest2.stdout)
+        #expect(ingestObj2["filesIngested"] as? Int == 1)
+        #expect(ingestObj2["eventsInserted"] as? Int == 1)
+
+        // 3. Query usage --json filtered by --repo and --days
+        let usageRun = try runCLI([
+            "usage",
+            "--home", tempCopy.path,
+            "--db", dbPath,
+            "--days", "3650",
+            "--repo", demoRepoPath,
+            "--json"
+        ])
+        #expect(usageRun.exitCode == 0)
+        let usageObj = try parseJSONObject(usageRun.stdout)
+        #expect(usageObj["schemaVersion"] as? Int == 1)
+        #expect(usageObj["command"] as? String == "usage")
+        #expect(usageObj["days"] as? Int == 3650)
+        #expect(usageObj["sessionCount"] as? Int == 4)
+        #expect(usageObj["eventCount"] as? Int == 14)
+
+        // Human-readable usage output check
+        let humanUsage = try runCLI([
+            "usage",
+            "--home", tempCopy.path,
+            "--db", dbPath,
+            "--days", "3650"
+        ])
+        #expect(humanUsage.exitCode == 0)
+        #expect(humanUsage.stdoutString.contains("Sessions: 4"))
+
+        // 4. Ingest --reset clears state and re-ingests all 14 events cleanly from offset 0
+        let resetRun = try runCLI([
+            "ingest",
+            "--home", tempCopy.path,
+            "--db", dbPath,
+            "--reset",
+            "--json"
+        ])
+        #expect(resetRun.exitCode == 0)
+        let resetObj = try parseJSONObject(resetRun.stdout)
+        #expect(resetObj["didReset"] as? Bool == true)
+        #expect(resetObj["eventsInserted"] as? Int == 14)
+    }
+
     // MARK: - Helpers
 
     private struct CLIResult {

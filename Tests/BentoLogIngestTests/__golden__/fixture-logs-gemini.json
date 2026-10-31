@@ -1,0 +1,123 @@
+[
+  {
+    "agent" : "gemini",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "sessionStart" : {
+        "model" : "gemini-2.5-pro"
+      }
+    },
+    "sessionID" : "gemini-log-001",
+    "timestamp" : "2026-10-30T15:00:00Z"
+  },
+  {
+    "agent" : "gemini",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "skillInvoked" : {
+        "name" : "log-triage"
+      }
+    },
+    "sessionID" : "gemini-log-001",
+    "timestamp" : "2026-10-30T15:00:03Z"
+  },
+  {
+    "agent" : "gemini",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "mcpToolCalled" : {
+        "server" : "cloud-logs",
+        "tool" : "tail_entries"
+      }
+    },
+    "sessionID" : "gemini-log-001",
+    "timestamp" : "2026-10-30T15:00:03Z"
+  },
+  {
+    "agent" : "gemini",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "builtinToolCalled" : {
+        "name" : "read_file"
+      }
+    },
+    "sessionID" : "gemini-log-001",
+    "timestamp" : "2026-10-30T15:00:03Z"
+  },
+  {
+    "agent" : "gemini",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "tokenUsage" : {
+        "cachedInput" : 7500,
+        "input" : 11300,
+        "output" : 240,
+        "turnIndex" : 0
+      }
+    },
+    "sessionID" : "gemini-log-001",
+    "timestamp" : "2026-10-30T15:00:04Z"
+  },
+  {
+    "agent" : "gemini",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "tokenUsage" : {
+        "cachedInput" : 11000,
+        "input" : 12050,
+        "output" : 130,
+        "turnIndex" : 1
+      }
+    },
+    "sessionID" : "gemini-log-001",
+    "timestamp" : "2026-10-30T15:00:10Z"
+  },
+  {
+    "agent" : "gemini",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "sessionStart" : {
+        "model" : "gemini-2.5-flash"
+      }
+    },
+    "sessionID" : "gemini-legacy-002",
+    "timestamp" : "2026-10-30T15:20:00Z"
+  },
+  {
+    "agent" : "gemini",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "tokenUsage" : {
+        "cachedInput" : 3200,
+        "input" : 6400,
+        "output" : 175,
+        "turnIndex" : 0
+      }
+    },
+    "sessionID" : "gemini-legacy-002",
+    "timestamp" : "2026-10-30T15:20:05Z"
+  },
+  {
+    "agent" : "gemini",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "subagentInvoked" : {
+        "name" : "code-investigator"
+      }
+    },
+    "sessionID" : "gemini-legacy-002",
+    "timestamp" : "2026-10-30T15:20:05Z"
+  },
+  {
+    "agent" : "gemini",
+    "cwd" : "<HOME>/repos/demo-app",
+    "kind" : {
+      "mcpToolCalled" : {
+        "server" : "docs",
+        "tool" : "get_reference"
+      }
+    },
+    "sessionID" : "gemini-legacy-002",
+    "timestamp" : "2026-10-30T15:20:05Z"
+  }
+]
