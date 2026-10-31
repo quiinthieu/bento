@@ -209,6 +209,87 @@ struct BentoCLITests {
         #expect(budgetRes.exitCode == 0)
     }
 
+    @Test("bentoctx budget --probe-mcp probes only explicitly named servers and caches results in --db")
+    func cliBudgetProbeMCPConsentsAndCachesInStore() throws {
+        let tempRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("bento-cli-probe-\(UUID().uuidString)", isDirectory: true)
+        let fakeHome = tempRoot.appendingPathComponent("home", isDirectory: true)
+        let fakeRepo = fakeHome.appendingPathComponent("repos/app", isDirectory: true)
+        let codexDir = fakeHome.appendingPathComponent(".codex", isDirectory: true)
+        try FileManager.default.createDirectory(at: fakeRepo, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: codexDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempRoot) }
+
+        let fakeServerPath = FixtureHome.repositoryRoot()
+            .appendingPathComponent("Fixtures/mcp/fake-server/server.py")
+            .standardizedFileURL
+            .path
+        let probedMarker = tempRoot.appendingPathComponent("probed-spawns.log")
+        let unprobedMarker = tempRoot.appendingPathComponent("unprobed-spawns.log")
+        let dbPath = tempRoot.appendingPathComponent("cli.sqlite").path
+
+        let configTOML = """
+            model = "gpt-5-codex"
+
+            [mcp_servers.consented_srv]
+            command = "/usr/bin/python3"
+            args = ["\(fakeServerPath)", "--mode", "normal", "--tools", "2", "--marker-file", "\(probedMarker.path)"]
+
+            [mcp_servers.unconsented_srv]
+            command = "/usr/bin/python3"
+            args = ["\(fakeServerPath)", "--mode", "normal", "--tools", "4", "--marker-file", "\(unprobedMarker.path)"]
+            """
+        try Data(configTOML.utf8).write(to: codexDir.appendingPathComponent("config.toml"))
+
+        // 1. Without --probe-mcp: zero servers spawned, both use unprobed fallback.
+        let unprobedRun = try runCLI([
+            "budget",
+            "--home", fakeHome.path,
+            "--repo", fakeRepo.path,
+            "--agent", "codex",
+            "--db", dbPath,
+            "--json"
+        ])
+        #expect(unprobedRun.exitCode == 0)
+        #expect(!FileManager.default.fileExists(atPath: probedMarker.path))
+        #expect(!FileManager.default.fileExists(atPath: unprobedMarker.path))
+
+        // 2. With --probe-mcp consented_srv: ONLY consented_srv spawns; unconsented_srv stays unspawned & uses median fallback!
+        let probedRun = try runCLI([
+            "budget",
+            "--home", fakeHome.path,
+            "--repo", fakeRepo.path,
+            "--agent", "codex",
+            "--db", dbPath,
+            "--probe-mcp", "consented_srv",
+            "--json"
+        ])
+        #expect(probedRun.exitCode == 0)
+        #expect(FileManager.default.fileExists(atPath: probedMarker.path))
+        #expect(!FileManager.default.fileExists(atPath: unprobedMarker.path))
+
+        let probedBudgets = try decodeField([Budget].self, key: "budgets", in: probedRun.stdout)
+        let codexBudget = try #require(probedBudgets.first)
+        let consentedItem = try #require(codexBudget.items.first { $0.label == "consented_srv" })
+        let unconsentedItem = try #require(codexBudget.items.first { $0.label == "unconsented_srv" })
+        #expect(consentedItem.method.hasPrefix("probed (2 tools,"))
+        #expect(unconsentedItem.method.contains("median fallback from 1 probed server"))
+
+        // 3. Subsequent run against same --db without --probe-mcp reuses cached probe with zero new spawns.
+        let cachedRun = try runCLI([
+            "budget",
+            "--home", fakeHome.path,
+            "--repo", fakeRepo.path,
+            "--agent", "codex",
+            "--db", dbPath,
+            "--json"
+        ])
+        #expect(cachedRun.exitCode == 0)
+        let spawnLines = try String(contentsOf: probedMarker, encoding: .utf8)
+            .split(whereSeparator: \.isNewline)
+        #expect(spawnLines.count == 1)
+    }
+
     // MARK: - Helpers
 
     private struct CLIResult {

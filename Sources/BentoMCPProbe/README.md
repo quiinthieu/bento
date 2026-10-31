@@ -1,3 +1,3 @@
 # BentoMCPProbe
 
-`BentoMCPProbe` probes consented MCP servers over stdio or Streamable HTTP with scrubbed environments and strict timeouts (`initialize` followed by `tools/list`) to measure tool schema token overhead without ever executing unconsented servers.
+`BentoMCPProbe` probes explicitly consented MCP servers (`MCPConsentStore`, keyed by `MCPServerConfigHasher` SHA-256 digests) over scrubbed non-TTY child processes (`StdioMCPClient`, 15 s timeout, bounded 16 KB stderr) or Streamable HTTP/SSE (`StreamableHTTPMCPClient`, skipping v1 OAuth `401`/`403` servers), follows `tools/list` `nextCursor` pagination, and caches tool schemas via `MCPProbeCaching`.
