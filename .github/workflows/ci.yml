@@ -31,10 +31,11 @@ jobs:
           swift --version
           xcodebuild -version
 
-      - name: Run write-isolation lint & self-test
+      - name: Run write-isolation & version-sync lints
         run: |
           Scripts/lint-writes.sh
           Scripts/test-lint-writes.sh
+          Scripts/bump-version.sh --verify
 
       - name: Check Swift formatting
         run: swift format lint --strict -r Package.swift Sources Tests XcodeApp XcodeUITests
@@ -55,6 +56,11 @@ jobs:
             -project Bento.xcodeproj \
             -scheme BentoMacApp \
             -configuration Debug \
+            -derivedDataPath "${RUNNER_TEMP}/DerivedData" \
             -destination 'platform=macOS' \
             CODE_SIGNING_ALLOWED=NO \
             build-for-testing
+          EMBEDDED_CLI="${RUNNER_TEMP}/DerivedData/Build/Products/Debug/Bento.app/Contents/Helpers/bentoctx"
+          test -x "${EMBEDDED_CLI}"
+          "${EMBEDDED_CLI}" --version
+          "${EMBEDDED_CLI}" scan --home Fixtures/homes/polyglot --json >/dev/null

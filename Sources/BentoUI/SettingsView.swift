@@ -1,4 +1,5 @@
 import BentoCore
+import BentoFixes
 import SwiftUI
 
 /// Sidebar → `Settings` view managing `"Allow changes"`, repository roots, log retention,
@@ -294,7 +295,79 @@ struct SettingsView: View {
                     }
                 #endif
 
-                // 6. Privacy & Delete All Data
+                // 6. Companion CLI Installer (PLAN.md §11 T16)
+                GroupBox("Command Line Tool (\(Product.cliName))") {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(
+                            "\(model.effectiveProductName) embeds \(Product.cliName) inside \(Product.name).app/Contents/Helpers/\(Product.cliName). "
+                                + "With your explicit consent, install a symlink into ~/.local/bin or /usr/local/bin."
+                        )
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                        Picker("Install destination:", selection: $bindableModel.selectedCLIInstallPreset) {
+                            Text("~/.local/bin/\(Product.cliName) (Recommended)")
+                                .tag(CLIInstallDestinationPreset.userLocalBin)
+                            Text("/usr/local/bin/\(Product.cliName)")
+                                .tag(CLIInstallDestinationPreset.usrLocalBin)
+                        }
+                        .pickerStyle(.segmented)
+                        .frame(maxWidth: 520)
+
+                        CLIInstallStatusRow(model: model)
+                    }
+                    .padding(.top, 4)
+                }
+
+                // 7. Application Updates — Sparkle EdDSA (can be turned off; PLAN.md §0 Rule 5, §7, §11 T16)
+                GroupBox("Application Updates (Sparkle EdDSA)") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Toggle(
+                            isOn: Binding(
+                                get: { model.automaticallyChecksForUpdates },
+                                set: { enabled in
+                                    do {
+                                        try model.setAutomaticallyChecksForUpdates(enabled)
+                                    } catch {
+                                        model.lastErrorMessage = error.localizedDescription
+                                    }
+                                }
+                            )
+                        ) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Automatically check for updates")
+                                    .font(.subheadline.weight(.semibold))
+                                Text(
+                                    "Off by default and can be turned off at any time. When off, zero Sparkle update network requests are made."
+                                )
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            }
+                        }
+                        .accessibilityIdentifier("settings-automatic-updates-toggle")
+
+                        HStack {
+                            if let feed = model.updaterFeedURLString {
+                                Text("Appcast feed: \(feed)")
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(.secondary)
+                            } else if !model.isUpdaterAvailable {
+                                Text("Sparkle updater is inactive in unsigned/development builds.")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Button("Check for Updates…") {
+                                model.checkForUpdates()
+                            }
+                            .controlSize(.small)
+                            .disabled(!model.isUpdaterAvailable || !model.canCheckForUpdates)
+                        }
+                    }
+                    .padding(.top, 4)
+                }
+
+                // 8. Privacy & Delete All Data
                 GroupBox("Privacy & Local Data Reset") {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
@@ -422,6 +495,90 @@ private struct APIProviderSettingsRow: View {
                     .controlSize(.small)
                     .foregroundStyle(.red)
                 }
+            }
+        }
+    }
+}
+
+private struct CLIInstallStatusRow: View {
+    let model: BentoAppModel
+
+    var body: some View {
+        let status = model.currentCLIInstallStatus()
+        let embeddedURL = model.embeddedCLIBinaryURL
+
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                switch status {
+                case .notInstalled(let dest):
+                    Text("Not installed at \(model.abbreviateHomePath(dest.path))")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+
+                case .installedMatching(let dest, let target):
+                    Text("Installed: \(model.abbreviateHomePath(dest.path)) → \(target.path)")
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.green)
+
+                case .installedPointingElsewhere(let dest, let currentTarget, _):
+                    Text(
+                        "Symlink at \(model.abbreviateHomePath(dest.path)) currently points to \(currentTarget.path)"
+                    )
+                    .font(.caption.monospaced())
+                    .foregroundStyle(.orange)
+
+                case .conflictRegularFile(let dest):
+                    Text("Regular file exists at \(model.abbreviateHomePath(dest.path)) (will not be overwritten)")
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+
+                if embeddedURL == nil {
+                    Text(
+                        "Running from an unpackaged build — package \(Product.name).app via Scripts/make-dmg.sh to embed Contents/Helpers/\(Product.cliName)."
+                    )
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer()
+
+            switch status {
+            case .installedMatching:
+                Button("Remove Symlink") {
+                    _ = try? model.uninstallCLISymlink(userConsented: true)
+                }
+                .controlSize(.small)
+                .foregroundStyle(.red)
+
+            case .installedPointingElsewhere:
+                Button("Update Symlink…") {
+                    model.requestInstallCLI()
+                }
+                .controlSize(.small)
+                .disabled(embeddedURL == nil)
+
+                Button("Remove Symlink") {
+                    _ = try? model.uninstallCLISymlink(userConsented: true)
+                }
+                .controlSize(.small)
+                .foregroundStyle(.red)
+
+            case .notInstalled:
+                Button("Install \(Product.cliName)…") {
+                    model.requestInstallCLI()
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                .disabled(embeddedURL == nil)
+
+            case .conflictRegularFile:
+                Button("Install \(Product.cliName)…") {
+                    model.requestInstallCLI()
+                }
+                .controlSize(.small)
+                .disabled(true)
             }
         }
     }

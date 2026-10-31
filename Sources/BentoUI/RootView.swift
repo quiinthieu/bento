@@ -105,6 +105,25 @@ public struct RootView: View {
                 ) { preview in
                     TokenCountPreviewSheet(model: model, preview: preview)
                 }
+                .confirmationDialog(
+                    "Install \(Product.cliName) Command Line Tool?",
+                    isPresented: $bindableModel.isShowingInstallCLIConfirmation
+                ) {
+                    Button("Install Symlink at \(model.abbreviateHomePath(model.currentCLISymlinkURL().path))") {
+                        _ = try? model.confirmInstallCLI()
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    let helperPath =
+                        model.embeddedCLIBinaryURL?.path
+                        ?? Bundle.main.bundleURL
+                        .appendingPathComponent("Contents/Helpers/\(Product.cliName)")
+                        .path
+                    Text(
+                        "Creates a symbolic link at \(model.abbreviateHomePath(model.currentCLISymlinkURL().path)) "
+                            + "pointing to \(helperPath). Existing non-symlink files are never overwritten."
+                    )
+                }
             } else {
                 ProgressView("Initializing \(configuration.windowTitle)…")
                     .frame(minWidth: 960, minHeight: 640)

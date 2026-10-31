@@ -42,6 +42,8 @@ public enum TokenizerResourceLoader: Sendable {
             for bundleName in bundleNames {
                 let bundleURL = baseURL.appendingPathComponent(bundleName, isDirectory: true)
                 dirs.append(bundleURL.appendingPathComponent("Resources", isDirectory: true))
+                dirs.append(bundleURL.appendingPathComponent("Contents/Resources/Resources", isDirectory: true))
+                dirs.append(bundleURL.appendingPathComponent("Contents/Resources", isDirectory: true))
                 dirs.append(bundleURL)
             }
             dirs.append(baseURL.appendingPathComponent("Resources", isDirectory: true))
@@ -53,7 +55,13 @@ public enum TokenizerResourceLoader: Sendable {
         }
         appendBundleCandidates(around: Bundle.main.bundleURL)
 
-        // Support embedded CLI helper at `<App>.app/Contents/Helpers/<cli>` looking into `../Resources/`.
+        // Support embedded CLI helper at `<App>.app/Contents/Helpers/<cli>` (including via PATH symlinks) looking into `../Resources/`.
+        if let mainExecDir = Bundle.main.executableURL?.resolvingSymlinksInPath().deletingLastPathComponent() {
+            appendBundleCandidates(around: mainExecDir)
+            appendBundleCandidates(
+                around: mainExecDir.deletingLastPathComponent().appendingPathComponent("Resources", isDirectory: true)
+            )
+        }
         let executableURL = URL(fileURLWithPath: CommandLine.arguments.first ?? "")
             .resolvingSymlinksInPath()
             .deletingLastPathComponent()
