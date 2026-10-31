@@ -16,6 +16,29 @@ public struct ResolvedMCPServerTarget: Sendable {
 }
 
 extension Workspace {
+    /// Returns the `FixSupport` capabilities declared by `agent`'s registered adapter.
+    nonisolated public func fixSupport(for agent: AgentID) -> FixSupport {
+        adaptersByID[agent]?.fixSupport() ?? FixSupport()
+    }
+
+    /// Returns all registered `AgentID`s whose adapters advertise `.budget` capability in registration order.
+    nonisolated public func budgetCapableAgents() -> [AgentID] {
+        adapters
+            .filter { $0.capabilities.contains(.budget) }
+            .map { type(of: $0).id }
+    }
+
+    /// Resolves `(artifacts, resolution)` for `agent` in `folder`, reusing cached `Snapshot` resolution when available.
+    public func resolvedContext(
+        for agent: AgentID,
+        folder: URL
+    ) async throws -> (artifacts: [Artifact], resolution: Resolution) {
+        guard adaptersByID[agent] != nil else {
+            throw BentoScannerError.unknownAgent(agent)
+        }
+        return try await loadArtifactsAndResolution(for: agent, folder: folder)
+    }
+
     /// Computes the context token `Budget` for `agent` in `folder`, reusing cached `Snapshot` resolution when available.
     public func budget(
         for agent: AgentID,
@@ -23,7 +46,8 @@ extension Workspace {
         model: String? = nil,
         tokenizer: any TokenCountingProvider,
         mcpProbesByConfigHash: [String: MCPProbeRecord] = [:],
-        mcpFallbackEstimate: MCPFallbackEstimate? = nil
+        mcpFallbackEstimate: MCPFallbackEstimate? = nil,
+        measuredFirstTurnInput: Int? = nil
     ) async throws -> Budget {
         guard let adapter = adaptersByID[agent] else {
             throw BentoScannerError.unknownAgent(agent)
@@ -42,7 +66,8 @@ extension Workspace {
             tokenizer: tokenizer,
             mcpProbesByConfigHash: mcpProbesByConfigHash,
             mcpFallbackEstimate: mcpFallbackEstimate,
-            environment: environment.env
+            environment: environment.env,
+            measuredFirstTurnInput: measuredFirstTurnInput
         )
     }
 
@@ -52,7 +77,8 @@ extension Workspace {
         model: String? = nil,
         tokenizer: any TokenCountingProvider,
         mcpProbesByConfigHash: [String: MCPProbeRecord] = [:],
-        mcpFallbackEstimate: MCPFallbackEstimate? = nil
+        mcpFallbackEstimate: MCPFallbackEstimate? = nil,
+        measuredFirstTurnInputsByAgent: [AgentID: Int] = [:]
     ) async throws -> [Budget] {
         var results: [Budget] = []
         for adapter in adapters where adapter.capabilities.contains(.budget) {
@@ -63,7 +89,8 @@ extension Workspace {
                 model: model,
                 tokenizer: tokenizer,
                 mcpProbesByConfigHash: mcpProbesByConfigHash,
-                mcpFallbackEstimate: mcpFallbackEstimate
+                mcpFallbackEstimate: mcpFallbackEstimate,
+                measuredFirstTurnInput: measuredFirstTurnInputsByAgent[agent]
             )
             results.append(computed)
         }

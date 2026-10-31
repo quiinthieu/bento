@@ -179,7 +179,15 @@ let package = Package(
         ),
         .testTarget(
             name: "BentoTokenizerTests",
-            dependencies: ["BentoCore", "BentoTokenizer", "BentoTestSupport"]
+            dependencies: [
+                "BentoCore",
+                "BentoTokenizer",
+                "BentoAdapters",
+                "BentoScanner",
+                "BentoLogIngest",
+                "BentoStore",
+                "BentoTestSupport"
+            ]
         ),
         .testTarget(
             name: "BentoMCPProbeTests",
@@ -202,6 +210,7 @@ let package = Package(
                 "BentoLogIngest",
                 "BentoScanner",
                 "BentoStore",
+                "BentoTokenizer",
                 "BentoTestSupport"
             ],
             exclude: ["__golden__"]

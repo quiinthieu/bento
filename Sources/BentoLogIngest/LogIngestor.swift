@@ -266,6 +266,7 @@ public struct LogIngestor: Sendable {
                 decoderStateData: nil,
                 rawEvents: rawEvents,
                 observedModels: decoder.observedModelsBySession,
+                firstUserCharCounts: decoder.firstUserMessageCharCountsBySession,
                 eventKeyCounts: &eventKeyCounts
             )
 
@@ -314,6 +315,7 @@ public struct LogIngestor: Sendable {
                 decoderStateData: nil,
                 rawEvents: rawEvents,
                 observedModels: decoder.observedModelsBySession,
+                firstUserCharCounts: decoder.firstUserMessageCharCountsBySession,
                 eventKeyCounts: &eventKeyCounts
             )
 
@@ -387,6 +389,7 @@ public struct LogIngestor: Sendable {
             decoderStateData: nil,
             rawEvents: rawEvents,
             observedModels: decoder.observedModelsBySession,
+            firstUserCharCounts: decoder.firstUserMessageCharCountsBySession,
             eventKeyCounts: &mutableCounts
         )
         let finalEnvelope = CursorEnvelope(
@@ -415,6 +418,7 @@ public struct LogIngestor: Sendable {
         decoderStateData: Data?,
         rawEvents: [UsageEvent],
         observedModels: [String: String],
+        firstUserCharCounts: [String: Int],
         eventKeyCounts: inout [String: Int]
     ) -> IngestedLogBatch {
         var storedEvents: [StoredUsageEvent] = []
@@ -424,6 +428,7 @@ public struct LogIngestor: Sendable {
 
         for event in rawEvents {
             let modelForSession = observedModels[event.sessionID] ?? Self.sessionStartModel(from: event.kind)
+            let userCharsForSession = firstUserCharCounts[event.sessionID]
             let eventUID = deterministicEventID(for: event, counts: &eventKeyCounts)
             storedEvents.append(
                 StoredUsageEvent(
@@ -443,7 +448,8 @@ public struct LogIngestor: Sendable {
                     cwd: event.cwd,
                     repoID: nil,
                     model: modelForSession,
-                    firstTurnInput: nil
+                    firstTurnInput: nil,
+                    firstUserMessageCharCount: userCharsForSession
                 )
 
             if event.timestamp < session.startedAt {
@@ -454,6 +460,9 @@ public struct LogIngestor: Sendable {
             }
             if let modelForSession {
                 session.model = modelForSession
+            }
+            if session.firstUserMessageCharCount == nil, let userCharsForSession {
+                session.firstUserMessageCharCount = userCharsForSession
             }
             if case .tokenUsage(let input, _, _, let turnIndex) = event.kind,
                 turnIndex == 0,

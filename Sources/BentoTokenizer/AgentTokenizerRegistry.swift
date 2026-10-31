@@ -14,6 +14,7 @@ public struct AgentTokenizerRegistry: TokenCountingProvider, Sendable {
     private let heuristic: HeuristicCounter
     private let cache: CachingTokenCounter
     private var calibrations: [CalibrationKey: Double] = [:]
+    private var exactAPICounters: [AgentID: any ExactAPITokenCounting] = [:]
 
     /// Creates an `AgentTokenizerRegistry` backed by shared `o200k_base` / `cl100k_base` BPE tables and `HeuristicCounter`.
     public init(
@@ -24,6 +25,45 @@ public struct AgentTokenizerRegistry: TokenCountingProvider, Sendable {
         self.cl100k = try BPETokenizer.shared(for: .cl100kBase)
         self.heuristic = heuristic
         self.cache = cache
+    }
+
+    /// Registers or removes an opt-in exact API token counter (`AnthropicCountTokens` or `GeminiCountTokens`) for `agent`.
+    public mutating func setExactAPICounter(_ counter: (any ExactAPITokenCounting)?, for agent: AgentID) {
+        if let counter, counter.isEnabled {
+            exactAPICounters[agent] = counter
+        } else {
+            exactAPICounters.removeValue(forKey: agent)
+        }
+    }
+
+    /// Returns the uncalibrated base offline `TokenCounter.id` selected for `(agent, model)`.
+    public func baseCounterID(for agent: AgentID, model: String?) -> String {
+        resolveSelection(for: agent, model: model, sampleText: "").counter.id
+    }
+
+    /// Applies persisted `CalibrationRecord` entries to `(agent, model)` pairs, setting a sample-weighted
+    /// agent-wide fallback when no explicit `"*"` record exists for that agent.
+    public mutating func applyCalibrations(_ records: [CalibrationRecord]) {
+        var weightedSumByAgent: [AgentID: Double] = [:]
+        var weightTotalByAgent: [AgentID: Int] = [:]
+        var hasWildcardByAgent: Set<AgentID> = []
+
+        for record in records where record.sampleCount > 0 {
+            let normalizedModel = Self.normalizeModel(record.model)
+            setCalibrationFactor(record.kFactor, for: record.agent, model: normalizedModel)
+            if normalizedModel == "*" {
+                hasWildcardByAgent.insert(record.agent)
+            } else {
+                weightedSumByAgent[record.agent, default: 0.0] += record.kFactor * Double(record.sampleCount)
+                weightTotalByAgent[record.agent, default: 0] += record.sampleCount
+            }
+        }
+
+        for (agent, totalSamples) in weightTotalByAgent where totalSamples > 0 && !hasWildcardByAgent.contains(agent) {
+            if let weightedSum = weightedSumByAgent[agent] {
+                setCalibrationFactor(weightedSum / Double(totalSamples), for: agent, model: nil)
+            }
+        }
     }
 
     /// Registers or updates a fitted calibration `kFactor` for `(agent, model)` (`nil` sets the agent-wide fallback).
@@ -44,6 +84,9 @@ public struct AgentTokenizerRegistry: TokenCountingProvider, Sendable {
 
     /// Selects the underlying `TokenCounter` for `(agent, model)`.
     public func counter(for agent: AgentID, model: String?) -> any TokenCounter {
+        if let apiCounter = exactAPICounters[agent], apiCounter.isEnabled {
+            return apiCounter
+        }
         let selection = resolveSelection(for: agent, model: model, sampleText: "")
         if let kFactor = calibrationFactor(for: agent, model: model), selection.confidence == .estimated {
             return CalibratedCounter(base: selection.counter, kFactor: kFactor)
@@ -57,6 +100,12 @@ public struct AgentTokenizerRegistry: TokenCountingProvider, Sendable {
         agent: AgentID,
         model: String?
     ) -> TokenCountEstimate {
+        if let apiCounter = exactAPICounters[agent], apiCounter.isEnabled {
+            if let exact = try? apiCounter.countExactSync(text: text, contentHash: contentHash, model: model) {
+                return exact
+            }
+        }
+
         let selection = resolveSelection(for: agent, model: model, sampleText: text)
         let activeCounter: any TokenCounter
         let methodString: String

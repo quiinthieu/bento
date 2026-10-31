@@ -12,6 +12,7 @@ public struct ClaudeCodeLogDecoder: LogDecoder, Sendable {
         var activeSessionID: String?
         var activeCwd: String?
         var observedModels: [String: String]
+        var firstUserCharCounts: [String: Int]?
         var emittedSessionStarts: Set<String>
         var seenUsageTurnKeys: Set<String>
         var seenToolUseIDs: Set<String>
@@ -21,6 +22,7 @@ public struct ClaudeCodeLogDecoder: LogDecoder, Sendable {
     private var activeSessionID: String?
     private var activeCwd: String?
     private var observedModels: [String: String] = [:]
+    private var firstUserCharCounts: [String: Int] = [:]
     private var emittedSessionStarts: Set<String> = []
     private var seenUsageTurnKeys: Set<String> = []
     private var seenToolUseIDs: Set<String> = []
@@ -38,11 +40,16 @@ public struct ClaudeCodeLogDecoder: LogDecoder, Sendable {
         observedModels
     }
 
+    public var firstUserMessageCharCountsBySession: [String: Int] {
+        firstUserCharCounts
+    }
+
     public func exportResumeState() -> Data? {
         let state = ResumeState(
             activeSessionID: activeSessionID,
             activeCwd: activeCwd,
             observedModels: observedModels,
+            firstUserCharCounts: firstUserCharCounts,
             emittedSessionStarts: emittedSessionStarts,
             seenUsageTurnKeys: seenUsageTurnKeys,
             seenToolUseIDs: seenToolUseIDs,
@@ -58,6 +65,7 @@ public struct ClaudeCodeLogDecoder: LogDecoder, Sendable {
         activeSessionID = state.activeSessionID
         activeCwd = state.activeCwd
         observedModels = state.observedModels
+        firstUserCharCounts = state.firstUserCharCounts ?? [:]
         emittedSessionStarts = state.emittedSessionStarts
         seenUsageTurnKeys = state.seenUsageTurnKeys
         seenToolUseIDs = state.seenToolUseIDs
@@ -124,7 +132,14 @@ public struct ClaudeCodeLogDecoder: LogDecoder, Sendable {
 
         case "user":
             ensureSessionStarted(initialModel: nil)
-            for cmdName in Self.extractSlashCommands(from: messageDict?["content"] ?? obj["content"]) {
+            let userContent = messageDict?["content"] ?? obj["content"]
+            if firstUserCharCounts[sessionID] == nil {
+                let charLen = Self.measureContentCharacterLength(userContent)
+                if charLen > 0 {
+                    firstUserCharCounts[sessionID] = charLen
+                }
+            }
+            for cmdName in Self.extractSlashCommands(from: userContent) {
                 emitted.append(
                     UsageEvent(
                         agent: .claudeCode,
@@ -241,6 +256,23 @@ public struct ClaudeCodeLogDecoder: LogDecoder, Sendable {
         default:
             return .builtinToolCalled(name: name)
         }
+    }
+
+    private static func measureContentCharacterLength(_ content: Any?) -> Int {
+        if let single = content as? String {
+            return single.count
+        }
+        if let blocks = content as? [[String: Any]] {
+            var sum = 0
+            for block in blocks {
+                if (block["type"] as? String) == "tool_result" { continue }
+                if let text = block["text"] as? String {
+                    sum += text.count
+                }
+            }
+            return sum
+        }
+        return 0
     }
 
     private static func extractSlashCommands(from content: Any?) -> [String] {

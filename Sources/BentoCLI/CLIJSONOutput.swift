@@ -75,6 +75,7 @@ enum CLIJSONOutput {
         var command: String = "usage"
         var generatedAt: Date
         var days: Int
+        var minimumSessions: Int
         var since: Date
         var until: Date
         var agentFilter: String?
@@ -83,6 +84,8 @@ enum CLIJSONOutput {
         var eventCount: Int
         var tokenTotals: UsageTokenTotals
         var byAgent: [AgentUsageSummary]
+        var artifactUsage: [ArtifactUsageJoin]
+        var unusedFindings: [Finding]
     }
 
     static func printJSON<T: Encodable>(_ payload: T) throws {

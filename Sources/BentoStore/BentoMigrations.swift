@@ -172,6 +172,15 @@ public enum BentoMigrations: Sendable {
             try db.execute(sql: "ALTER TABLE log_file ADD COLUMN decoder_state BLOB")
         }
 
+        migrator.registerMigration("v3_session_user_chars_and_finding_fixes") { db in
+            try db.execute(
+                sql: """
+                    ALTER TABLE session ADD COLUMN first_user_chars INTEGER;
+                    ALTER TABLE finding ADD COLUMN suggested_fixes_json TEXT NOT NULL DEFAULT '[]';
+                    """
+            )
+        }
+
         return migrator
     }
 }

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "prototype-db": {
+      "command": "npx",
+      "args": ["-y", "@acme/prototype-db-mcp"]
+    }
+  }
+}

@@ -42,11 +42,20 @@ struct CLICommonOptions: ParsableArguments {
             effectiveEnv = processEnv
         }
 
+        let fixedNow: Date?
+        if let rawNow = processEnv["BENTO_NOW_ISO8601"]?.trimmingCharacters(in: .whitespacesAndNewlines),
+            !rawNow.isEmpty
+        {
+            fixedNow = ISO8601DateFormatter().date(from: rawNow)
+        } else {
+            fixedNow = nil
+        }
+
         let agentEnv = AgentEnvironment(
             home: homeURL,
             env: effectiveEnv,
             fileSystem: LocalReadOnlyFileSystem(),
-            now: { Date() }
+            now: { fixedNow ?? Date() }
         )
 
         let explicitDB = db?.trimmingCharacters(in: .whitespacesAndNewlines) ?? processEnv["BENTO_DB_PATH"]

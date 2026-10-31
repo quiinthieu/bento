@@ -155,15 +155,17 @@ extension BentoStore: LogIngestPersisting {
                 try db.execute(
                     sql: """
                         INSERT INTO session (
-                            agent, session_id, started_at, cwd, repo_id, model, first_turn_input
+                            agent, session_id, started_at, cwd, repo_id,
+                            model, first_turn_input, first_user_chars
                         )
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                         ON CONFLICT(agent, session_id) DO UPDATE SET
                             started_at = MIN(session.started_at, excluded.started_at),
                             cwd = COALESCE(session.cwd, excluded.cwd),
                             repo_id = COALESCE(session.repo_id, excluded.repo_id),
                             model = COALESCE(excluded.model, session.model),
-                            first_turn_input = COALESCE(session.first_turn_input, excluded.first_turn_input)
+                            first_turn_input = COALESCE(session.first_turn_input, excluded.first_turn_input),
+                            first_user_chars = COALESCE(session.first_user_chars, excluded.first_user_chars)
                         """,
                     arguments: [
                         session.agent.rawValue,
@@ -172,7 +174,8 @@ extension BentoStore: LogIngestPersisting {
                         session.cwd,
                         resolvedRepoID,
                         session.model,
-                        session.firstTurnInput
+                        session.firstTurnInput,
+                        session.firstUserMessageCharCount
                     ]
                 )
                 sessionsUpdated += 1
@@ -500,7 +503,7 @@ extension BentoStore: LogIngestPersisting {
 
     // MARK: - Private Row Mapping Helpers
 
-    private struct RepoCandidate {
+    struct RepoCandidate {
         var id: String
         var path: String
         var realPath: String
@@ -550,7 +553,7 @@ extension BentoStore: LogIngestPersisting {
         }
     }
 
-    private static func fetchRepoCandidates(in db: Database) throws -> [RepoCandidate] {
+    static func fetchRepoCandidates(in db: Database) throws -> [RepoCandidate] {
         let rows = try Row.fetchAll(db, sql: "SELECT id, path, real_path FROM repo")
         return rows.map {
             RepoCandidate(
@@ -561,7 +564,7 @@ extension BentoStore: LogIngestPersisting {
         }
     }
 
-    private static func matchRepoID(forCwd rawCwd: String, against candidates: [RepoCandidate]) -> String? {
+    static func matchRepoID(forCwd rawCwd: String, against candidates: [RepoCandidate]) -> String? {
         guard !candidates.isEmpty else { return nil }
         let stdCwd = URL(fileURLWithPath: rawCwd).standardizedFileURL.path
         let realCwd = URL(fileURLWithPath: rawCwd).resolvingSymlinksInPath().standardizedFileURL.path
@@ -612,7 +615,7 @@ extension BentoStore: LogIngestPersisting {
         )
     }
 
-    private static func decodeSessionRecord(from row: Row) throws -> SessionRecord {
+    static func decodeSessionRecord(from row: Row) throws -> SessionRecord {
         let rawAgent: String = row["agent"]
         let sessionID: String = row["session_id"]
         guard let agent = AgentID(rawValue: rawAgent) else {
@@ -625,7 +628,8 @@ extension BentoStore: LogIngestPersisting {
             cwd: row["cwd"],
             repoID: row["repo_id"],
             model: row["model"],
-            firstTurnInput: row["first_turn_input"]
+            firstTurnInput: row["first_turn_input"],
+            firstUserMessageCharCount: row["first_user_chars"]
         )
     }
 
