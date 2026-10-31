@@ -37,18 +37,18 @@ jobs:
           Scripts/test-lint-writes.sh
 
       - name: Check Swift formatting
-        run: swift format lint --strict -r Package.swift Sources Tests XcodeApp
+        run: swift format lint --strict -r Package.swift Sources Tests XcodeApp XcodeUITests
 
       - name: Swift Package build (warnings as errors)
         run: swift build -Xswiftc -warnings-as-errors
 
       - name: Swift Package test
-        run: swift test --parallel -Xswiftc -warnings-as-errors
+        run: swift test --no-parallel -Xswiftc -warnings-as-errors
 
       - name: Install XcodeGen if needed
         run: which xcodegen >/dev/null 2>&1 || brew install xcodegen
 
-      - name: Generate Xcode project and build macOS App target
+      - name: Generate Xcode project and build macOS App + XCUITest targets
         run: |
           xcodegen generate
           xcodebuild \
@@ -57,4 +57,4 @@ jobs:
             -configuration Debug \
             -destination 'platform=macOS' \
             CODE_SIGNING_ALLOWED=NO \
-            build
+            build-for-testing

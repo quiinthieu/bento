@@ -4,24 +4,16 @@ import Synchronization
 
 /// Byte-level BPE tokenizer compatible with OpenAI `tiktoken` (`o200k_base` and `cl100k_base`, `PLAN.md` §6.3).
 public final class BPETokenizer: TokenCounter, Sendable {
-    private struct SharedCache {
-        var instances: [BPEEncoding: BPETokenizer] = [:]
-    }
+    private static let sharedO200k = Result { try BPETokenizer(encoding: .o200kBase) }
+    private static let sharedCl100k = Result { try BPETokenizer(encoding: .cl100kBase) }
 
-    private static let sharedCache = Mutex(SharedCache())
-
-    /// Returns a cached shared `BPETokenizer` for `encoding`, loading its bundled vocabulary once.
+    /// Returns a cached shared `BPETokenizer` for `encoding`, loading its bundled vocabulary once via singleflight initialization.
     public static func shared(for encoding: BPEEncoding) throws -> BPETokenizer {
-        if let existing = sharedCache.withLock({ $0.instances[encoding] }) {
-            return existing
-        }
-        let loaded = try BPETokenizer(encoding: encoding)
-        return sharedCache.withLock { state in
-            if let raced = state.instances[encoding] {
-                return raced
-            }
-            state.instances[encoding] = loaded
-            return loaded
+        switch encoding {
+        case .o200kBase:
+            return try sharedO200k.get()
+        case .cl100kBase:
+            return try sharedCl100k.get()
         }
     }
 

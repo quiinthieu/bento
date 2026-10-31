@@ -40,6 +40,22 @@ public enum FileOp: Sendable, Codable, Hashable {
             return [path]
         }
     }
+
+    /// Human-readable one-line description of this planned operation for CLI and UI fix previews.
+    public var displayTitle: String {
+        switch self {
+        case .writeFile(let path, let newBytes, _):
+            return "Write \(newBytes.count) B → \(path)"
+        case .symlink(let atPath, let destinationPath):
+            return "Symlink \(atPath) → \(destinationPath)"
+        case .moveToTrash(let path, _):
+            return "Move to Trash: \(path)"
+        case .moveItem(let fromPath, let toPath, _):
+            return "Move \(fromPath) → \(toPath)"
+        case .mkdir(let path):
+            return "Create Directory: \(path)"
+        }
+    }
 }
 
 /// Expected filesystem state recorded during planning and verified immediately prior to `apply` (`TOCTOU` guard).
