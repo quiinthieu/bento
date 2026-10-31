@@ -133,12 +133,22 @@ public struct StdioMCPClient: Sendable {
             stderrThread.qualityOfService = .userInitiated
             stderrThread.start()
 
-            // Schedule strict wall-clock timeout killer.
+            // Schedule strict wall-clock timeout killer on a dedicated thread so GCD global-queue
+            // saturation under parallel workloads can never delay timeout enforcement.
             let timeoutFlag = AtomicFlag()
             let completedFlag = AtomicFlag()
-            DispatchQueue.global(qos: .userInitiated).asyncAfter(
-                deadline: .now() + effectiveTimeout
-            ) {
+            let timeoutDeadline = Date().addingTimeInterval(effectiveTimeout)
+            let timeoutThread = Thread {
+                while true {
+                    if completedFlag.isSet {
+                        return
+                    }
+                    let remaining = timeoutDeadline.timeIntervalSinceNow
+                    if remaining <= 0 {
+                        break
+                    }
+                    Thread.sleep(forTimeInterval: min(0.025, remaining))
+                }
                 guard completedFlag.setIfUnset() else { return }
                 timeoutFlag.set()
                 try? stdinPipe.fileHandleForWriting.close()
@@ -152,9 +162,11 @@ public struct StdioMCPClient: Sendable {
                     )
                 )
             }
+            timeoutThread.qualityOfService = .userInitiated
+            timeoutThread.start()
 
-            // Run blocking pipe handshake on a dedicated background worker.
-            DispatchQueue.global(qos: .userInitiated).async {
+            // Run blocking pipe handshake on a dedicated thread rather than GCD's bounded global pool.
+            let handshakeThread = Thread {
                 defer {
                     _ = completedFlag.setIfUnset()
                     try? stdinPipe.fileHandleForWriting.close()
@@ -267,6 +279,8 @@ public struct StdioMCPClient: Sendable {
                     }
                 }
             }
+            handshakeThread.qualityOfService = .userInitiated
+            handshakeThread.start()
         }
     }
 

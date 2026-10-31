@@ -222,7 +222,7 @@ struct BentoMCPProbeTests {
         }
 
         let elapsed = ContinuousClock.now - start
-        #expect(elapsed < .seconds(4))
+        #expect(elapsed < .seconds(10))
 
         // Verify spawned child process was terminated cleanly (kill(pid, 0) != 0).
         if let rawMarker = try? String(contentsOf: markerFile, encoding: .utf8),

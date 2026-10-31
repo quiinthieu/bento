@@ -507,16 +507,20 @@ struct BentoCLITests {
         let pipeGroup = DispatchGroup()
 
         pipeGroup.enter()
-        DispatchQueue.global(qos: .userInitiated).async {
+        let outThread = Thread {
             outBox.data = outPipe.fileHandleForReading.readDataToEndOfFile()
             pipeGroup.leave()
         }
+        outThread.qualityOfService = .userInitiated
+        outThread.start()
 
         pipeGroup.enter()
-        DispatchQueue.global(qos: .userInitiated).async {
+        let errThread = Thread {
             errBox.data = errPipe.fileHandleForReading.readDataToEndOfFile()
             pipeGroup.leave()
         }
+        errThread.qualityOfService = .userInitiated
+        errThread.start()
 
         let waitResult = exitSemaphore.wait(timeout: .now() + .seconds(15))
         if waitResult == .timedOut {
