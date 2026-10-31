@@ -43,7 +43,7 @@ jobs:
         run: swift build -Xswiftc -warnings-as-errors
 
       - name: Swift Package test
-        run: swift test --parallel -Xswiftc -warnings-as-errors
+        run: swift test --no-parallel -Xswiftc -warnings-as-errors
 
       - name: Install XcodeGen if needed
         run: which xcodegen >/dev/null 2>&1 || brew install xcodegen
