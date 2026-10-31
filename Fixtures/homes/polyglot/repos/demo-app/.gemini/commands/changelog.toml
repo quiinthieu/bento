@@ -1,0 +1,2 @@
+description = "Draft release changelog entries"
+prompt = "Summarize merged pull requests since the latest tag in Keep a Changelog format."

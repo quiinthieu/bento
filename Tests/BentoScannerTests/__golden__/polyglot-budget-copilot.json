@@ -1,0 +1,183 @@
+{
+  "agent" : "copilot",
+  "contextWindow" : 128000,
+  "folder" : "<HOME>/repos/demo-app",
+  "items" : [
+    {
+      "category" : "builtInSystem",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "Copilot CLI system prompt",
+      "method" : "estimated (built-in, measured on 2026-10-30, GitHub Copilot CLI 0.0.420)",
+      "range" : [
+        2635,
+        3565
+      ],
+      "tokens" : 3100
+    },
+    {
+      "category" : "builtInTools",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "Copilot CLI built-in tools",
+      "method" : "estimated (built-in, measured on 2026-10-30, GitHub Copilot CLI 0.0.420)",
+      "range" : [
+        6290,
+        8510
+      ],
+      "tokens" : 7400
+    },
+    {
+      "artifactID" : "246e750351c8e9a9af613c2f3a4f50d12b444f7e720c9d98c3404dfeecf20d09",
+      "category" : "rules",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "copilot-instructions.md",
+      "method" : "o200k_base (default model proxy)",
+      "range" : [
+        14,
+        20
+      ],
+      "tokens" : 17
+    },
+    {
+      "artifactID" : "e29580e007c1477dd00cf72d8691417b4bd1e41b13a8a4a925adc7da99f46d90",
+      "category" : "rules",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "copilot-instructions.md",
+      "method" : "o200k_base (default model proxy)",
+      "range" : [
+        23,
+        33
+      ],
+      "tokens" : 28
+    },
+    {
+      "artifactID" : "fcf4b4aa66c4f42d60df532b080b7151892d16efa02da81322ca088a3019450f",
+      "category" : "rules",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "AGENTS.md",
+      "method" : "o200k_base (default model proxy)",
+      "range" : [
+        31,
+        43
+      ],
+      "tokens" : 37
+    },
+    {
+      "artifactID" : "a19e14dfdb7970d138fb8e5b50e9fa49fb264d86d605df25af2c727e1da6b364",
+      "category" : "rules",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "typescript.instructions.md (conditional: **/*.ts)",
+      "method" : "o200k_base (default model proxy)",
+      "range" : [
+        18,
+        26
+      ],
+      "tokens" : 22
+    },
+    {
+      "artifactID" : "beab4427cd81f676cf3d13d393f81e5a4a4d73cce8e40934bca22f6ebfdf7f38",
+      "category" : "rules",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "packages/api/AGENTS.md (conditional: packages/api/**)",
+      "method" : "o200k_base (default model proxy)",
+      "range" : [
+        17,
+        25
+      ],
+      "tokens" : 21
+    },
+    {
+      "artifactID" : "640efbd44122eae3a04389fe39f67e6713599c5e6dd012aaa79fac73a3e9e880",
+      "category" : "mcpToolsLoaded",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "docs",
+      "method" : "unknown (not probed; default fallback estimate)",
+      "range" : [
+        600,
+        2160
+      ],
+      "tokens" : 1200
+    },
+    {
+      "artifactID" : "41d64dd1c898fd3b336292a4df15a08757c5b906d517ea522ca23cee1af0d7c7",
+      "category" : "skillFrontmatter",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "lint-fix (frontmatter)",
+      "method" : "o200k_base (default model proxy)",
+      "range" : [
+        15,
+        21
+      ],
+      "tokens" : 18
+    },
+    {
+      "artifactID" : "41d64dd1c898fd3b336292a4df15a08757c5b906d517ea522ca23cee1af0d7c7",
+      "category" : "skillBody",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "lint-fix (body)",
+      "method" : "o200k_base (default model proxy)",
+      "range" : [
+        28,
+        40
+      ],
+      "tokens" : 34
+    },
+    {
+      "artifactID" : "41d93d4c5b9d2721f60701320be3fe2da3aaddee76624d599872b7fb6e26f529",
+      "category" : "subagents",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "security-reviewer (description)",
+      "method" : "o200k_base (default model proxy)",
+      "range" : [
+        13,
+        19
+      ],
+      "tokens" : 16
+    },
+    {
+      "artifactID" : "41d93d4c5b9d2721f60701320be3fe2da3aaddee76624d599872b7fb6e26f529",
+      "category" : "subagents",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "security-reviewer (body)",
+      "method" : "o200k_base (default model proxy)",
+      "range" : [
+        12,
+        18
+      ],
+      "tokens" : 15
+    },
+    {
+      "artifactID" : "8f0df7273184b36e3de1c8b60a70377ca4437e4d09fb624112bb0c798b8e8a32",
+      "category" : "commands",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "test-plan",
+      "method" : "o200k_base (default model proxy)",
+      "range" : [
+        14,
+        20
+      ],
+      "tokens" : 17
+    },
+    {
+      "artifactID" : "78b0704c61283ad6686e4b3db96a2aa3a9e34e35bb65198d617b6002aa89eeb7",
+      "category" : "hooks",
+      "confidence" : "measured",
+      "countsTowardPrePrompt" : false,
+      "label" : "postToolUse",
+      "method" : "measured-only (dynamic hook output)",
+      "tokens" : 0
+    }
+  ]
+}

@@ -5,9 +5,9 @@ import Foundation
 /// Actor owning the live `Snapshot`, incremental `PathCatalog`-driven rescans, and `AsyncStream<SnapshotDelta>`
 /// notifications (`PLAN.md` §3.5, §6.1).
 public actor Workspace {
-    private let environment: AgentEnvironment
-    private let adapters: [any AgentAdapter]
-    private let adaptersByID: [AgentID: any AgentAdapter]
+    let environment: AgentEnvironment
+    let adapters: [any AgentAdapter]
+    let adaptersByID: [AgentID: any AgentAdapter]
     private let store: (any SnapshotPersisting)?
     private let watcher: (any FileWatcher)?
     private var repoDiscoveryOptions: RepoDiscoveryOptions

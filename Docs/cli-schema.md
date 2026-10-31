@@ -89,6 +89,29 @@ bentoctx resolve [--home PATH] [--db PATH] --repo PATH --agent AGENT --json
 
 ---
 
+## `budget --json`
+
+Computes pre-prompt and deferred/on-invoke/conditional context token `Budget` breakdowns across all budget-capable agents (`claudeCode`, `codex`, `gemini`, `copilot`), or for a single `--agent`, when launched in `--repo`.
+
+```bash
+bentoctx budget [--home PATH] [--db PATH] --repo PATH [--agent AGENT] [--model MODEL] --json
+```
+
+### Top-Level Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `schemaVersion` | `Int` | Always `1`. |
+| `command` | `String` | Always `"budget"`. |
+| `generatedAt` | `String` | ISO-8601 UTC timestamp when the response was emitted. |
+| `snapshotID` | `String` | Identifier of the `Snapshot` backing this budget query (or on-demand scan). |
+| `repoPath` | `String` | Standardized target repository or working directory path. |
+| `agentFilter` | `String?` | Canonical `AgentID` raw value when `--agent` was specified; omitted otherwise. |
+| `modelOverride` | `String?` | Explicit `--model` override when supplied; omitted otherwise. |
+| `budgets` | `Array<Budget>` | Deterministically ordered `BentoCore.Budget` records (`agent`, `folder`, `model`, `items`, `measuredFirstTurnInput`, `contextWindow`). Every `BudgetItem` carries `confidence`, `method`, and `countsTowardPrePrompt`. |
+
+---
+
 ## Reserved Subcommand Envelopes (M2–M4)
 
-Upcoming commands (`budget`, `usage`, `hygiene`, `fix`, `undo`, `ingest`) share the same `"schemaVersion": 1`, `"command": "<name>"`, `"generatedAt": "<ISO-8601>"` envelope and will be documented here as tasks T09–T14 land.
+Upcoming commands (`usage`, `hygiene`, `fix`, `undo`, `ingest`) share the same `"schemaVersion": 1`, `"command": "<name>"`, `"generatedAt": "<ISO-8601>"` envelope and will be documented here as tasks T10–T14 land.

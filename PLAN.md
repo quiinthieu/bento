@@ -625,7 +625,7 @@ Each task is sized for one agent session (~0.5–2 days of agent work). Tick `[x
 ### M2 Context budget
 - [x] **T08 Tokenizer.** BPE port (o200k/cl100k) with reference vectors, HeuristicCounter, the `TokenCounter` protocol, content-hash cache, and the model→counter map per agent.
   *AC:* 100% match on ≥ 1,000 reference vectors. Throughput ≥ 5 MB/s. Heuristic is within ±20% of BPE on the fixture corpus.
-- [ ] **T09 Budget engine + built-ins.** `budgetContributions` for all budget-capable adapters (skills frontmatter vs body, subagent descriptions, commands, hooks, rules, conditional rules shown separately), `Resources/builtins/*.json` with provenance, and the CLI `budget`.
+- [x] **T09 Budget engine + built-ins.** `budgetContributions` for all budget-capable adapters (skills frontmatter vs body, subagent descriptions, commands, hooks, rules, conditional rules shown separately), `Resources/builtins/*.json` with provenance, and the CLI `budget`.
   *AC:* `polyglot` budget golden for each agent, with every item carrying confidence + method. The sum excludes deferred/onInvoke from pre-prompt.
 - [ ] **T10 MCP probe.** Fake server fixture, stdio + Streamable HTTP clients, consent store, timeout, env scrub, pagination, cache by config hash, deferred-vs-loaded rules, fallback estimates, and CLI `--probe-mcp`.
   *AC:* tests for success, pagination, timeout (≤ 15 s +1), crash, env scrub (the server can't see unrelated env vars), and cache hit. No probe ever runs without consent (asserted).

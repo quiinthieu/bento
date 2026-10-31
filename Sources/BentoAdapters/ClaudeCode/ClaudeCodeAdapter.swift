@@ -52,107 +52,11 @@ public struct ClaudeCodeAdapter: AgentAdapter, Sendable {
     }
 
     public func builtInBudget(model: String?) -> [BudgetItem] {
-        []
+        BuiltInBudgetCatalog.items(for: Self.id, displayName: displayName, model: model)
     }
 
     public func budgetContributions(for resolved: ResolvedArtifact, artifact: Artifact) -> [BudgetContribution] {
-        guard resolved.effectiveLoadMode != .never else {
-            return []
-        }
-
-        switch artifact.payload {
-        case .rules(let doc):
-            let prePrompt: Bool =
-                switch resolved.effectiveLoadMode {
-                case .always:
-                    true
-                case .conditional, .onInvoke, .deferred, .frontmatterOnly, .never:
-                    false
-                }
-            return [
-                BudgetContribution(
-                    artifactID: artifact.id,
-                    category: .rules,
-                    label: artifact.name,
-                    text: doc.content,
-                    countsTowardPrePrompt: prePrompt
-                )
-            ]
-
-        case .skill(let doc):
-            var items: [BudgetContribution] = []
-            let summaryText = [doc.name, doc.description].compactMap { $0 }.joined(separator: ": ")
-            if resolved.effectiveLoadMode == .frontmatterOnly {
-                items.append(
-                    BudgetContribution(
-                        artifactID: artifact.id,
-                        category: .skillFrontmatter,
-                        label: "\(doc.name) (frontmatter)",
-                        text: summaryText,
-                        countsTowardPrePrompt: true
-                    )
-                )
-            }
-            items.append(
-                BudgetContribution(
-                    artifactID: artifact.id,
-                    category: .skillBody,
-                    label: "\(doc.name) (body)",
-                    text: doc.body,
-                    countsTowardPrePrompt: false
-                )
-            )
-            return items
-
-        case .subagent(let doc):
-            let summaryText = [doc.name, doc.description].compactMap { $0 }.joined(separator: ": ")
-            return [
-                BudgetContribution(
-                    artifactID: artifact.id,
-                    category: .subagents,
-                    label: doc.name,
-                    text: summaryText,
-                    countsTowardPrePrompt: resolved.effectiveLoadMode == .frontmatterOnly
-                )
-            ]
-
-        case .command(let doc):
-            return [
-                BudgetContribution(
-                    artifactID: artifact.id,
-                    category: .commands,
-                    label: doc.name,
-                    text: doc.body,
-                    countsTowardPrePrompt: false
-                )
-            ]
-
-        case .hook(let config):
-            return [
-                BudgetContribution(
-                    artifactID: artifact.id,
-                    category: .hooks,
-                    label: artifact.name,
-                    text: config.command,
-                    countsTowardPrePrompt: false
-                )
-            ]
-
-        case .mcpServer:
-            let isDeferred = resolved.effectiveLoadMode == .deferred
-            return [
-                BudgetContribution(
-                    artifactID: artifact.id,
-                    category: isDeferred ? .mcpToolsDeferred : .mcpToolsLoaded,
-                    label: artifact.name,
-                    fixedTokensEstimate: isDeferred ? 120 : 1_200,
-                    countsTowardPrePrompt: true
-                )
-            ]
-
-        case .settings, .plugin, .other:
-            return []
-        }
+        AdapterBudgetContributor.contributions(for: resolved, artifact: artifact)
     }
 
     public func logSources(in env: AgentEnvironment) throws -> [LogSource] {

@@ -12,6 +12,7 @@ enum ClaudeCodeResolver {
         var deniedMCPServers: Set<String> = []
         var allowedMCPServers: Set<String>?
         var disableAllHooks: Bool = false
+        var enableToolSearch: Bool = false
     }
 
     static func resolve(_ artifacts: [Artifact], folder: URL, env: AgentEnvironment) -> Resolution {
@@ -194,6 +195,7 @@ enum ClaudeCodeResolver {
         }
 
         var disableHooksResolved = false
+        var toolSearchResolved = false
 
         for item in highToLow {
             guard item.enabled, case .settings(let doc) = item.payload else {
@@ -218,6 +220,12 @@ enum ClaudeCodeResolver {
             if !disableHooksResolved, let flag = ClaudeCodePayloadParser.boolValue(tree["disableAllHooks"]) {
                 policy.disableAllHooks = flag
                 disableHooksResolved = true
+            }
+
+            // enableToolSearch: highest-precedence explicit bool wins (defers MCP tool schemas)
+            if !toolSearchResolved, let flag = ClaudeCodePayloadParser.boolValue(tree["enableToolSearch"]) {
+                policy.enableToolSearch = flag
+                toolSearchResolved = true
             }
 
             // disabledMcpjsonServers applies from all active settings tiers (deny wins)
@@ -623,6 +631,8 @@ enum ClaudeCodeResolver {
             }
         }
 
+        let activeMode: LoadMode = policy.enableToolSearch ? .deferred : server.loadMode
+
         if ClaudeCodePathCatalog.isProjectMCPJsonArtifact(server, in: env) {
             if let disabler = policy.disabledMcpjsonSources[server.name] {
                 return (
@@ -638,7 +648,7 @@ enum ClaudeCodeResolver {
                 return (
                     ResolvedArtifact(
                         artifactID: server.id,
-                        effectiveLoadMode: server.loadMode,
+                        effectiveLoadMode: activeMode,
                         reason: "\(winnerSource), approved in \(approver)"
                     ),
                     nil
@@ -648,7 +658,7 @@ enum ClaudeCodeResolver {
                 return (
                     ResolvedArtifact(
                         artifactID: server.id,
-                        effectiveLoadMode: server.loadMode,
+                        effectiveLoadMode: activeMode,
                         reason: "\(winnerSource), approved via enableAllProjectMcpServers in \(allApprover)"
                     ),
                     nil
@@ -674,7 +684,7 @@ enum ClaudeCodeResolver {
         return (
             ResolvedArtifact(
                 artifactID: server.id,
-                effectiveLoadMode: server.loadMode,
+                effectiveLoadMode: activeMode,
                 reason: "active MCP server from \(winnerSource)"
             ),
             nil

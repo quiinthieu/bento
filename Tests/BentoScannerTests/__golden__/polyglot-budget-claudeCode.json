@@ -1,0 +1,183 @@
+{
+  "agent" : "claudeCode",
+  "contextWindow" : 200000,
+  "folder" : "<HOME>/repos/demo-app",
+  "items" : [
+    {
+      "category" : "builtInSystem",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "Claude Code system prompt",
+      "method" : "estimated (built-in, measured on 2026-10-30, Claude Code 2.1.x)",
+      "range" : [
+        3570,
+        4830
+      ],
+      "tokens" : 4200
+    },
+    {
+      "category" : "builtInTools",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "Claude Code built-in tools",
+      "method" : "estimated (built-in, measured on 2026-10-30, Claude Code 2.1.x)",
+      "range" : [
+        10030,
+        13570
+      ],
+      "tokens" : 11800
+    },
+    {
+      "artifactID" : "4fce622d1c78c08649fd48dd4432d32d59b56fcc041b39c3ec3bd511aea7d375",
+      "category" : "rules",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "CLAUDE.md",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        23,
+        33
+      ],
+      "tokens" : 28
+    },
+    {
+      "artifactID" : "89da69c397f3f48e3bc05d03f750b81107c4edfe367d74fdc398677308f2c41a",
+      "category" : "rules",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "CLAUDE.md",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        34,
+        46
+      ],
+      "tokens" : 40
+    },
+    {
+      "artifactID" : "466fc34c1fef4b3308370ef743ce062d20a3e8b3fc24513649ba353144c92241",
+      "category" : "rules",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "api.md (conditional: src/api/**/*.ts)",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        30,
+        42
+      ],
+      "tokens" : 36
+    },
+    {
+      "artifactID" : "35cb541432c0a152523dfdfeab0f6edff718e28f93086f123f3fdebf10a94268",
+      "category" : "mcpToolsLoaded",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "docs",
+      "method" : "unknown (not probed; default fallback estimate)",
+      "range" : [
+        600,
+        2160
+      ],
+      "tokens" : 1200
+    },
+    {
+      "artifactID" : "ed3ab06476621dfe054aeab291916d792d8045b0f87ecd7421d36df7ef752033",
+      "category" : "mcpToolsLoaded",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "github (tool-search stub)",
+      "method" : "estimated (deferred MCP tool-search stub)",
+      "range" : [
+        90,
+        150
+      ],
+      "tokens" : 120
+    },
+    {
+      "artifactID" : "ed3ab06476621dfe054aeab291916d792d8045b0f87ecd7421d36df7ef752033",
+      "category" : "mcpToolsDeferred",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "github (deferred tools)",
+      "method" : "unknown (not probed; default fallback estimate)",
+      "range" : [
+        600,
+        2160
+      ],
+      "tokens" : 1200
+    },
+    {
+      "artifactID" : "2f4bbc471428e90bd4f4eace1ad33c0d9076c1181d767119f1a3505e806b82ee",
+      "category" : "skillFrontmatter",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "deploy-check (frontmatter)",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        18,
+        26
+      ],
+      "tokens" : 22
+    },
+    {
+      "artifactID" : "2f4bbc471428e90bd4f4eace1ad33c0d9076c1181d767119f1a3505e806b82ee",
+      "category" : "skillBody",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "deploy-check (body)",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        45,
+        61
+      ],
+      "tokens" : 53
+    },
+    {
+      "artifactID" : "9c89bd3aba4564f5358ce2b9ec8606fc8b9ccfbe2106a255ba8653fa9a2614d2",
+      "category" : "subagents",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "code-reviewer (description)",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        17,
+        23
+      ],
+      "tokens" : 20
+    },
+    {
+      "artifactID" : "9c89bd3aba4564f5358ce2b9ec8606fc8b9ccfbe2106a255ba8653fa9a2614d2",
+      "category" : "subagents",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "code-reviewer (body)",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        22,
+        32
+      ],
+      "tokens" : 27
+    },
+    {
+      "artifactID" : "aa9c73248ca3ce6e6abeac00d53a12bfb31b020d1d4aef497fd28d4f3e8df310",
+      "category" : "commands",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "release-notes",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        17,
+        23
+      ],
+      "tokens" : 20
+    },
+    {
+      "artifactID" : "28379df6fd2cbe908a1244303c2eb465e6bc98adc62ec854e62caef54e5e26b1",
+      "category" : "hooks",
+      "confidence" : "measured",
+      "countsTowardPrePrompt" : false,
+      "label" : "PostToolUse (Edit|Write)",
+      "method" : "measured-only (dynamic hook output)",
+      "tokens" : 0
+    }
+  ]
+}

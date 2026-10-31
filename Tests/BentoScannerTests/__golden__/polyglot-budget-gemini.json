@@ -1,0 +1,157 @@
+{
+  "agent" : "gemini",
+  "contextWindow" : 1048576,
+  "folder" : "<HOME>/repos/demo-app",
+  "items" : [
+    {
+      "category" : "builtInSystem",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "Gemini CLI system prompt",
+      "method" : "estimated (built-in, measured on 2026-10-30, @google/gemini-cli 0.41.2)",
+      "range" : [
+        3060,
+        4140
+      ],
+      "tokens" : 3600
+    },
+    {
+      "category" : "builtInTools",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "Gemini CLI built-in tools",
+      "method" : "estimated (built-in, measured on 2026-10-30, @google/gemini-cli 0.41.2)",
+      "range" : [
+        5865,
+        7935
+      ],
+      "tokens" : 6900
+    },
+    {
+      "artifactID" : "70b3e145fc6d34e2abc463664501620a2863876fad45526a9b38e36e23bdc6af",
+      "category" : "rules",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "GEMINI.md",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        15,
+        21
+      ],
+      "tokens" : 18
+    },
+    {
+      "artifactID" : "fbf38aa0d7e1b65809c57a694a628cc9a31c37af7417eb52c536065dddf0986d",
+      "category" : "rules",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "GEMINI.md",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        25,
+        35
+      ],
+      "tokens" : 30
+    },
+    {
+      "artifactID" : "45f014f8e8e1384b4bea40c099dcb887955d3f944dd3a93eceaccc64501b99da",
+      "category" : "rules",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "GEMINI.md (conditional: packages/api/**)",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        20,
+        28
+      ],
+      "tokens" : 24
+    },
+    {
+      "artifactID" : "1d9fb0fc0c50e37ab42e3c2bdb6966c463152a4c61792c78ba24a4fb783013f1",
+      "category" : "mcpToolsLoaded",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "docs",
+      "method" : "unknown (not probed; default fallback estimate)",
+      "range" : [
+        600,
+        2160
+      ],
+      "tokens" : 1200
+    },
+    {
+      "artifactID" : "8d08a2ea64157e0f0c737f77fdb1035c01e7c9a4b133db7e18c5ae2c1a3673ca",
+      "category" : "skillFrontmatter",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "lint-fix (frontmatter)",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        18,
+        26
+      ],
+      "tokens" : 22
+    },
+    {
+      "artifactID" : "8d08a2ea64157e0f0c737f77fdb1035c01e7c9a4b133db7e18c5ae2c1a3673ca",
+      "category" : "skillBody",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "lint-fix (body)",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        24,
+        34
+      ],
+      "tokens" : 29
+    },
+    {
+      "artifactID" : "2f2e9f61cf84057c745eef56874b9034855b97f704ed5704110b693086fe573a",
+      "category" : "subagents",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : true,
+      "label" : "perf-auditor (description)",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        15,
+        21
+      ],
+      "tokens" : 18
+    },
+    {
+      "artifactID" : "2f2e9f61cf84057c745eef56874b9034855b97f704ed5704110b693086fe573a",
+      "category" : "subagents",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "perf-auditor (body)",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        20,
+        28
+      ],
+      "tokens" : 24
+    },
+    {
+      "artifactID" : "0b667b7d31cacb17f5df61b70c4f3983b5ea9342edc7f425010397479a3171c3",
+      "category" : "commands",
+      "confidence" : "estimated",
+      "countsTowardPrePrompt" : false,
+      "label" : "changelog",
+      "method" : "heuristic chars/4.60",
+      "range" : [
+        14,
+        20
+      ],
+      "tokens" : 17
+    },
+    {
+      "artifactID" : "3e4f3b7ae3767cf02dff566249cafa45ddc3992a625081170ca34013447e9db3",
+      "category" : "hooks",
+      "confidence" : "measured",
+      "countsTowardPrePrompt" : false,
+      "label" : "BeforeTool (run_shell_command)",
+      "method" : "measured-only (dynamic hook output)",
+      "tokens" : 0
+    }
+  ]
+}

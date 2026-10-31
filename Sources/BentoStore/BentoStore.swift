@@ -412,7 +412,7 @@ public final class BentoStore: SnapshotPersisting, Sendable {
 
     // MARK: - Decoding Helpers
 
-    private static func repoIdentifier(forPath path: String) -> String {
+    static func repoIdentifier(forPath path: String) -> String {
         ContentHasher.sha256Hex(Data(path.utf8))
     }
 

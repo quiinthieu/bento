@@ -67,6 +67,41 @@ struct BentoCLITests {
         #expect(!resolution.ordered.isEmpty)
         let resArtifacts = try decodeField([Artifact].self, key: "artifacts", in: resOut.stdout)
         #expect(!resArtifacts.isEmpty)
+
+        // 4. budget --home <polyglot> --repo <demo-app> --json (all 4 budget-capable agents)
+        let budgetAllOut = try runCLI([
+            "budget",
+            "--home", fixture.url.path,
+            "--repo", repoURL.path,
+            "--json"
+        ])
+        #expect(budgetAllOut.exitCode == 0)
+        let budgetAllJSON = try parseJSONObject(budgetAllOut.stdout)
+        #expect(budgetAllJSON["schemaVersion"] as? Int == 1)
+        #expect(budgetAllJSON["command"] as? String == "budget")
+        #expect(budgetAllJSON["repoPath"] as? String == repoURL.path)
+        #expect(budgetAllJSON["agentFilter"] == nil)
+        let allBudgets = try decodeField([Budget].self, key: "budgets", in: budgetAllOut.stdout)
+        #expect(allBudgets.map(\.agent) == [.claudeCode, .codex, .gemini, .copilot])
+        #expect(allBudgets.allSatisfy { $0.prePromptTokens > 0 })
+
+        // 5. budget --home <polyglot> --repo <demo-app> --agent codex --model o3 --json
+        let budgetCodexOut = try runCLI([
+            "budget",
+            "--home", fixture.url.path,
+            "--repo", repoURL.path,
+            "--agent", "codex",
+            "--model", "o3",
+            "--json"
+        ])
+        #expect(budgetCodexOut.exitCode == 0)
+        let budgetCodexJSON = try parseJSONObject(budgetCodexOut.stdout)
+        #expect(budgetCodexJSON["agentFilter"] as? String == "codex")
+        #expect(budgetCodexJSON["modelOverride"] as? String == "o3")
+        let codexBudgets = try decodeField([Budget].self, key: "budgets", in: budgetCodexOut.stdout)
+        #expect(codexBudgets.count == 1)
+        #expect(codexBudgets.first?.model == "o3")
+        #expect(codexBudgets.first?.contextWindow == 200_000)
     }
 
     @Test("bentoctx shares persistent WAL SQLite store via --db and renders human-readable output")
@@ -114,10 +149,32 @@ struct BentoCLITests {
         let resJSON = try parseJSONObject(resOut.stdout)
         #expect(resJSON["snapshotID"] as? String == persistedSnapshotID)
 
+        let budgetOut = try runCLI([
+            "budget",
+            "--home", fixture.url.path,
+            "--db", dbURL.path,
+            "--repo", repoURL.path,
+            "--agent", "claudeCode",
+            "--json"
+        ])
+        #expect(budgetOut.exitCode == 0)
+        let budgetJSON = try parseJSONObject(budgetOut.stdout)
+        #expect(budgetJSON["snapshotID"] as? String == persistedSnapshotID)
+
         // Human-readable output (no --json) succeeds cleanly.
         let humanScan = try runCLI(["scan", "--home", fixture.url.path])
         #expect(humanScan.exitCode == 0)
         #expect(humanScan.stdoutString.contains("demo-app"))
+
+        let humanBudget = try runCLI([
+            "budget",
+            "--home", fixture.url.path,
+            "--repo", repoURL.path,
+            "--agent", "codex"
+        ])
+        #expect(humanBudget.exitCode == 0)
+        #expect(humanBudget.stdoutString.contains("Pre-prompt tokens:"))
+        #expect(humanBudget.stdoutString.contains("gpt-5-codex"))
     }
 
     @Test("bentoctx runs cleanly against a chmod a-w read-only copy of polyglot without writes")
@@ -143,6 +200,13 @@ struct BentoCLITests {
             "--json"
         ])
         #expect(resRes.exitCode == 0)
+        let budgetRes = try runCLI([
+            "budget",
+            "--home", tempCopy.path,
+            "--repo", repoPath,
+            "--json"
+        ])
+        #expect(budgetRes.exitCode == 0)
     }
 
     // MARK: - Helpers
