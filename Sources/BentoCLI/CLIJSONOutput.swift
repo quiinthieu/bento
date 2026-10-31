@@ -88,6 +88,21 @@ enum CLIJSONOutput {
         var unusedFindings: [Finding]
     }
 
+    struct HygieneResponse: Codable, Sendable {
+        var schemaVersion: Int = CLIJSONOutput.currentSchemaVersion
+        var command: String = "hygiene"
+        var generatedAt: Date
+        var snapshotID: String
+        var agentFilter: String?
+        var repoFilter: String?
+        var failOn: String?
+        var findingCount: Int
+        var errorCount: Int
+        var warningCount: Int
+        var infoCount: Int
+        var findings: [Finding]
+    }
+
     static func printJSON<T: Encodable>(_ payload: T) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]

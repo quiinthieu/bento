@@ -1,0 +1,262 @@
+[
+  {
+    "artifacts" : [
+      "89da69c397f3f48e3bc05d03f750b81107c4edfe367d74fdc398677308f2c41a",
+      "aff53d8b3a22cf019af82d4310d29871f2abe9ddeeb2e25f45f12bae514d1d03",
+      "b199e990072eb69256708f15563995f12d7774c982a9799853bbcf6f5a24c97a",
+      "c3f6fb1c467e6b9b73d380ea8085e186f56bb719477c514be6f71f8b68ddd670",
+      "d343f5b7c51db979e303979f41b32b1b4a41ee63e268b3526660631dd5aad75b",
+      "d4edb43c51a16689f103efd4f7e949d68ab3af69caf801b157614d38bd423fc9",
+      "e29580e007c1477dd00cf72d8691417b4bd1e41b13a8a4a925adc7da99f46d90",
+      "fbf38aa0d7e1b65809c57a694a628cc9a31c37af7417eb52c536065dddf0986d",
+      "fcf4b4aa66c4f42d60df532b080b7151892d16efa02da81322ca088a3019450f"
+    ],
+    "id" : "090a389ccc4868bafd498e8fc078cb14e90004ab2d9cbaef88c3c3f9939803cc",
+    "kind" : "conflict",
+    "message" : "Conflicting indentation style directives between AGENTS.md and GEMINI.md: \"Use spaces for indentation across all source files.\" vs \"Use tabs for indentation across all source files.\"",
+    "severity" : "warning",
+    "spans" : [
+      {
+        "lineRange" : [
+          3,
+          3
+        ],
+        "path" : "<HOME>/repos/demo-app/AGENTS.md",
+        "realPath" : "<HOME>/repos/demo-app/AGENTS.md"
+      },
+      {
+        "lineRange" : [
+          3,
+          3
+        ],
+        "path" : "<HOME>/repos/demo-app/GEMINI.md",
+        "realPath" : "<HOME>/repos/demo-app/GEMINI.md"
+      }
+    ],
+    "suggestedFixes" : [
+
+    ]
+  },
+  {
+    "artifacts" : [
+      "89da69c397f3f48e3bc05d03f750b81107c4edfe367d74fdc398677308f2c41a",
+      "aff53d8b3a22cf019af82d4310d29871f2abe9ddeeb2e25f45f12bae514d1d03",
+      "b199e990072eb69256708f15563995f12d7774c982a9799853bbcf6f5a24c97a",
+      "d343f5b7c51db979e303979f41b32b1b4a41ee63e268b3526660631dd5aad75b",
+      "d4edb43c51a16689f103efd4f7e949d68ab3af69caf801b157614d38bd423fc9",
+      "fcf4b4aa66c4f42d60df532b080b7151892d16efa02da81322ca088a3019450f"
+    ],
+    "id" : "0f53b3db7bcb1e6c04fd33b263ddc0de77547a61ec0289c523355c4956d17b7c",
+    "kind" : "conflict",
+    "message" : "Conflicting JavaScript package manager directives between AGENTS.md and CLAUDE.md: \"Use pnpm for JavaScript package management.\" vs \"Use npm for JavaScript package management.\"",
+    "severity" : "warning",
+    "spans" : [
+      {
+        "lineRange" : [
+          4,
+          4
+        ],
+        "path" : "<HOME>/repos/demo-app/AGENTS.md",
+        "realPath" : "<HOME>/repos/demo-app/AGENTS.md"
+      },
+      {
+        "lineRange" : [
+          4,
+          4
+        ],
+        "path" : "<HOME>/repos/demo-app/CLAUDE.md",
+        "realPath" : "<HOME>/repos/demo-app/CLAUDE.md"
+      }
+    ],
+    "suggestedFixes" : [
+
+    ]
+  },
+  {
+    "artifacts" : [
+      "0b606e4b6c4c66087cabe793c19c4504678e4ebac5d196adf2398008efb0adf1",
+      "4fce622d1c78c08649fd48dd4432d32d59b56fcc041b39c3ec3bd511aea7d375",
+      "70b3e145fc6d34e2abc463664501620a2863876fad45526a9b38e36e23bdc6af"
+    ],
+    "id" : "01b35e8def3f9c78b5bd6e3c5cfa6d226154bbd80b6f78812c5c9f7d9fa566b6",
+    "kind" : "exactDuplicate",
+    "message" : "Exact duplicate rule across 3 files (CLAUDE.md, AGENTS.md, GEMINI.md): \"Always run unit tests before committing changes.\"",
+    "severity" : "warning",
+    "spans" : [
+      {
+        "lineRange" : [
+          3,
+          3
+        ],
+        "path" : "<HOME>/.claude/CLAUDE.md",
+        "realPath" : "<HOME>/.claude/CLAUDE.md"
+      },
+      {
+        "lineRange" : [
+          3,
+          3
+        ],
+        "path" : "<HOME>/.codex/AGENTS.md",
+        "realPath" : "<HOME>/.codex/AGENTS.md"
+      },
+      {
+        "lineRange" : [
+          3,
+          3
+        ],
+        "path" : "<HOME>/.gemini/GEMINI.md",
+        "realPath" : "<HOME>/.gemini/GEMINI.md"
+      }
+    ],
+    "suggestedFixes" : [
+
+    ]
+  },
+  {
+    "artifacts" : [
+      "aff53d8b3a22cf019af82d4310d29871f2abe9ddeeb2e25f45f12bae514d1d03",
+      "b199e990072eb69256708f15563995f12d7774c982a9799853bbcf6f5a24c97a",
+      "d343f5b7c51db979e303979f41b32b1b4a41ee63e268b3526660631dd5aad75b",
+      "d4edb43c51a16689f103efd4f7e949d68ab3af69caf801b157614d38bd423fc9",
+      "fcf4b4aa66c4f42d60df532b080b7151892d16efa02da81322ca088a3019450f"
+    ],
+    "id" : "1d601f2175164806daf63a29bb0d832d5f02355ef52bed64eff903e7554302de",
+    "kind" : "exactDuplicate",
+    "message" : "Exact duplicate rule across 2 files (style.mdc, AGENTS.md): \"Use pnpm for JavaScript package management.\"",
+    "severity" : "warning",
+    "spans" : [
+      {
+        "lineRange" : [
+          8,
+          8
+        ],
+        "path" : "<HOME>/repos/demo-app/.cursor/rules/style.mdc",
+        "realPath" : "<HOME>/repos/demo-app/.cursor/rules/style.mdc"
+      },
+      {
+        "lineRange" : [
+          4,
+          4
+        ],
+        "path" : "<HOME>/repos/demo-app/AGENTS.md",
+        "realPath" : "<HOME>/repos/demo-app/AGENTS.md"
+      }
+    ],
+    "suggestedFixes" : [
+
+    ]
+  },
+  {
+    "artifacts" : [
+      "89da69c397f3f48e3bc05d03f750b81107c4edfe367d74fdc398677308f2c41a",
+      "aff53d8b3a22cf019af82d4310d29871f2abe9ddeeb2e25f45f12bae514d1d03",
+      "b199e990072eb69256708f15563995f12d7774c982a9799853bbcf6f5a24c97a",
+      "d4edb43c51a16689f103efd4f7e949d68ab3af69caf801b157614d38bd423fc9",
+      "e29580e007c1477dd00cf72d8691417b4bd1e41b13a8a4a925adc7da99f46d90",
+      "fbf38aa0d7e1b65809c57a694a628cc9a31c37af7417eb52c536065dddf0986d",
+      "fcf4b4aa66c4f42d60df532b080b7151892d16efa02da81322ca088a3019450f"
+    ],
+    "id" : "4ca43c7d44785315262538d9ef34c63f9e23bff351a71aac27e0b801fb26ba18",
+    "kind" : "exactDuplicate",
+    "message" : "Exact duplicate rule across 4 files (copilot-instructions.md, AGENTS.md, CLAUDE.md, GEMINI.md): \"Always run the test suite before opening a pull request.\"",
+    "severity" : "warning",
+    "spans" : [
+      {
+        "lineRange" : [
+          4,
+          4
+        ],
+        "path" : "<HOME>/repos/demo-app/.github/copilot-instructions.md",
+        "realPath" : "<HOME>/repos/demo-app/.github/copilot-instructions.md"
+      },
+      {
+        "lineRange" : [
+          5,
+          5
+        ],
+        "path" : "<HOME>/repos/demo-app/AGENTS.md",
+        "realPath" : "<HOME>/repos/demo-app/AGENTS.md"
+      },
+      {
+        "lineRange" : [
+          5,
+          5
+        ],
+        "path" : "<HOME>/repos/demo-app/CLAUDE.md",
+        "realPath" : "<HOME>/repos/demo-app/CLAUDE.md"
+      },
+      {
+        "lineRange" : [
+          4,
+          4
+        ],
+        "path" : "<HOME>/repos/demo-app/GEMINI.md",
+        "realPath" : "<HOME>/repos/demo-app/GEMINI.md"
+      }
+    ],
+    "suggestedFixes" : [
+
+    ]
+  },
+  {
+    "artifacts" : [
+      "89da69c397f3f48e3bc05d03f750b81107c4edfe367d74fdc398677308f2c41a",
+      "aff53d8b3a22cf019af82d4310d29871f2abe9ddeeb2e25f45f12bae514d1d03",
+      "b199e990072eb69256708f15563995f12d7774c982a9799853bbcf6f5a24c97a",
+      "c3f6fb1c467e6b9b73d380ea8085e186f56bb719477c514be6f71f8b68ddd670",
+      "d343f5b7c51db979e303979f41b32b1b4a41ee63e268b3526660631dd5aad75b",
+      "d4edb43c51a16689f103efd4f7e949d68ab3af69caf801b157614d38bd423fc9",
+      "e29580e007c1477dd00cf72d8691417b4bd1e41b13a8a4a925adc7da99f46d90",
+      "fcf4b4aa66c4f42d60df532b080b7151892d16efa02da81322ca088a3019450f"
+    ],
+    "id" : "e3df9a4ec6a8d8a6e12a74c72c8fc3da4e4c5aa5f3bc51dcfeb60f2589c1106d",
+    "kind" : "exactDuplicate",
+    "message" : "Exact duplicate rule across 5 files (style.mdc, copilot-instructions.md, workspace.md, AGENTS.md, CLAUDE.md): \"Use spaces for indentation across all source files.\"",
+    "severity" : "warning",
+    "spans" : [
+      {
+        "lineRange" : [
+          7,
+          7
+        ],
+        "path" : "<HOME>/repos/demo-app/.cursor/rules/style.mdc",
+        "realPath" : "<HOME>/repos/demo-app/.cursor/rules/style.mdc"
+      },
+      {
+        "lineRange" : [
+          3,
+          3
+        ],
+        "path" : "<HOME>/repos/demo-app/.github/copilot-instructions.md",
+        "realPath" : "<HOME>/repos/demo-app/.github/copilot-instructions.md"
+      },
+      {
+        "lineRange" : [
+          3,
+          3
+        ],
+        "path" : "<HOME>/repos/demo-app/.windsurf/rules/workspace.md",
+        "realPath" : "<HOME>/repos/demo-app/.windsurf/rules/workspace.md"
+      },
+      {
+        "lineRange" : [
+          3,
+          3
+        ],
+        "path" : "<HOME>/repos/demo-app/AGENTS.md",
+        "realPath" : "<HOME>/repos/demo-app/AGENTS.md"
+      },
+      {
+        "lineRange" : [
+          3,
+          3
+        ],
+        "path" : "<HOME>/repos/demo-app/CLAUDE.md",
+        "realPath" : "<HOME>/repos/demo-app/CLAUDE.md"
+      }
+    ],
+    "suggestedFixes" : [
+
+    ]
+  }
+]

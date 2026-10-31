@@ -21,6 +21,55 @@ extension Workspace {
         adaptersByID[agent]?.fixSupport() ?? FixSupport()
     }
 
+    /// Returns the `FixSupport` map across all registered adapters.
+    nonisolated public func allFixSupports() -> [AgentID: FixSupport] {
+        var map: [AgentID: FixSupport] = [:]
+        for (id, adapter) in adaptersByID {
+            map[id] = adapter.fixSupport()
+        }
+        return map
+    }
+
+    /// Discovers artifacts and computes precedence resolutions across `agentFilter` (or all adapters) for `folder` on demand.
+    public func discoverAndResolveOnDemand(
+        agentFilter: AgentID? = nil,
+        folder: URL
+    ) async throws -> (artifacts: [Artifact], resolutions: [Resolution], repo: DiscoveredRepo) {
+        let stdFolder = folder.standardizedFileURL
+        let realPath = environment.fileSystem.resolveSymlinks(stdFolder).standardizedFileURL.path
+        let selectedAdapters: [any AgentAdapter]
+        if let agentFilter {
+            guard let adapter = adaptersByID[agentFilter] else {
+                throw BentoScannerError.unknownAgent(agentFilter)
+            }
+            selectedAdapters = [adapter]
+        } else {
+            selectedAdapters = adapters
+        }
+
+        var seen: Set<ArtifactID> = []
+        var artifacts: [Artifact] = []
+        var resolutions: [Resolution] = []
+
+        for adapter in selectedAdapters {
+            let discovered = try await adapter.discover(in: environment, folder: stdFolder)
+            for item in discovered where seen.insert(item.id).inserted {
+                artifacts.append(item)
+            }
+            if adapter.capabilities.contains(.resolution) {
+                resolutions.append(adapter.resolve(discovered, folder: stdFolder, env: environment))
+            }
+        }
+
+        let repo = DiscoveredRepo(
+            path: stdFolder.path,
+            realPath: realPath,
+            displayName: stdFolder.lastPathComponent,
+            sources: [.manual]
+        )
+        return (artifacts, resolutions, repo)
+    }
+
     /// Returns all registered `AgentID`s whose adapters advertise `.budget` capability in registration order.
     nonisolated public func budgetCapableAgents() -> [AgentID] {
         adapters

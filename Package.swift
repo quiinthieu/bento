@@ -79,8 +79,16 @@ let package = Package(
         ),
         .target(
             name: "BentoHygiene",
-            dependencies: ["BentoCore", "BentoParsing", "BentoTokenizer"],
-            exclude: ["README.md"]
+            dependencies: [
+                "BentoCore",
+                "BentoParsing",
+                "BentoTokenizer",
+                .product(name: "Yams", package: "Yams")
+            ],
+            exclude: ["README.md"],
+            resources: [
+                .copy("Resources")
+            ]
         ),
         .target(
             name: "BentoStore",
@@ -175,7 +183,22 @@ let package = Package(
         ),
         .testTarget(
             name: "BentoCLITests",
-            dependencies: ["BentoCore", "BentoStore", "BentoScanner", "BentoTestSupport"]
+            dependencies: ["BentoCore", "BentoHygiene", "BentoStore", "BentoScanner", "BentoTestSupport"]
+        ),
+        .testTarget(
+            name: "BentoHygieneTests",
+            dependencies: [
+                "BentoCore",
+                "BentoParsing",
+                "BentoTokenizer",
+                "BentoHygiene",
+                "BentoAdapters",
+                "BentoLogIngest",
+                "BentoScanner",
+                "BentoStore",
+                "BentoTestSupport"
+            ],
+            exclude: ["__golden__"]
         ),
         .testTarget(
             name: "BentoTokenizerTests",

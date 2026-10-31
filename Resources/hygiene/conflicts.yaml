@@ -1,0 +1,454 @@
+schemaVersion: 1
+rules:
+  - id: indentation-style
+    topic: indentation style
+    kind: exclusive_choice
+    subjectTerms:
+      - indent
+      - indentation
+      - whitespace
+      - formatting
+    choices:
+      - label: tabs
+        terms:
+          - tabs
+          - tab characters
+          - hard tabs
+      - label: spaces
+        terms:
+          - spaces
+          - soft tabs
+
+  - id: js-package-manager
+    topic: JavaScript package manager
+    kind: exclusive_choice
+    subjectTerms:
+      - package
+      - packages
+      - dependency
+      - dependencies
+      - install
+      - lockfile
+      - manager
+      - management
+    choices:
+      - label: npm
+        terms:
+          - npm
+      - label: pnpm
+        terms:
+          - pnpm
+      - label: yarn
+        terms:
+          - yarn
+      - label: bun
+        terms:
+          - bun
+
+  - id: python-package-manager
+    topic: Python package manager
+    kind: exclusive_choice
+    subjectTerms:
+      - python
+      - package
+      - packages
+      - dependency
+      - dependencies
+      - install
+      - virtualenv
+      - venv
+      - environment
+    choices:
+      - label: uv
+        terms:
+          - uv
+      - label: poetry
+        terms:
+          - poetry
+      - label: pipenv
+        terms:
+          - pipenv
+      - label: conda
+        terms:
+          - conda
+      - label: pip
+        terms:
+          - pip
+
+  - id: quote-style
+    topic: string quote style
+    kind: exclusive_choice
+    subjectTerms:
+      - quote
+      - quotes
+      - string
+      - strings
+    choices:
+      - label: single quotes
+        terms:
+          - single quotes
+          - single-quoted
+          - single quote
+      - label: double quotes
+        terms:
+          - double quotes
+          - double-quoted
+          - double quote
+
+  - id: semicolons
+    topic: semicolon usage
+    kind: polarity_opposition
+    positivePhrases:
+      - use semicolons
+      - always use semicolons
+      - require semicolons
+      - include semicolons
+      - enforce semicolons
+      - end statements with semicolons
+    negativePhrases:
+      - omit semicolons
+      - no semicolons
+      - never use semicolons
+      - avoid semicolons
+      - do not use semicolons
+      - don't use semicolons
+      - without semicolons
+
+  - id: trailing-commas
+    topic: trailing commas
+    kind: polarity_opposition
+    positivePhrases:
+      - use trailing commas
+      - always use trailing commas
+      - require trailing commas
+      - include trailing commas
+      - enforce trailing commas
+    negativePhrases:
+      - omit trailing commas
+      - no trailing commas
+      - never use trailing commas
+      - avoid trailing commas
+      - do not use trailing commas
+      - don't use trailing commas
+      - without trailing commas
+
+  - id: js-module-system
+    topic: JavaScript module system
+    kind: exclusive_choice
+    subjectTerms:
+      - module
+      - modules
+      - import
+      - imports
+      - syntax
+    choices:
+      - label: ESM
+        terms:
+          - esm
+          - es modules
+          - ecmascript modules
+      - label: CommonJS
+        terms:
+          - commonjs
+          - cjs
+
+  - id: react-component-style
+    topic: React component style
+    kind: exclusive_choice
+    subjectTerms:
+      - component
+      - components
+      - react
+    choices:
+      - label: function components
+        terms:
+          - function components
+          - functional components
+      - label: class components
+        terms:
+          - class components
+          - class-based components
+
+  - id: css-styling
+    topic: CSS styling approach
+    kind: exclusive_choice
+    subjectTerms:
+      - css
+      - style
+      - styles
+      - styling
+      - components
+      - ui
+    choices:
+      - label: Tailwind CSS
+        terms:
+          - tailwind
+          - tailwindcss
+      - label: CSS Modules
+        terms:
+          - css modules
+      - label: CSS-in-JS
+        terms:
+          - styled-components
+          - css-in-js
+          - emotion
+
+  - id: js-test-runner
+    topic: JavaScript test runner
+    kind: exclusive_choice
+    subjectTerms:
+      - test
+      - tests
+      - testing
+      - runner
+      - suite
+      - unit
+    choices:
+      - label: Vitest
+        terms:
+          - vitest
+      - label: Jest
+        terms:
+          - jest
+      - label: Mocha
+        terms:
+          - mocha
+
+  - id: python-test-runner
+    topic: Python test framework
+    kind: exclusive_choice
+    subjectTerms:
+      - test
+      - tests
+      - testing
+      - python
+      - suite
+      - unit
+    choices:
+      - label: pytest
+        terms:
+          - pytest
+      - label: unittest
+        terms:
+          - unittest
+
+  - id: swift-test-framework
+    topic: Swift test framework
+    kind: exclusive_choice
+    subjectTerms:
+      - test
+      - tests
+      - testing
+      - swift
+      - suite
+    choices:
+      - label: Swift Testing
+        terms:
+          - swift testing
+      - label: XCTest
+        terms:
+          - xctest
+          - xctestcase
+
+  - id: git-commit
+    topic: automatic git commit policy
+    kind: polarity_opposition
+    positivePhrases:
+      - always commit
+      - must commit
+      - commit changes automatically
+      - auto-commit changes
+      - automatically commit
+      - commit after every change
+      - commit each change
+    negativePhrases:
+      - never commit
+      - do not commit
+      - don't commit
+      - must not commit
+      - avoid committing
+      - never create commits
+      - do not create commits
+    exceptionTerms:
+      - secret
+      - secrets
+      - credential
+      - credentials
+      - .env
+      - api key
+      - api keys
+      - token
+      - tokens
+      - on main
+      - to main
+      - on master
+      - to master
+      - on prod
+      - to prod
+      - broken
+
+  - id: git-force-push
+    topic: git force-push policy
+    kind: polarity_opposition
+    positivePhrases:
+      - use force-push
+      - use force push
+      - allow force-push
+      - allow force push
+      - always force-push
+      - always force push
+      - push with --force
+    negativePhrases:
+      - never force-push
+      - never force push
+      - do not force-push
+      - do not force push
+      - don't force-push
+      - don't force push
+      - forbid force-push
+      - forbid force push
+      - avoid force-push
+      - avoid force push
+
+  - id: git-merge-strategy
+    topic: pull request merge strategy
+    kind: exclusive_choice
+    subjectTerms:
+      - merge
+      - pull request
+      - pull requests
+      - pr
+      - branch
+      - branches
+    choices:
+      - label: squash merge
+        terms:
+          - squash merge
+          - squash-merge
+          - squash commits
+      - label: rebase merge
+        terms:
+          - rebase merge
+          - rebase-merge
+          - always rebase
+      - label: merge commit
+        terms:
+          - merge commit
+          - merge commits
+          - --no-ff
+
+  - id: run-tests
+    topic: running tests
+    kind: polarity_opposition
+    positivePhrases:
+      - always run tests
+      - always run unit tests
+      - always run the test suite
+      - must run tests
+      - must run unit tests
+      - must run the test suite
+      - run tests before
+      - run unit tests before
+      - run the test suite before
+    negativePhrases:
+      - never run tests
+      - never run unit tests
+      - never run the test suite
+      - do not run tests
+      - do not run unit tests
+      - do not run the test suite
+      - don't run tests
+      - don't run unit tests
+      - don't run the test suite
+      - skip running tests
+      - skip tests
+      - skip the test suite
+      - avoid running tests
+
+  - id: export-style
+    topic: module export style
+    kind: exclusive_choice
+    subjectTerms:
+      - export
+      - exports
+      - module
+      - modules
+    choices:
+      - label: named exports
+        terms:
+          - named exports
+          - named export
+      - label: default exports
+        terms:
+          - default exports
+          - default export
+
+  - id: code-comments
+    topic: code commenting policy
+    kind: polarity_opposition
+    positivePhrases:
+      - always add comments
+      - always write comments
+      - comment every function
+      - document every function
+      - require docstrings on all functions
+    negativePhrases:
+      - never write comments
+      - never add comments
+      - do not write comments
+      - do not add comments
+      - don't write comments
+      - don't add comments
+      - avoid code comments
+      - no comments in code
+
+  - id: test-mocking
+    topic: mocking in tests
+    kind: polarity_opposition
+    positivePhrases:
+      - always mock
+      - mock all external
+      - mock database
+      - use mocks for all
+      - prefer mocks in unit tests
+    negativePhrases:
+      - never mock
+      - never use mocks
+      - do not mock
+      - do not use mocks
+      - don't mock
+      - don't use mocks
+      - avoid mocks
+      - no mocks in tests
+
+  - id: line-length
+    topic: maximum line length
+    kind: numeric_value
+    unit: columns
+    patterns:
+      - '(?:max(?:imum)?\s+)?line\s+length(?:\s+(?:of|is|to|at|at\s+most|<=|:|=))?\s+(\d{2,3})\b'
+      - '(?:wrap|limit|keep)\s+lines\s+(?:at|to|under|within)\s+(\d{2,3})\s*(?:chars?|characters?|columns?|cols?)\b'
+
+  - id: indent-width
+    topic: indentation width
+    kind: numeric_value
+    unit: spaces
+    patterns:
+      - '\b(?:use|prefer|indent(?:\s+with)?|enforce|require)\s+(\d+)\s*(?:-|\s)\s*spaces?\b'
+      - '\b(\d+)-space\s+indent(?:ation)?\b'
+
+  - id: node-version
+    topic: Node.js runtime version
+    kind: numeric_value
+    unit: major
+    patterns:
+      - '\b(?:use|target|require|run(?:\s+on)?|pin(?:\s+to)?)\s+node(?:\.js)?\s+v?(\d{2})(?:\.\d+)*\b'
+      - '\bnode(?:\.js)?\s+(?:version\s+)?v?(\d{2})(?:\.\d+)*\s+(?:is\s+required|only|runtime)\b'
+
+  - id: python-version
+    topic: Python runtime version
+    kind: numeric_value
+    unit: minor
+    patterns:
+      - '\b(?:use|target|require|run(?:\s+on)?|pin(?:\s+to)?)\s+python\s+(\d+\.\d+)(?:\.\d+)*\b'
+      - '\bpython\s+(?:version\s+)?(\d+\.\d+)(?:\.\d+)*\s+(?:is\s+required|only|runtime)\b'
