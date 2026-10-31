@@ -666,6 +666,170 @@ struct BentoAppUITests {
         #expect(model.hasStoredAPIKey(for: .anthropic) == false)
     }
 
+    @Test(
+        "Findings view lazily renders large lists, caches span reads, caps multi-hundred-line and multi-location spans"
+    )
+    @MainActor
+    func findingsViewLazyRendersCachesExcerptsAndCapsSpans() async throws {
+        let tempRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("bento-ui-perf-\(UUID().uuidString)", isDirectory: true)
+        let homeURL = tempRoot.appendingPathComponent("home", isDirectory: true)
+        let supportDir = tempRoot.appendingPathComponent("support", isDirectory: true)
+        try FileManager.default.createDirectory(at: homeURL, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: supportDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempRoot) }
+
+        // Create 25 repositories x 2 rule files x 10 duplicated rules -> 275 real findings across 50 files.
+        var manualRepoURLs: [URL] = []
+        let sharedRules = (1...10).map { idx in
+            "- Shared repository rule \(idx): validate incoming payloads at service boundaries before persisting mutations."
+        }.joined(separator: "\n")
+
+        for repoIdx in 0..<25 {
+            let repoURL = homeURL.appendingPathComponent(
+                String(format: "repos/worktree-%02d", repoIdx),
+                isDirectory: true
+            )
+            try FileManager.default.createDirectory(at: repoURL, withIntermediateDirectories: true)
+            let agentsText = "# Shared Rules \(repoIdx)\n\n\(sharedRules)\n"
+            let claudeText = "# Claude Rules \(repoIdx)\n\n\(sharedRules)\n"
+            try Data(agentsText.utf8).write(to: repoURL.appendingPathComponent("AGENTS.md"))
+            try Data(claudeText.utf8).write(to: repoURL.appendingPathComponent("CLAUDE.md"))
+            manualRepoURLs.append(repoURL.standardizedFileURL)
+        }
+
+        // Create a 400-line rule file and 30 distinct location files for span-capping assertions.
+        let largeRuleURL = homeURL.appendingPathComponent("large-claude.md").standardizedFileURL
+        let largeLines = (1...400).map { "Line \($0): strict concurrency rule detail" }.joined(separator: "\n")
+        try Data(largeLines.utf8).write(to: largeRuleURL)
+
+        var thirtyLocations: [BentoCore.SourceLocation] = []
+        var thirtyPaths: Set<String> = []
+        for locIdx in 0..<30 {
+            let locURL = homeURL.appendingPathComponent(String(format: "loc-%02d.md", locIdx)).standardizedFileURL
+            try Data("# Location \(locIdx)\n- Always run tests.\n".utf8).write(to: locURL)
+            thirtyLocations.append(
+                BentoCore.SourceLocation(path: locURL.path, realPath: locURL.path, lineRange: 2...2)
+            )
+            thirtyPaths.insert(locURL.path)
+        }
+
+        let recordingFS = RecordingReadOnlyFileSystem()
+        let store = try BentoStore(databaseURL: supportDir.appendingPathComponent("bento.sqlite"))
+        try store.setSetting(manualRepoURLs.map(\.path), forKey: "ui.manualRepoPaths")
+
+        let env = AgentEnvironment(
+            home: homeURL,
+            env: ["BENTO_SYSTEM_ROOT": homeURL.path],
+            fileSystem: recordingFS
+        )
+        let fixEngine = FixEngine(
+            homeURL: homeURL,
+            supportDirectory: supportDir,
+            store: store,
+            fileSystem: recordingFS
+        )
+        let model = BentoAppModel(
+            environment: env,
+            store: store,
+            supportDirectory: supportDir,
+            fixEngine: fixEngine,
+            apiKeyStore: InMemoryAPIKeyStore(),
+            externalActions: RecordingExternalActionHandler(),
+            showOnboardingOnFirstRun: false,
+            enableLiveWatching: true
+        )
+        defer {
+            Task {
+                await model.workspace.stopWatching()
+            }
+        }
+
+        await model.refreshAll()
+        #expect(model.allFindings.count >= 250)
+
+        // 1. Live-watch subscription must NOT run a duplicate post-refreshAll rebuild for the same fullScan snapshot.
+        recordingFS.reset()
+        try await Task.sleep(for: .milliseconds(120))
+        #expect(
+            recordingFS.contentsReadPaths.isEmpty,
+            "Expected zero duplicate background file reads after refreshAll(), got \(recordingFS.contentsReadPaths.count)"
+        )
+
+        // 2. Multi-hundred-line span (e.g. blockImport 1...400) is capped to <= 20 lines with an omission marker,
+        //    and repeated spanExcerpts(for:) calls hit the in-memory cache without re-reading disk.
+        let largeSpanFinding = Finding(
+            id: "finding-large-400-line-span",
+            kind: .exactDuplicate,
+            severity: .warning,
+            artifacts: [],
+            spans: [SourceLocation(path: largeRuleURL.path, realPath: largeRuleURL.path, lineRange: 1...400)],
+            message: "100% of rules in large-claude.md duplicate AGENTS.md"
+        )
+        recordingFS.reset()
+        let firstExcerpts = model.spanExcerpts(for: largeSpanFinding)
+        let secondExcerpts = model.spanExcerpts(for: largeSpanFinding)
+        let thirdExcerpts = model.spanExcerpts(for: largeSpanFinding)
+        #expect(firstExcerpts == secondExcerpts)
+        #expect(secondExcerpts == thirdExcerpts)
+
+        let firstExcerpt = try #require(firstExcerpts.first)
+        #expect(firstExcerpt.lineRangeLabel == "L1–L400")
+        #expect(
+            firstExcerpt.lines.count <= 20,
+            "Expected 400-line span excerpt to be truncated to <= 20 lines, got \(firstExcerpt.lines.count)"
+        )
+        #expect(
+            firstExcerpt.lines.contains { $0.text.contains("omitted") },
+            "Expected truncated span excerpt to include an omitted-lines indicator"
+        )
+        let largeFileReads = recordingFS.contentsReadPaths.filter { $0 == largeRuleURL.path }.count
+        #expect(largeFileReads == 1, "Expected cached spanExcerpts to read disk once, got \(largeFileReads)")
+
+        // 3. A 30-location finding card renders at most 4 locations inline until expanded.
+        let thirtySpanFinding = Finding(
+            id: "finding-30-locations",
+            kind: .exactDuplicate,
+            severity: .warning,
+            artifacts: [],
+            spans: thirtyLocations,
+            message: "Exact duplicate rule across 30 worktrees"
+        )
+        recordingFS.reset()
+        let (cardWindow, _) = Self.hostViewInWindow(FindingCardView(finding: thirtySpanFinding, model: model))
+        let readThirtyLocations = Set(recordingFS.contentsReadPaths).intersection(thirtyPaths)
+        #expect(
+            readThirtyLocations.count <= 4,
+            "Expected FindingCardView to cap initial inline span reads to <= 4, got \(readThirtyLocations.count)"
+        )
+        Self.tearDownWindow(cardWindow)
+
+        // 4. Switching RootView to `.findings` with 250+ findings lazily renders only the visible viewport cards
+        //    rather than eagerly reading all 50 repository rule files in one main-thread layout pass.
+        let allRepoRulePaths = Set(
+            manualRepoURLs.flatMap {
+                [
+                    $0.appendingPathComponent("AGENTS.md").path,
+                    $0.appendingPathComponent("CLAUDE.md").path
+                ]
+            }
+        )
+        recordingFS.reset()
+        let (rootWindow, rootHosting) = Self.hostViewInWindow(RootView(model: model))
+        let layoutClock = ContinuousClock()
+        let layoutElapsed = layoutClock.measure {
+            model.selectedSection = .findings
+            rootHosting.layoutSubtreeIfNeeded()
+        }
+        let eagerlyReadRepoFiles = Set(recordingFS.contentsReadPaths).intersection(allRepoRulePaths)
+        #expect(
+            eagerlyReadRepoFiles.count < 30,
+            "Expected lazy FindingsView to read < 30 of 50 rule files for visible cards, got \(eagerlyReadRepoFiles.count)"
+        )
+        #expect(layoutElapsed < .milliseconds(750), "Findings layout took too long: \(layoutElapsed)")
+        Self.tearDownWindow(rootWindow)
+    }
+
     private static func setReadOnlyPermissionsRecursively(at root: URL, writable: Bool) {
         let fm = FileManager.default
         let dirMode = writable ? 0o755 : 0o555

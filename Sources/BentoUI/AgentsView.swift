@@ -51,7 +51,7 @@ private struct AgentInventoryCard: View {
     var body: some View {
         let detection = model.snapshot?.detections[agent]
         let isDetected = detection?.isDetected ?? false
-        let artifacts = (model.snapshot?.artifacts ?? []).filter { $0.agent == agent }
+        let artifacts = model.artifacts(for: agent)
 
         GroupBox {
             VStack(alignment: .leading, spacing: 10) {
@@ -69,66 +69,68 @@ private struct AgentInventoryCard: View {
                         .foregroundStyle(.secondary)
                         .padding(.vertical, 6)
                 } else {
-                    ForEach(artifacts) { artifact in
-                        HStack(spacing: 10) {
-                            Button {
-                                model.inspectorSelection = .artifact(artifact.id)
-                            } label: {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    HStack(spacing: 6) {
-                                        Text(artifact.name)
-                                            .font(.subheadline.weight(.medium))
-                                        ScopeBadgeView(scope: artifact.scope)
-                                        Text(artifact.kind.displayName)
-                                            .font(.caption2)
-                                            .padding(.horizontal, 6)
-                                            .padding(.vertical, 1)
-                                            .background(Capsule().fill(Color.primary.opacity(0.06)))
-                                        if !artifact.enabled {
-                                            Text("Disabled")
-                                                .font(.caption2.weight(.semibold))
-                                                .foregroundStyle(.orange)
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(artifacts) { artifact in
+                            HStack(spacing: 10) {
+                                Button {
+                                    model.inspectorSelection = .artifact(artifact.id)
+                                } label: {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        HStack(spacing: 6) {
+                                            Text(artifact.name)
+                                                .font(.subheadline.weight(.medium))
+                                            ScopeBadgeView(scope: artifact.scope)
+                                            Text(artifact.kind.displayName)
+                                                .font(.caption2)
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 1)
+                                                .background(Capsule().fill(Color.primary.opacity(0.06)))
+                                            if !artifact.enabled {
+                                                Text("Disabled")
+                                                    .font(.caption2.weight(.semibold))
+                                                    .foregroundStyle(.orange)
+                                            }
+                                        }
+                                        Text(model.abbreviateHomePath(artifact.location.path))
+                                            .font(.caption2.monospaced())
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
+
+                                Spacer()
+
+                                Button {
+                                    model.revealArtifactInFinder(artifact)
+                                } label: {
+                                    Image(systemName: "folder")
+                                }
+                                .buttonStyle(.borderless)
+                                .help("Reveal in Finder")
+
+                                Button {
+                                    model.openArtifactInEditor(artifact)
+                                } label: {
+                                    Image(systemName: "square.and.pencil")
+                                }
+                                .buttonStyle(.borderless)
+                                .help("Open in editor")
+
+                                if let fixKind = toggleFixKind(for: artifact) {
+                                    Button(fixKind.displayName) {
+                                        do {
+                                            try model.openFixPreview(for: FixRequest(kind: fixKind, artifact: artifact))
+                                        } catch {
+                                            model.lastErrorMessage = error.localizedDescription
                                         }
                                     }
-                                    Text(model.abbreviateHomePath(artifact.location.path))
-                                        .font(.caption2.monospaced())
-                                        .foregroundStyle(.secondary)
+                                    .controlSize(.mini)
                                 }
-                                .contentShape(Rectangle())
                             }
-                            .buttonStyle(.plain)
-
-                            Spacer()
-
-                            Button {
-                                model.revealArtifactInFinder(artifact)
-                            } label: {
-                                Image(systemName: "folder")
-                            }
-                            .buttonStyle(.borderless)
-                            .help("Reveal in Finder")
-
-                            Button {
-                                model.openArtifactInEditor(artifact)
-                            } label: {
-                                Image(systemName: "square.and.pencil")
-                            }
-                            .buttonStyle(.borderless)
-                            .help("Open in editor")
-
-                            if let fixKind = toggleFixKind(for: artifact) {
-                                Button(fixKind.displayName) {
-                                    do {
-                                        try model.openFixPreview(for: FixRequest(kind: fixKind, artifact: artifact))
-                                    } catch {
-                                        model.lastErrorMessage = error.localizedDescription
-                                    }
-                                }
-                                .controlSize(.mini)
-                            }
+                            .padding(.vertical, 4)
+                            Divider()
                         }
-                        .padding(.vertical, 4)
-                        Divider()
                     }
                 }
             }

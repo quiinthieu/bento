@@ -7,6 +7,7 @@ import os
 public final class RecordingReadOnlyFileSystem: ReadOnlyFileSystem, Sendable {
     private let underlying: any ReadOnlyFileSystem
     private let accessedPathsLock = OSAllocatedUnfairLock(initialState: [String]())
+    private let contentsReadPathsLock = OSAllocatedUnfairLock(initialState: [String]())
 
     /// Creates a recording wrapper around `underlying`.
     public init(wrapping underlying: any ReadOnlyFileSystem = LocalReadOnlyFileSystem()) {
@@ -18,8 +19,21 @@ public final class RecordingReadOnlyFileSystem: ReadOnlyFileSystem, Sendable {
         accessedPathsLock.withLock { $0 }
     }
 
+    /// Snapshot of filesystem paths read via `contents(at:)` in call order.
+    public var contentsReadPaths: [String] {
+        contentsReadPathsLock.withLock { $0 }
+    }
+
+    /// Clears recorded access and content-read logs.
+    public func reset() {
+        accessedPathsLock.withLock { $0.removeAll() }
+        contentsReadPathsLock.withLock { $0.removeAll() }
+    }
+
     public func contents(at url: URL) throws -> Data {
         record(url)
+        let path = url.standardizedFileURL.path
+        contentsReadPathsLock.withLock { $0.append(path) }
         return try underlying.contents(at: url)
     }
 

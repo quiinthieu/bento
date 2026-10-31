@@ -63,8 +63,7 @@ struct OverviewView: View {
                     OverviewStatCard(
                         title: "Hygiene Findings",
                         value: "\(model.allFindings.count)",
-                        subtitle: "\(model.allFindings.filter { $0.severity == .error }.count) errors, "
-                            + "\(model.allFindings.filter { $0.severity == .warning }.count) warnings",
+                        subtitle: "\(model.errorFindingCount) errors, \(model.warningFindingCount) warnings",
                         symbolName: "checkmark.shield",
                         tint: model.allFindings.isEmpty ? .green : .orange
                     ) {

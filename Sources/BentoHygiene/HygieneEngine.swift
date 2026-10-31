@@ -78,31 +78,54 @@ public struct HygieneEngine: Sendable {
         fileSystem: (any ReadOnlyFileSystem)? = nil,
         tokenizer: (any TokenCountingProvider)? = nil
     ) throws -> [Finding] {
-        let catalog = try conflictCatalog ?? ConflictCatalog.loadDefault()
-        let conflictDetector = ConflictDetector(catalog: catalog)
+        let conflictDetector: ConflictDetector
+        if let customCatalog = conflictCatalog {
+            conflictDetector = ConflictDetector(catalog: customCatalog)
+        } else {
+            conflictDetector = try ConflictDetector.defaultShared()
+        }
         let homePrefixes = Self.computeHomePrefixes(homePath: homePath, fileSystem: fileSystem)
+        let sortedRepos = Self.prepareSortedRepos(repos)
 
         let physicalRuleFiles = extractPhysicalRuleFiles(
             from: artifacts,
-            repos: repos,
+            sortedRepos: sortedRepos,
             homePrefixes: homePrefixes,
             fileSystem: fileSystem
         )
 
+        var uniqueNorms: [UniqueNormalizedRule] = []
+        var normIDByText: [String: Int] = [:]
         var indexedUnits: [IndexedRuleUnit] = []
+
         for (fileIndex, file) in physicalRuleFiles.enumerated() {
             for unit in file.units {
-                let stances = conflictDetector.extractStances(for: unit.normalizedText)
-                let shingles = MinHashLSH.shingles(
-                    for: unit.normalizedText,
-                    wordCount: config.shingleWordCount
-                )
+                let normID: Int
+                if let existingID = normIDByText[unit.normalizedText] {
+                    normID = existingID
+                } else {
+                    let allocatedID = uniqueNorms.count
+                    let stances = conflictDetector.extractStances(for: unit.normalizedText)
+                    let shingles = MinHashLSH.shingles(
+                        for: unit.normalizedText,
+                        wordCount: config.shingleWordCount
+                    )
+                    uniqueNorms.append(
+                        UniqueNormalizedRule(
+                            id: allocatedID,
+                            normalizedText: unit.normalizedText,
+                            stances: stances,
+                            shingles: shingles
+                        )
+                    )
+                    normIDByText[unit.normalizedText] = allocatedID
+                    normID = allocatedID
+                }
                 indexedUnits.append(
                     IndexedRuleUnit(
                         fileIndex: fileIndex,
                         unit: unit,
-                        stances: stances,
-                        shingles: shingles
+                        normID: normID
                     )
                 )
             }
@@ -114,7 +137,8 @@ public struct HygieneEngine: Sendable {
         findings.append(
             contentsOf: detectExactRuleDuplicates(
                 files: physicalRuleFiles,
-                units: indexedUnits
+                units: indexedUnits,
+                uniqueNorms: uniqueNorms
             )
         )
 
@@ -122,7 +146,7 @@ public struct HygieneEngine: Sendable {
         findings.append(
             contentsOf: detectDuplicateSkills(
                 artifacts: artifacts,
-                repos: repos,
+                sortedRepos: sortedRepos,
                 homePrefixes: homePrefixes,
                 fixSupports: fixSupports
             )
@@ -131,7 +155,8 @@ public struct HygieneEngine: Sendable {
         // 3. Deterministic opposing directive conflicts (`conflicts.yaml`).
         let (conflictFindings, conflictingUnitPairs) = detectConflicts(
             files: physicalRuleFiles,
-            units: indexedUnits
+            units: indexedUnits,
+            uniqueNorms: uniqueNorms
         )
         findings.append(contentsOf: conflictFindings)
 
@@ -139,6 +164,7 @@ public struct HygieneEngine: Sendable {
         let (nearDupFindings, nearDupUnitPairs) = detectNearDuplicates(
             files: physicalRuleFiles,
             units: indexedUnits,
+            uniqueNorms: uniqueNorms,
             conflictingUnitPairs: conflictingUnitPairs
         )
         findings.append(contentsOf: nearDupFindings)
@@ -181,10 +207,18 @@ public struct HygieneEngine: Sendable {
         }
     }
 
+    private struct PreparedRepoMatcher {
+        var path: String
+        var pathPrefix: String
+        var realPath: String
+        var realPathPrefix: String
+    }
+
     private struct PhysicalRuleFile {
         var path: String
         var realPath: String
         var identityPath: String
+        var fileName: String
         var repoRoot: String?
         var agents: Set<AgentID>
         var artifactIDs: [ArtifactID]
@@ -196,18 +230,24 @@ public struct HygieneEngine: Sendable {
         var isCanonicalSharedAgentsFile: Bool
     }
 
+    private struct UniqueNormalizedRule {
+        var id: Int
+        var normalizedText: String
+        var stances: [ConflictDetector.UnitStance]
+        var shingles: Set<UInt64>
+    }
+
     private struct IndexedRuleUnit {
         var fileIndex: Int
         var unit: RuleUnit
-        var stances: [ConflictDetector.UnitStance]
-        var shingles: Set<UInt64>
+        var normID: Int
     }
 
     // MARK: - Step 0: Physical Rule File Extraction
 
     private func extractPhysicalRuleFiles(
         from artifacts: [Artifact],
-        repos: [DiscoveredRepo],
+        sortedRepos: [PreparedRepoMatcher],
         homePrefixes: [String],
         fileSystem: (any ReadOnlyFileSystem)?
     ) -> [PhysicalRuleFile] {
@@ -219,6 +259,7 @@ public struct HygieneEngine: Sendable {
 
         var files: [PhysicalRuleFile] = []
         files.reserveCapacity(grouped.count)
+        var cachedFilteredUnitsByText: [String: [RuleUnit]] = [:]
 
         for realPath in grouped.keys.sorted() {
             guard let group = grouped[realPath], !group.isEmpty else { continue }
@@ -232,6 +273,7 @@ public struct HygieneEngine: Sendable {
             guard case .rules(let primaryDoc) = primary.payload else { continue }
 
             let displayPath = primary.location.path
+            let fileName = (displayPath as NSString).lastPathComponent
             let identityPath = Self.makeIdentityPath(displayPath, homePrefixes: homePrefixes)
             let agents = Set(sortedGroup.map(\.agent))
             let artifactIDs = Array(Set(sortedGroup.map(\.id))).sorted { $0.rawValue < $1.rawValue }
@@ -251,30 +293,41 @@ public struct HygieneEngine: Sendable {
                 for: sortedGroup,
                 path: displayPath,
                 realPath: realPath,
-                repos: repos
+                sortedRepos: sortedRepos
             )
 
             let rawDocumentText: String
-            let splitUnits: [RuleUnit]
             if let fileSystem,
-                let rawData = try? fileSystem.contents(at: URL(fileURLWithPath: displayPath)),
+                let rawData = try? fileSystem.contents(at: URL(fileURLWithPath: displayPath, isDirectory: false)),
                 let decoded = String(data: rawData, encoding: .utf8)
             {
                 rawDocumentText = decoded
-                splitUnits = MarkdownRuleSplitter.splitDocument(decoded)
             } else {
                 rawDocumentText = primaryDoc.content
-                splitUnits = MarkdownRuleSplitter.splitDocument(primaryDoc.content)
             }
 
-            let filteredUnits = splitUnits.filter { !Self.isPureImportDirectiveUnit($0) }
-            let isSharedAgents = Self.isSharedAgentsMarkdownPath(displayPath, repoRoot: repoRoot)
+            let filteredUnits: [RuleUnit]
+            if let cached = cachedFilteredUnitsByText[rawDocumentText] {
+                filteredUnits = cached
+            } else {
+                let computed = MarkdownRuleSplitter.splitDocument(rawDocumentText).filter {
+                    !Self.isPureImportDirectiveUnit($0)
+                }
+                cachedFilteredUnitsByText[rawDocumentText] = computed
+                filteredUnits = computed
+            }
+            let isSharedAgents = Self.isSharedAgentsMarkdownPath(
+                displayPath,
+                fileName: fileName,
+                repoRoot: repoRoot
+            )
 
             files.append(
                 PhysicalRuleFile(
                     path: displayPath,
                     realPath: realPath,
                     identityPath: identityPath,
+                    fileName: fileName,
                     repoRoot: repoRoot,
                     agents: agents,
                     artifactIDs: artifactIDs,
@@ -309,16 +362,20 @@ public struct HygieneEngine: Sendable {
         return remainder.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    private static func isSharedAgentsMarkdownPath(_ path: String, repoRoot: String?) -> Bool {
-        let url = URL(fileURLWithPath: path).standardizedFileURL
-        guard url.lastPathComponent == "AGENTS.md", let repoRoot else {
+    private static func isSharedAgentsMarkdownPath(
+        _ path: String,
+        fileName: String,
+        repoRoot: String?
+    ) -> Bool {
+        guard fileName == "AGENTS.md", let repoRoot else {
             return false
         }
-        let stdRepo = URL(fileURLWithPath: repoRoot).standardizedFileURL.path
-        guard url.path.hasPrefix(stdRepo + "/") else {
+        let stdPath = URL(fileURLWithPath: path, isDirectory: false).standardizedFileURL.path
+        let stdRepo = URL(fileURLWithPath: repoRoot, isDirectory: true).standardizedFileURL.path
+        guard stdPath.hasPrefix(stdRepo + "/") else {
             return false
         }
-        let rel = String(url.path.dropFirst(stdRepo.count + 1))
+        let rel = String(stdPath.dropFirst(stdRepo.count + 1))
         let components = rel.split(separator: "/").dropLast()
         return !components.contains { privateAgentDirectories.contains(String($0)) || $0.hasPrefix(".") }
     }
@@ -338,27 +395,45 @@ public struct HygieneEngine: Sendable {
 
     private func detectExactRuleDuplicates(
         files: [PhysicalRuleFile],
-        units: [IndexedRuleUnit]
+        units: [IndexedRuleUnit],
+        uniqueNorms: [UniqueNormalizedRule]
     ) -> [Finding] {
-        var byNormalizedText: [String: [Int]] = [:]
-        var seenFileForNorm: [String: Set<Int>] = [:]
+        guard !uniqueNorms.isEmpty else { return [] }
+        var byNormID = Array(repeating: [Int](), count: uniqueNorms.count)
+        var seenFileForNormID = Array(repeating: Set<Int>(), count: uniqueNorms.count)
 
         for (unitIdx, item) in units.enumerated() {
-            let norm = item.unit.normalizedText
-            guard !norm.isEmpty else { continue }
-            if seenFileForNorm[norm, default: []].insert(item.fileIndex).inserted {
-                byNormalizedText[norm, default: []].append(unitIdx)
+            guard !uniqueNorms[item.normID].normalizedText.isEmpty else { continue }
+            if seenFileForNormID[item.normID].insert(item.fileIndex).inserted {
+                byNormID[item.normID].append(unitIdx)
             }
         }
 
-        var findings: [Finding] = []
-        for norm in byNormalizedText.keys.sorted() {
-            guard let occurrenceIndices = byNormalizedText[norm], occurrenceIndices.count >= 2 else {
-                continue
-            }
+        let orderedNormIDs = uniqueNorms.indices
+            .filter { byNormID[$0].count >= 2 }
+            .sorted { uniqueNorms[$0].normalizedText < uniqueNorms[$1].normalizedText }
 
-            let components = connectedComponents(items: occurrenceIndices) { idxA, idxB in
-                Self.areComparable(files[units[idxA].fileIndex], files[units[idxB].fileIndex])
+        var findings: [Finding] = []
+        var previewCacheByRawText: [String: String] = [:]
+
+        for normID in orderedNormIDs {
+            let occurrenceIndices = byNormID[normID]
+            let norm = uniqueNorms[normID].normalizedText
+
+            let hasGlobalOccurrence = occurrenceIndices.contains { files[units[$0].fileIndex].repoRoot == nil }
+            let components: [[Int]]
+            if hasGlobalOccurrence {
+                components = connectedComponents(items: occurrenceIndices) { idxA, idxB in
+                    Self.areComparable(files[units[idxA].fileIndex], files[units[idxB].fileIndex])
+                }
+            } else {
+                var byRepo: [String: [Int]] = [:]
+                for idx in occurrenceIndices {
+                    if let repoRoot = files[units[idx].fileIndex].repoRoot {
+                        byRepo[repoRoot, default: []].append(idx)
+                    }
+                }
+                components = byRepo.keys.sorted().compactMap { byRepo[$0] }
             }
 
             for component in components where component.count >= 2 {
@@ -388,10 +463,16 @@ public struct HygieneEngine: Sendable {
                     Set(sortedOccurrences.flatMap { files[units[$0].fileIndex].artifactIDs })
                 ).sorted { $0.rawValue < $1.rawValue }
 
-                let sampleRaw = Self.singleLinePreview(units[sortedOccurrences[0]].unit.rawText)
-                let fileNames = sortedOccurrences.map {
-                    URL(fileURLWithPath: files[units[$0].fileIndex].path).lastPathComponent
+                let rawSampleText = units[sortedOccurrences[0]].unit.rawText
+                let sampleRaw: String
+                if let cachedPreview = previewCacheByRawText[rawSampleText] {
+                    sampleRaw = cachedPreview
+                } else {
+                    let computed = Self.singleLinePreview(rawSampleText)
+                    previewCacheByRawText[rawSampleText] = computed
+                    sampleRaw = computed
                 }
+                let fileNames = sortedOccurrences.map { files[units[$0].fileIndex].fileName }
                 let findingID = Self.hashFindingID(
                     "exactDuplicate|\(norm)|\(identitySpanTokens.joined(separator: ","))"
                 )
@@ -418,7 +499,7 @@ public struct HygieneEngine: Sendable {
 
     private func detectDuplicateSkills(
         artifacts: [Artifact],
-        repos: [DiscoveredRepo],
+        sortedRepos: [PreparedRepoMatcher],
         homePrefixes: [String],
         fixSupports: [AgentID: FixSupport]
     ) -> [Finding] {
@@ -437,7 +518,7 @@ public struct HygieneEngine: Sendable {
         var byDirRealPath: [String: [Artifact]] = [:]
         for artifact in artifacts where artifact.kind == .skill && artifact.enabled {
             guard case .skill = artifact.payload else { continue }
-            let dirRealPath = URL(fileURLWithPath: artifact.location.realPath)
+            let dirRealPath = URL(fileURLWithPath: artifact.location.realPath, isDirectory: false)
                 .deletingLastPathComponent()
                 .standardizedFileURL
                 .path
@@ -456,7 +537,7 @@ public struct HygieneEngine: Sendable {
                 for: sorted,
                 path: primary.location.path,
                 realPath: primary.location.realPath,
-                repos: repos
+                sortedRepos: sortedRepos
             )
             let signature = "\(primary.contentHash)|\(skillDoc.supportingFiles.sorted().joined(separator: ","))"
 
@@ -483,13 +564,25 @@ public struct HygieneEngine: Sendable {
         var findings: [Finding] = []
         for sig in bySignature.keys.sorted() {
             guard let indices = bySignature[sig], indices.count >= 2 else { continue }
-            let components = connectedComponents(items: indices) { a, b in
-                let lhs = physicalSkills[a]
-                let rhs = physicalSkills[b]
-                guard lhs.skillDirRealPath != rhs.skillDirRealPath else { return false }
-                if lhs.repoRoot == nil && rhs.repoRoot == nil { return true }
-                if let lr = lhs.repoRoot, let rr = rhs.repoRoot { return lr == rr }
-                return !lhs.agents.isDisjoint(with: rhs.agents)
+            let hasGlobalSkill = indices.contains { physicalSkills[$0].repoRoot == nil }
+            let components: [[Int]]
+            if hasGlobalSkill {
+                components = connectedComponents(items: indices) { a, b in
+                    let lhs = physicalSkills[a]
+                    let rhs = physicalSkills[b]
+                    guard lhs.skillDirRealPath != rhs.skillDirRealPath else { return false }
+                    if lhs.repoRoot == nil && rhs.repoRoot == nil { return true }
+                    if let lr = lhs.repoRoot, let rr = rhs.repoRoot { return lr == rr }
+                    return !lhs.agents.isDisjoint(with: rhs.agents)
+                }
+            } else {
+                var byRepo: [String: [Int]] = [:]
+                for idx in indices {
+                    if let repoRoot = physicalSkills[idx].repoRoot {
+                        byRepo[repoRoot, default: []].append(idx)
+                    }
+                }
+                components = byRepo.keys.sorted().compactMap { byRepo[$0] }
             }
 
             for component in components where component.count >= 2 {
@@ -538,7 +631,8 @@ public struct HygieneEngine: Sendable {
 
     private func detectConflicts(
         files: [PhysicalRuleFile],
-        units: [IndexedRuleUnit]
+        units: [IndexedRuleUnit],
+        uniqueNorms: [UniqueNormalizedRule]
     ) -> (findings: [Finding], conflictingPairs: Set<UnitPair>) {
         struct ConflictGroupAccumulator {
             var ruleID: String
@@ -556,50 +650,90 @@ public struct HygieneEngine: Sendable {
 
         guard units.count >= 2 else { return ([], []) }
 
-        for i in 0..<(units.count - 1) where !units[i].stances.isEmpty {
+        var globalStanceUnits: [Int] = []
+        var repoStanceUnits: [String: [Int]] = [:]
+        for (unitIdx, item) in units.enumerated() where !uniqueNorms[item.normID].stances.isEmpty {
+            if let repoRoot = files[item.fileIndex].repoRoot {
+                repoStanceUnits[repoRoot, default: []].append(unitIdx)
+            } else {
+                globalStanceUnits.append(unitIdx)
+            }
+        }
+
+        func inspectPair(_ rawA: Int, _ rawB: Int) {
+            let i = min(rawA, rawB)
+            let j = max(rawA, rawB)
+            guard i != j else { return }
+
             let unitA = units[i]
+            let unitB = units[j]
             let fileA = files[unitA.fileIndex]
+            let fileB = files[unitB.fileIndex]
+            guard Self.areComparable(fileA, fileB) else { return }
 
-            for j in (i + 1)..<units.count where !units[j].stances.isEmpty {
-                let unitB = units[j]
-                let fileB = files[unitB.fileIndex]
-                guard Self.areComparable(fileA, fileB) else { continue }
+            let stancesA = uniqueNorms[unitA.normID].stances
+            let stancesB = uniqueNorms[unitB.normID].stances
 
-                for stanceA in unitA.stances {
-                    for stanceB in unitB.stances where ConflictDetector.areConflicting(stanceA, stanceB) {
-                        conflictingPairs.insert(UnitPair(i, j))
+            for stanceA in stancesA {
+                for stanceB in stancesB where ConflictDetector.areConflicting(stanceA, stanceB) {
+                    conflictingPairs.insert(UnitPair(i, j))
 
-                        let scopeTag = fileA.repoRoot ?? fileB.repoRoot ?? "<global>"
-                        let normA = unitA.unit.normalizedText
-                        let normB = unitB.unit.normalizedText
+                    let scopeTag = fileA.repoRoot ?? fileB.repoRoot ?? "<global>"
+                    let normA = unitA.unit.normalizedText
+                    let normB = unitB.unit.normalizedText
 
-                        let (leftNorm, leftStance, leftIdx, rightNorm, rightStance, rightIdx):
-                            (String, String, Int, String, String, Int)
-                        if (stanceA.stanceLabel, normA) <= (stanceB.stanceLabel, normB) {
-                            (leftNorm, leftStance, leftIdx, rightNorm, rightStance, rightIdx) =
-                                (normA, stanceA.stanceLabel, i, normB, stanceB.stanceLabel, j)
-                        } else {
-                            (leftNorm, leftStance, leftIdx, rightNorm, rightStance, rightIdx) =
-                                (normB, stanceB.stanceLabel, j, normA, stanceA.stanceLabel, i)
-                        }
+                    let (leftNorm, leftStance, leftIdx, rightNorm, rightStance, rightIdx):
+                        (String, String, Int, String, String, Int)
+                    if (stanceA.stanceLabel, normA) <= (stanceB.stanceLabel, normB) {
+                        (leftNorm, leftStance, leftIdx, rightNorm, rightStance, rightIdx) =
+                            (normA, stanceA.stanceLabel, i, normB, stanceB.stanceLabel, j)
+                    } else {
+                        (leftNorm, leftStance, leftIdx, rightNorm, rightStance, rightIdx) =
+                            (normB, stanceB.stanceLabel, j, normA, stanceA.stanceLabel, i)
+                    }
 
-                        let groupKey = "\(scopeTag)|\(stanceA.ruleID)|\(leftNorm)|\(rightNorm)"
-                        if var existing = groupedConflicts[groupKey] {
-                            existing.leftUnitIndices.insert(leftIdx)
-                            existing.rightUnitIndices.insert(rightIdx)
-                            groupedConflicts[groupKey] = existing
-                        } else {
-                            groupedConflicts[groupKey] = ConflictGroupAccumulator(
-                                ruleID: stanceA.ruleID,
-                                topic: stanceA.topic,
-                                leftNorm: leftNorm,
-                                leftStance: leftStance,
-                                rightNorm: rightNorm,
-                                rightStance: rightStance,
-                                leftUnitIndices: [leftIdx],
-                                rightUnitIndices: [rightIdx]
-                            )
-                        }
+                    let groupKey = "\(scopeTag)|\(stanceA.ruleID)|\(leftNorm)|\(rightNorm)"
+                    if var existing = groupedConflicts[groupKey] {
+                        existing.leftUnitIndices.insert(leftIdx)
+                        existing.rightUnitIndices.insert(rightIdx)
+                        groupedConflicts[groupKey] = existing
+                    } else {
+                        groupedConflicts[groupKey] = ConflictGroupAccumulator(
+                            ruleID: stanceA.ruleID,
+                            topic: stanceA.topic,
+                            leftNorm: leftNorm,
+                            leftStance: leftStance,
+                            rightNorm: rightNorm,
+                            rightStance: rightStance,
+                            leftUnitIndices: [leftIdx],
+                            rightUnitIndices: [rightIdx]
+                        )
+                    }
+                }
+            }
+        }
+
+        if globalStanceUnits.count >= 2 {
+            for a in 0..<(globalStanceUnits.count - 1) {
+                for b in (a + 1)..<globalStanceUnits.count {
+                    inspectPair(globalStanceUnits[a], globalStanceUnits[b])
+                }
+            }
+        }
+
+        for repoKey in repoStanceUnits.keys.sorted() {
+            guard let bucket = repoStanceUnits[repoKey] else { continue }
+            if bucket.count >= 2 {
+                for a in 0..<(bucket.count - 1) {
+                    for b in (a + 1)..<bucket.count {
+                        inspectPair(bucket[a], bucket[b])
+                    }
+                }
+            }
+            if !globalStanceUnits.isEmpty {
+                for g in globalStanceUnits {
+                    for r in bucket {
+                        inspectPair(g, r)
                     }
                 }
             }
@@ -657,8 +791,8 @@ public struct HygieneEngine: Sendable {
 
             let firstPreview = Self.singleLinePreview(units[firstIdx].unit.rawText)
             let secondPreview = Self.singleLinePreview(units[secondIdx].unit.rawText)
-            let firstFileName = URL(fileURLWithPath: firstFile.path).lastPathComponent
-            let secondFileName = URL(fileURLWithPath: secondFile.path).lastPathComponent
+            let firstFileName = firstFile.fileName
+            let secondFileName = secondFile.fileName
 
             let idSeed =
                 "conflict|\(group.ruleID)|\(firstFile.identityPath):\(units[firstIdx].unit.lineRange.lowerBound)"
@@ -689,43 +823,125 @@ public struct HygieneEngine: Sendable {
     private func detectNearDuplicates(
         files: [PhysicalRuleFile],
         units: [IndexedRuleUnit],
+        uniqueNorms: [UniqueNormalizedRule],
         conflictingUnitPairs: Set<UnitPair>
     ) -> (findings: [Finding], verifiedPairs: [UnitPair: Double]) {
-        guard units.count >= 2 else { return ([], [:]) }
+        guard units.count >= 2, uniqueNorms.count >= 2 else { return ([], [:]) }
 
         let lsh = MinHashLSH(
             permutations: config.minHashPermutations,
             bands: config.lshBands
         )
-        let signatures = units.map { lsh.signature(for: $0.shingles) }
-        let candidates = lsh.candidatePairs(for: signatures)
+        // Index unique normalized rule texts rather than duplicate occurrences so identical rules
+        // shared across dozens of worktrees never create O(W^2) single-bucket LSH explosions.
+        let uniqueSignatures = uniqueNorms.map { lsh.signature(for: $0.shingles) }
+        let candidateNormPairs = lsh.candidatePairs(for: uniqueSignatures)
+        guard !candidateNormPairs.isEmpty else { return ([], [:]) }
+
+        var verifiedNormPairs: [(normA: Int, normB: Int, similarity: Double)] = []
+        var participatingNormIDs: Set<Int> = []
+        for (normA, normB) in candidateNormPairs {
+            guard !uniqueNorms[normA].normalizedText.isEmpty,
+                !uniqueNorms[normB].normalizedText.isEmpty
+            else {
+                continue
+            }
+            let similarity = MinHashLSH.jaccard(
+                uniqueNorms[normA].shingles,
+                uniqueNorms[normB].shingles
+            )
+            if similarity >= config.nearDuplicateJaccardThreshold {
+                verifiedNormPairs.append((normA, normB, similarity))
+                participatingNormIDs.insert(normA)
+                participatingNormIDs.insert(normB)
+            }
+        }
+        guard !verifiedNormPairs.isEmpty else { return ([], [:]) }
+
+        var globalUnitsByNorm: [Int: [Int]] = [:]
+        var repoUnitsByNorm: [Int: [String: [Int]]] = [:]
+        var allRepoUnitsFlatByNorm: [Int: [Int]] = [:]
+        for (unitIdx, item) in units.enumerated() where participatingNormIDs.contains(item.normID) {
+            if let repoRoot = files[item.fileIndex].repoRoot {
+                repoUnitsByNorm[item.normID, default: [:]][repoRoot, default: []].append(unitIdx)
+                allRepoUnitsFlatByNorm[item.normID, default: []].append(unitIdx)
+            } else {
+                globalUnitsByNorm[item.normID, default: []].append(unitIdx)
+            }
+        }
 
         var verifiedPairs: [UnitPair: Double] = [:]
-        var participatingIndicesSet: Set<Int> = []
+        var adjacency: [Int: [Int]] = [:]
 
-        for (i, j) in candidates {
-            let unitA = units[i]
-            let unitB = units[j]
-            guard unitA.fileIndex != unitB.fileIndex else { continue }
-            guard unitA.unit.normalizedText != unitB.unit.normalizedText else { continue }
-            guard Self.areComparable(files[unitA.fileIndex], files[unitB.fileIndex]) else { continue }
-
-            let pair = UnitPair(i, j)
-            guard !conflictingUnitPairs.contains(pair) else { continue }
-
-            let similarity = MinHashLSH.jaccard(unitA.shingles, unitB.shingles)
-            if similarity >= config.nearDuplicateJaccardThreshold {
+        func recordVerifiedUnitPair(_ rawA: Int, _ rawB: Int, similarity: Double) {
+            let unitA = units[rawA]
+            let unitB = units[rawB]
+            guard unitA.fileIndex != unitB.fileIndex else { return }
+            guard Self.areComparable(files[unitA.fileIndex], files[unitB.fileIndex]) else { return }
+            let pair = UnitPair(rawA, rawB)
+            guard !conflictingUnitPairs.contains(pair) else { return }
+            if verifiedPairs[pair] == nil {
                 verifiedPairs[pair] = similarity
-                participatingIndicesSet.insert(i)
-                participatingIndicesSet.insert(j)
+                adjacency[pair.first, default: []].append(pair.second)
+                adjacency[pair.second, default: []].append(pair.first)
+            }
+        }
+
+        for (normA, normB, similarity) in verifiedNormPairs {
+            let globalsA = globalUnitsByNorm[normA] ?? []
+            let globalsB = globalUnitsByNorm[normB] ?? []
+
+            for i in globalsA {
+                for j in globalsB {
+                    recordVerifiedUnitPair(i, j, similarity: similarity)
+                }
+            }
+            if !globalsA.isEmpty, let reposFlatB = allRepoUnitsFlatByNorm[normB] {
+                for i in globalsA {
+                    for j in reposFlatB {
+                        recordVerifiedUnitPair(i, j, similarity: similarity)
+                    }
+                }
+            }
+            if !globalsB.isEmpty, let reposFlatA = allRepoUnitsFlatByNorm[normA] {
+                for i in reposFlatA {
+                    for j in globalsB {
+                        recordVerifiedUnitPair(i, j, similarity: similarity)
+                    }
+                }
+            }
+
+            if let reposA = repoUnitsByNorm[normA], let reposB = repoUnitsByNorm[normB] {
+                let (smallerMap, largerMap) = reposA.count <= reposB.count ? (reposA, reposB) : (reposB, reposA)
+                for (repoKey, listSmall) in smallerMap {
+                    guard let listLarge = largerMap[repoKey] else { continue }
+                    for i in listSmall {
+                        for j in listLarge {
+                            recordVerifiedUnitPair(i, j, similarity: similarity)
+                        }
+                    }
+                }
             }
         }
 
         guard !verifiedPairs.isEmpty else { return ([], [:]) }
 
-        let participating = participatingIndicesSet.sorted()
-        let components = connectedComponents(items: participating) { a, b in
-            verifiedPairs[UnitPair(a, b)] != nil
+        let participating = adjacency.keys.sorted()
+        var visited: Set<Int> = []
+        var components: [[Int]] = []
+        for start in participating where visited.insert(start).inserted {
+            var queue: [Int] = [start]
+            var cursor = 0
+            while cursor < queue.count {
+                let current = queue[cursor]
+                cursor += 1
+                if let neighbors = adjacency[current] {
+                    for next in neighbors where visited.insert(next).inserted {
+                        queue.append(next)
+                    }
+                }
+            }
+            components.append(queue)
         }
 
         var findings: [Finding] = []
@@ -816,9 +1032,22 @@ public struct HygieneEngine: Sendable {
             unitIndicesByFile[item.fileIndex, default: []].append(idx)
         }
 
+        var canonicalTargetsByRepo: [String: [Int]] = [:]
+        for (idx, file) in files.enumerated() where file.isCanonicalSharedAgentsFile {
+            if let repoRoot = file.repoRoot {
+                canonicalTargetsByRepo[repoRoot, default: []].append(idx)
+            }
+        }
+
         var findings: [Finding] = []
         for (sourceIdx, sourceFile) in files.enumerated() where !sourceFile.units.isEmpty {
-            guard !sourceFile.isCanonicalSharedAgentsFile else { continue }
+            guard !sourceFile.isCanonicalSharedAgentsFile,
+                let sourceRepoRoot = sourceFile.repoRoot,
+                let candidateTargets = canonicalTargetsByRepo[sourceRepoRoot],
+                !candidateTargets.isEmpty
+            else {
+                continue
+            }
 
             let supportsImportFix = sourceFile.agents.contains { agent in
                 guard let support = fixSupports[agent] else { return false }
@@ -831,12 +1060,8 @@ public struct HygieneEngine: Sendable {
 
             // Find the highest-overlap shared `AGENTS.md` target in the same repository.
             var bestTarget: (targetIdx: Int, matchedSourceUnits: [Int], allExact: Bool)?
-            for (targetIdx, targetFile) in files.enumerated()
-            where targetIdx != sourceIdx
-                && targetFile.isCanonicalSharedAgentsFile
-                && sourceFile.repoRoot != nil
-                && sourceFile.repoRoot == targetFile.repoRoot
-            {
+            for targetIdx in candidateTargets where targetIdx != sourceIdx {
+                let targetFile = files[targetIdx]
                 if Self.alreadyImportsTarget(
                     sourceFile: sourceFile,
                     targetFile: targetFile,
@@ -850,13 +1075,12 @@ public struct HygieneEngine: Sendable {
                     continue
                 }
 
-                let targetNorms = Set(targetUnitIndices.map { units[$0].unit.normalizedText })
+                let targetNormIDs = Set(targetUnitIndices.map { units[$0].normID })
                 var matchedSource: [Int] = []
                 var allExact = true
 
                 for sUnitIdx in sourceUnitIndices {
-                    let sNorm = units[sUnitIdx].unit.normalizedText
-                    if targetNorms.contains(sNorm) {
+                    if targetNormIDs.contains(units[sUnitIdx].normID) {
                         matchedSource.append(sUnitIdx)
                     } else if targetUnitIndices.contains(where: { nearDupUnitPairs[UnitPair(sUnitIdx, $0)] != nil }) {
                         matchedSource.append(sUnitIdx)
@@ -893,8 +1117,8 @@ public struct HygieneEngine: Sendable {
 
             let importToken = Self.relativeImportToken(from: sourceFile.path, to: targetFile.path)
             let pct = Int((Double(match.matchedSourceUnits.count) / Double(sourceUnitIndices.count) * 100.0).rounded())
-            let sourceName = URL(fileURLWithPath: sourceFile.path).lastPathComponent
-            let targetName = URL(fileURLWithPath: targetFile.path).lastPathComponent
+            let sourceName = sourceFile.fileName
+            let targetName = targetFile.fileName
             let artifactIDs = Array(Set(sourceFile.artifactIDs + targetFile.artifactIDs)).sorted {
                 $0.rawValue < $1.rawValue
             }
@@ -1145,7 +1369,7 @@ public struct HygieneEngine: Sendable {
     }
 
     private static func makeIdentityPath(_ rawPath: String, homePrefixes: [String]) -> String {
-        let std = URL(fileURLWithPath: rawPath).standardizedFileURL.path
+        let std = URL(fileURLWithPath: rawPath, isDirectory: false).standardizedFileURL.path
         for prefix in homePrefixes {
             if std == prefix {
                 return "~"
@@ -1157,28 +1381,40 @@ public struct HygieneEngine: Sendable {
         return std
     }
 
+    private static func prepareSortedRepos(_ repos: [DiscoveredRepo]) -> [PreparedRepoMatcher] {
+        repos
+            .sorted { $0.path.count > $1.path.count }
+            .map { repo in
+                PreparedRepoMatcher(
+                    path: repo.path,
+                    pathPrefix: repo.path + "/",
+                    realPath: repo.realPath,
+                    realPathPrefix: repo.realPath + "/"
+                )
+            }
+    }
+
     private static func inferRepoRoot(
         for artifacts: [Artifact],
         path: String,
         realPath: String,
-        repos: [DiscoveredRepo]
+        sortedRepos: [PreparedRepoMatcher]
     ) -> String? {
         let isGlobalOnly = artifacts.allSatisfy { $0.scope == .user || $0.scope == .managed }
         if isGlobalOnly {
             return nil
         }
 
-        let sortedRepos = repos.sorted { $0.path.count > $1.path.count }
         for repo in sortedRepos {
-            if path == repo.path || path.hasPrefix(repo.path + "/")
-                || realPath == repo.realPath || realPath.hasPrefix(repo.realPath + "/")
+            if path == repo.path || path.hasPrefix(repo.pathPrefix)
+                || realPath == repo.realPath || realPath.hasPrefix(repo.realPathPrefix)
             {
                 return repo.path
             }
         }
 
         // Fallback when `repos` wasn't passed explicitly: infer repository folder above known agent subpaths.
-        let url = URL(fileURLWithPath: path).standardizedFileURL
+        let url = URL(fileURLWithPath: path, isDirectory: false).standardizedFileURL
         let components = url.pathComponents
         for (idx, comp) in components.enumerated() where idx > 1 && privateAgentDirectories.contains(comp) {
             let prefixComponents = Array(components[0..<idx])
@@ -1194,15 +1430,17 @@ public struct HygieneEngine: Sendable {
         fileSystem: (any ReadOnlyFileSystem)?
     ) -> Bool {
         guard !sourceFile.directImports.isEmpty else { return false }
-        let sourceDir = URL(fileURLWithPath: sourceFile.path).deletingLastPathComponent().standardizedFileURL
-        let homeURL = homePath.map { URL(fileURLWithPath: $0).standardizedFileURL }
+        let sourceDir = URL(fileURLWithPath: sourceFile.path, isDirectory: false)
+            .deletingLastPathComponent()
+            .standardizedFileURL
+        let homeURL = homePath.map { URL(fileURLWithPath: $0, isDirectory: true).standardizedFileURL }
 
         for imported in sourceFile.directImports {
             let resolvedURL: URL
             if imported.hasPrefix("~/"), let homeURL {
                 resolvedURL = homeURL.appendingPathComponent(String(imported.dropFirst(2))).standardizedFileURL
             } else if imported.hasPrefix("/") {
-                resolvedURL = URL(fileURLWithPath: imported).standardizedFileURL
+                resolvedURL = URL(fileURLWithPath: imported, isDirectory: false).standardizedFileURL
             } else {
                 resolvedURL = sourceDir.appendingPathComponent(imported).standardizedFileURL
             }
@@ -1218,11 +1456,11 @@ public struct HygieneEngine: Sendable {
     }
 
     private static func relativeImportToken(from sourceFilePath: String, to targetFilePath: String) -> String {
-        let sourceDirComponents = URL(fileURLWithPath: sourceFilePath)
+        let sourceDirComponents = URL(fileURLWithPath: sourceFilePath, isDirectory: false)
             .standardizedFileURL
             .deletingLastPathComponent()
             .pathComponents
-        let targetComponents = URL(fileURLWithPath: targetFilePath)
+        let targetComponents = URL(fileURLWithPath: targetFilePath, isDirectory: false)
             .standardizedFileURL
             .pathComponents
 

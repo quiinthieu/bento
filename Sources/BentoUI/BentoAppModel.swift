@@ -148,12 +148,25 @@ public struct BudgetConsumerSummary: Sendable, Identifiable, Hashable {
     public var repoPrePromptTotal: Int
 }
 
-/// Single 1-based physical line inside a side-by-side hygiene finding span excerpt.
+/// Single 1-based physical line (or omission marker when `isOmissionMarker == true`) inside a hygiene span excerpt.
 public struct SpanLine: Sendable, Identifiable, Hashable {
     public var id: Int { lineNumber }
     public var lineNumber: Int
     public var text: String
     public var isHighlighted: Bool
+    public var isOmissionMarker: Bool
+
+    public init(
+        lineNumber: Int,
+        text: String,
+        isHighlighted: Bool,
+        isOmissionMarker: Bool = false
+    ) {
+        self.lineNumber = lineNumber
+        self.text = text
+        self.isHighlighted = isHighlighted
+        self.isOmissionMarker = isOmissionMarker
+    }
 }
 
 /// Read-only source excerpt rendered side-by-side for multi-span hygiene findings (`PLAN.md` §6.7).
@@ -204,6 +217,11 @@ public enum InspectorSelection: Sendable, Hashable {
 @MainActor
 @Observable
 public final class BentoAppModel {
+    /// Default maximum number of physical lines rendered per span excerpt before omitting middle lines.
+    public static let defaultMaxLinesPerSpan = 18
+    /// Default number of span locations rendered inline on a `FindingCardView` before disclosure expansion.
+    public static let defaultInlineSpanLimit = 4
+
     private static let onboardingCompletedSettingKey = "ui.onboardingCompleted"
     private static let shallowScanRootsSettingKey = "ui.shallowScanRoots"
     private static let includeShallowScanSettingKey = "ui.includeShallowScan"
@@ -215,6 +233,15 @@ public final class BentoAppModel {
     private static let geminiAPIEnabledSettingKey = "tokenizer.api.gemini.enabled"
     private static let automaticUpdatesSettingKey = "updates.automaticallyChecks"
     private static let debugProductNameSettingKey = "debug.productNameOverride"
+
+    private struct SpanExcerptCacheKey: Hashable {
+        var findingID: String
+        var totalSpanCount: Int
+        var firstSpanPath: String
+        var contextLines: Int
+        var maxSpans: Int
+        var maxLinesPerSpan: Int
+    }
 
     public let environment: AgentEnvironment
     public let store: BentoStore
@@ -229,6 +256,14 @@ public final class BentoAppModel {
     private var mcpConsentStore: MCPConsentStore
     private var confirmedAPICounters: [AgentID: any ExactAPITokenCounting] = [:]
     private var deltaSubscriptionTask: Task<Void, Never>?
+    private var coalescedLogDeltaTask: Task<Void, Never>?
+    private var explicitRefreshDepth: Int = 0
+    private var derivedRebuildGeneration: Int = 0
+    private var lastHandledSnapshotID: String?
+    private var lastRawHygieneFindings: [Finding]?
+    private var cachedPhysicalLinesByPath: [String: [String]] = [:]
+    private var unreadableSpanPaths: Set<String> = []
+    private var cachedSpanExcerpts: [SpanExcerptCacheKey: [SpanExcerpt]] = [:]
 
     // MARK: - Navigation & Chrome State
 
@@ -242,6 +277,7 @@ public final class BentoAppModel {
     public var isInspectorPresented: Bool = true
     public var findingsKindFilter: Finding.Kind? = nil
     public var findingsSeverityFilter: Severity? = nil
+    public var expandedFindingSpanIDs: Set<String> = []
     public var agentsFilter: AgentID? = nil
     public var settingsManualRepoDraft: String = ""
     public var settingsAnthropicKeyDraft: String = ""
@@ -266,16 +302,22 @@ public final class BentoAppModel {
 
     public private(set) var snapshot: Snapshot?
     public private(set) var repositories: [DiscoveredRepo] = []
+    public private(set) var totalArtifactCount: Int = 0
     public private(set) var persistedFindings: [PersistedFinding] = []
     public private(set) var allFindings: [Finding] = []
+    public private(set) var errorFindingCount: Int = 0
+    public private(set) var warningFindingCount: Int = 0
     public private(set) var repoBudgetsByPath: [String: [AgentID: Budget]] = [:]
+    public private(set) var biggestBudgetConsumers: [BudgetConsumerSummary] = []
     public private(set) var repoUsageByPath: [String: [ArtifactUsageJoin]] = [:]
     public private(set) var globalUsageItems: [ArtifactUsageJoin] = []
+    public private(set) var unusedGlobalUsageCount: Int = 0
     public private(set) var globalUsageSummary: UsageSummary?
     public private(set) var fixHistory: [FixJournalEntry] = []
     public private(set) var mcpServerEntries: [MCPServerInventoryEntry] = []
     public private(set) var tccNotices: [TCCDenialNotice] = []
     private var artifactsIndex: [ArtifactID: Artifact] = [:]
+    private var artifactsByAgent: [AgentID: [Artifact]] = [:]
 
     // MARK: - Persisted Settings State
 
@@ -453,8 +495,8 @@ public final class BentoAppModel {
         return snapshot.detections.values.filter(\.isDetected).count
     }
 
-    public var totalArtifactCount: Int {
-        snapshot?.artifacts.count ?? 0
+    public func artifacts(for agent: AgentID) -> [Artifact] {
+        artifactsByAgent[agent] ?? []
     }
 
     public var filteredRepositories: [DiscoveredRepo] {
@@ -477,43 +519,6 @@ public final class BentoAppModel {
     public var selectedRepository: DiscoveredRepo? {
         guard let selectedRepoPath else { return nil }
         return repositories.first { $0.path == selectedRepoPath }
-    }
-
-    public var biggestBudgetConsumers: [BudgetConsumerSummary] {
-        var consumers: [BudgetConsumerSummary] = []
-        let repoNamesByPath = Dictionary(uniqueKeysWithValues: repositories.map { ($0.path, $0.displayName) })
-
-        for (repoPath, byAgent) in repoBudgetsByPath {
-            let repoName = repoNamesByPath[repoPath] ?? URL(fileURLWithPath: repoPath).lastPathComponent
-            for (agent, budget) in byAgent {
-                let preTotal = budget.prePromptTokens
-                for (index, item) in budget.items.enumerated()
-                where item.countsTowardPrePrompt && item.tokens > 0
-                    && item.category != .builtInSystem && item.category != .builtInTools
-                {
-                    consumers.append(
-                        BudgetConsumerSummary(
-                            id: "\(repoPath):\(agent.rawValue):\(index):\(item.label)",
-                            repoPath: repoPath,
-                            repoName: repoName,
-                            agent: agent,
-                            item: item,
-                            repoPrePromptTotal: preTotal
-                        )
-                    )
-                }
-            }
-        }
-
-        return consumers.sorted { lhs, rhs in
-            if lhs.item.tokens != rhs.item.tokens {
-                return lhs.item.tokens > rhs.item.tokens
-            }
-            if lhs.agent != rhs.agent {
-                return lhs.agent < rhs.agent
-            }
-            return lhs.item.label < rhs.item.label
-        }
     }
 
     public var currentRepoBudgetsByAgent: [AgentID: Budget] {
@@ -585,29 +590,82 @@ public final class BentoAppModel {
 
     // MARK: - Refresh Pipeline
 
+    private struct DerivedRebuildInput: Sendable {
+        var activeSnapshot: Snapshot
+        var updatedRepos: [DiscoveredRepo]
+        var runLogIngest: Bool
+        var reusedHygieneFindings: [Finding]?
+        var environment: AgentEnvironment
+        var store: BentoStore
+        var workspace: Workspace
+        var retentionDays: Int
+        var unusedWindowDays: Int
+        var unusedMinimumSessions: Int
+        var anthropicCountAPIEnabled: Bool
+        var geminiCountAPIEnabled: Bool
+        var confirmedAPICounters: [AgentID: any ExactAPITokenCounting]
+        var productName: String
+    }
+
+    private struct DerivedRebuildOutput: Sendable {
+        var mcpConsentStore: MCPConsentStore?
+        var globalUsageSummary: UsageSummary?
+        var repoBudgetsByPath: [String: [AgentID: Budget]]
+        var biggestBudgetConsumers: [BudgetConsumerSummary]
+        var repoUsageByPath: [String: [ArtifactUsageJoin]]
+        var globalUsageItems: [ArtifactUsageJoin]
+        var unusedGlobalUsageCount: Int
+        var rawHygieneFindings: [Finding]
+        var persistedFindings: [PersistedFinding]
+        var allFindings: [Finding]
+        var fixHistory: [FixJournalEntry]
+        var mcpServerEntries: [MCPServerInventoryEntry]
+        var tccNotices: [TCCDenialNotice]
+    }
+
     /// Executes a full scan, incremental log ingest, calibration fit, budget computation, usage join, and hygiene audit.
     public func refreshAll() async {
+        coalescedLogDeltaTask?.cancel()
+        coalescedLogDeltaTask = nil
+        explicitRefreshDepth += 1
         isRefreshing = true
         lastErrorMessage = nil
-        defer { isRefreshing = false }
+        defer {
+            explicitRefreshDepth = max(0, explicitRefreshDepth - 1)
+            isRefreshing = explicitRefreshDepth > 0
+        }
 
         do {
             await workspace.setRepoDiscoveryOptions(buildCurrentRepoDiscoveryOptions())
             let scannedSnapshot = try await workspace.scanFull()
-            try await rebuildDerivedState(from: scannedSnapshot, runLogIngest: true)
+            lastHandledSnapshotID = scannedSnapshot.id
+            try await rebuildDerivedState(
+                from: scannedSnapshot,
+                runLogIngest: true,
+                reusedHygieneFindings: nil
+            )
         } catch {
             lastErrorMessage = error.localizedDescription
         }
     }
 
-    private func rebuildDerivedState(from activeSnapshot: Snapshot, runLogIngest: Bool) async throws {
+    private func applyImmediateSnapshotState(_ activeSnapshot: Snapshot) -> [DiscoveredRepo] {
         self.snapshot = activeSnapshot
+        self.lastHandledSnapshotID = activeSnapshot.id
+        clearExcerptCaches()
+
+        let allArtifacts = activeSnapshot.artifacts
+        self.totalArtifactCount = allArtifacts.count
 
         var index: [ArtifactID: Artifact] = [:]
-        for art in activeSnapshot.artifacts {
+        index.reserveCapacity(allArtifacts.count)
+        var byAgent: [AgentID: [Artifact]] = [:]
+        for art in allArtifacts {
             index[art.id] = art
+            byAgent[art.agent, default: []].append(art)
         }
         self.artifactsIndex = index
+        self.artifactsByAgent = byAgent
 
         let pinnedPaths = (try? store.pinnedRepoPaths()) ?? []
         var updatedRepos = activeSnapshot.repos
@@ -620,9 +678,73 @@ public final class BentoAppModel {
             selectedRepoPath = updatedRepos.first?.path
         }
 
+        return updatedRepos
+    }
+
+    private func rebuildDerivedState(
+        from activeSnapshot: Snapshot,
+        runLogIngest: Bool,
+        reusedHygieneFindings: [Finding]? = nil
+    ) async throws {
+        derivedRebuildGeneration &+= 1
+        let generation = derivedRebuildGeneration
+        let updatedRepos = applyImmediateSnapshotState(activeSnapshot)
+
+        let input = DerivedRebuildInput(
+            activeSnapshot: activeSnapshot,
+            updatedRepos: updatedRepos,
+            runLogIngest: runLogIngest,
+            reusedHygieneFindings: reusedHygieneFindings,
+            environment: environment,
+            store: store,
+            workspace: workspace,
+            retentionDays: retentionDays,
+            unusedWindowDays: unusedWindowDays,
+            unusedMinimumSessions: unusedMinimumSessions,
+            anthropicCountAPIEnabled: anthropicCountAPIEnabled,
+            geminiCountAPIEnabled: geminiCountAPIEnabled,
+            confirmedAPICounters: confirmedAPICounters,
+            productName: effectiveProductName
+        )
+
+        let output = try await Task.detached(priority: .userInitiated) {
+            try await Self.computeDerivedWorkspaceState(input)
+        }.value
+
+        guard generation == derivedRebuildGeneration else {
+            return
+        }
+
+        if let refreshedConsentStore = output.mcpConsentStore {
+            self.mcpConsentStore = refreshedConsentStore
+        }
+        self.globalUsageSummary = output.globalUsageSummary
+        self.repoBudgetsByPath = output.repoBudgetsByPath
+        self.biggestBudgetConsumers = output.biggestBudgetConsumers
+        self.repoUsageByPath = output.repoUsageByPath
+        self.globalUsageItems = output.globalUsageItems
+        self.unusedGlobalUsageCount = output.unusedGlobalUsageCount
+        self.lastRawHygieneFindings = output.rawHygieneFindings
+        self.persistedFindings = output.persistedFindings
+        self.allFindings = output.allFindings
+        updateFindingCounts()
+        self.fixHistory = output.fixHistory
+        self.mcpServerEntries = output.mcpServerEntries
+        self.tccNotices = output.tccNotices
+    }
+
+    nonisolated private static func computeDerivedWorkspaceState(
+        _ input: DerivedRebuildInput
+    ) async throws -> DerivedRebuildOutput {
+        let activeSnapshot = input.activeSnapshot
+        let updatedRepos = input.updatedRepos
+        let environment = input.environment
+        let store = input.store
+        let workspace = input.workspace
+
         // 1. Incremental log ingest + retention pruning when requested.
         var logDiagnostics: [Diagnostic] = []
-        if runLogIngest {
+        if input.runLogIngest {
             try store.syncDiscoveredRepos(updatedRepos, seenAt: environment.now())
             let logTargets = try await workspace.logIngestTargets(for: nil)
             let ingestReport = try await LogIngestor(
@@ -631,14 +753,15 @@ public final class BentoAppModel {
             ).ingest(targets: logTargets)
             logDiagnostics = ingestReport.diagnostics
 
-            if retentionDays > 0 {
-                let cutoff = environment.now().addingTimeInterval(-Double(retentionDays) * 86_400.0)
+            if input.retentionDays > 0 {
+                let cutoff = environment.now().addingTimeInterval(-Double(input.retentionDays) * 86_400.0)
                 _ = try? store.pruneUsageEvents(olderThan: cutoff)
             }
         }
 
         // 2. Collect MCP probe cache & consent status.
-        self.mcpConsentStore = (try? MCPConsentStore(persistence: store)) ?? mcpConsentStore
+        let refreshedConsentStore = try? MCPConsentStore(persistence: store)
+        let consentedHashes = refreshedConsentStore?.allConsentedHashes ?? []
         var probesByHash: [String: MCPProbeRecord] = [:]
         let allProbes = (try? store.allMCPProbes()) ?? []
         for probe in allProbes where probe.ok {
@@ -647,9 +770,7 @@ public final class BentoAppModel {
         let fallbackEstimate = try? store.mcpFallbackEstimate()
 
         // 3. Fit calibrations from local session logs if >= 3 samples exist.
-        let uncalibratedTokenizer = try await Task.detached(priority: .userInitiated) {
-            try AgentTokenizerRegistry()
-        }.value
+        let uncalibratedTokenizer = try AgentTokenizerRegistry()
         let sessions = (try? store.calibrationSessions(agent: nil)) ?? []
         if sessions.count >= CalibrationFitter.defaultMinimumSamples {
             let fitted = await Self.fitCalibrations(
@@ -666,17 +787,27 @@ public final class BentoAppModel {
             }
         }
 
-        let tokenizer = try makeConfiguredTokenizer(base: uncalibratedTokenizer)
+        var tokenizer = uncalibratedTokenizer
+        let calibrations = (try? store.calibrations(for: nil)) ?? []
+        if !calibrations.isEmpty {
+            tokenizer.applyCalibrations(calibrations)
+        }
+        if input.anthropicCountAPIEnabled, let counter = input.confirmedAPICounters[.claudeCode] {
+            tokenizer.setExactAPICounter(counter, for: .claudeCode)
+        }
+        if input.geminiCountAPIEnabled, let counter = input.confirmedAPICounters[.gemini] {
+            tokenizer.setExactAPICounter(counter, for: .gemini)
+        }
 
         // 4. Compute per-repo budgets & usage joins across budget-capable agents.
         let now = environment.now()
-        let windowDays = max(1, unusedWindowDays)
-        let minSessions = max(1, unusedMinimumSessions)
+        let windowDays = max(1, input.unusedWindowDays)
+        let minSessions = max(1, input.unusedMinimumSessions)
         let since = now.addingTimeInterval(-Double(windowDays) * 86_400.0)
         let hasFixedClock = !(environment.env["BENTO_NOW_ISO8601"] ?? "").isEmpty
         let until = hasFixedClock ? now : max(now, now.addingTimeInterval(86_400.0 * 3650.0))
 
-        self.globalUsageSummary = try? store.usageSummary(
+        let globalUsageSummary = try? store.usageSummary(
             since: since,
             until: until,
             agent: nil,
@@ -765,17 +896,28 @@ public final class BentoAppModel {
             }
         }
 
-        self.repoBudgetsByPath = budgetsMap
-        self.repoUsageByPath = usageByRepo
-        self.globalUsageItems = allUsageItems
-
-        // 5. Run HygieneEngine across the snapshot and merge with `unused` findings.
-        let hygieneFindings = try HygieneEngine().audit(
-            snapshot: activeSnapshot,
-            fixSupports: workspace.allFixSupports(),
-            fileSystem: environment.fileSystem,
-            tokenizer: tokenizer
+        let biggestConsumers = Self.computeBiggestBudgetConsumers(
+            repositories: updatedRepos,
+            repoBudgetsByPath: budgetsMap
         )
+        let unusedGlobalCount = allUsageItems.reduce(into: 0) { count, item in
+            if item.costTimesUnusedScore > 0 {
+                count += 1
+            }
+        }
+
+        // 5. Run HygieneEngine across the snapshot (or reuse cached findings on pure log-only updates).
+        let hygieneFindings: [Finding]
+        if let reused = input.reusedHygieneFindings {
+            hygieneFindings = reused
+        } else {
+            hygieneFindings = try HygieneEngine().audit(
+                snapshot: activeSnapshot,
+                fixSupports: workspace.allFixSupports(),
+                fileSystem: environment.fileSystem,
+                tokenizer: tokenizer
+            )
+        }
 
         var combinedFindings = hygieneFindings
         let existingIDs = Set(hygieneFindings.map(\.id))
@@ -785,19 +927,25 @@ public final class BentoAppModel {
         try? store.saveFindings(combinedFindings, snapshotID: activeSnapshot.id)
 
         let storedFindings = (try? store.fetchPersistedFindings(snapshotID: activeSnapshot.id)) ?? []
+        let resolvedPersisted: [PersistedFinding]
+        let resolvedActiveFindings: [Finding]
         if storedFindings.isEmpty && !combinedFindings.isEmpty {
-            self.persistedFindings = combinedFindings.map {
+            resolvedPersisted = combinedFindings.map {
                 PersistedFinding(snapshotID: activeSnapshot.id, finding: $0, isDismissed: false)
             }
-            self.allFindings = combinedFindings
+            resolvedActiveFindings = combinedFindings
         } else {
-            self.persistedFindings = storedFindings
-            self.allFindings = storedFindings.filter { !$0.isDismissed }.map(\.finding)
+            resolvedPersisted = storedFindings
+            resolvedActiveFindings = storedFindings.filter { !$0.isDismissed }.map(\.finding)
         }
 
         // 6. Refresh Fix History, MCP server inventory, and TCC notices.
-        self.fixHistory = (try? store.fetchFixJournalEntries(limit: 200)) ?? []
-        self.mcpServerEntries = buildMCPServerInventory(from: activeSnapshot, probes: allProbes)
+        let fixHistory = (try? store.fetchFixJournalEntries(limit: 200)) ?? []
+        let mcpServerEntries = Self.buildMCPServerInventoryList(
+            from: activeSnapshot,
+            probes: allProbes,
+            consentedHashes: consentedHashes
+        )
 
         var allDiagnostics: [Diagnostic] = logDiagnostics
         for art in activeSnapshot.artifacts {
@@ -806,11 +954,67 @@ public final class BentoAppModel {
         for res in activeSnapshot.resolutions {
             allDiagnostics.append(contentsOf: res.warnings)
         }
-        self.tccNotices = TCCDenialDetector.detect(
+        let tccNotices = TCCDenialDetector.detect(
             from: allDiagnostics,
             homePath: activeSnapshot.homePath,
-            productName: effectiveProductName
+            productName: input.productName
         )
+
+        return DerivedRebuildOutput(
+            mcpConsentStore: refreshedConsentStore,
+            globalUsageSummary: globalUsageSummary,
+            repoBudgetsByPath: budgetsMap,
+            biggestBudgetConsumers: biggestConsumers,
+            repoUsageByPath: usageByRepo,
+            globalUsageItems: allUsageItems,
+            unusedGlobalUsageCount: unusedGlobalCount,
+            rawHygieneFindings: hygieneFindings,
+            persistedFindings: resolvedPersisted,
+            allFindings: resolvedActiveFindings,
+            fixHistory: fixHistory,
+            mcpServerEntries: mcpServerEntries,
+            tccNotices: tccNotices
+        )
+    }
+
+    nonisolated private static func computeBiggestBudgetConsumers(
+        repositories: [DiscoveredRepo],
+        repoBudgetsByPath: [String: [AgentID: Budget]]
+    ) -> [BudgetConsumerSummary] {
+        var consumers: [BudgetConsumerSummary] = []
+        let repoNamesByPath = Dictionary(uniqueKeysWithValues: repositories.map { ($0.path, $0.displayName) })
+
+        for (repoPath, byAgent) in repoBudgetsByPath {
+            let repoName = repoNamesByPath[repoPath] ?? URL(fileURLWithPath: repoPath).lastPathComponent
+            for (agent, budget) in byAgent {
+                let preTotal = budget.prePromptTokens
+                for (index, item) in budget.items.enumerated()
+                where item.countsTowardPrePrompt && item.tokens > 0
+                    && item.category != .builtInSystem && item.category != .builtInTools
+                {
+                    consumers.append(
+                        BudgetConsumerSummary(
+                            id: "\(repoPath):\(agent.rawValue):\(index):\(item.label)",
+                            repoPath: repoPath,
+                            repoName: repoName,
+                            agent: agent,
+                            item: item,
+                            repoPrePromptTotal: preTotal
+                        )
+                    )
+                }
+            }
+        }
+
+        return consumers.sorted { lhs, rhs in
+            if lhs.item.tokens != rhs.item.tokens {
+                return lhs.item.tokens > rhs.item.tokens
+            }
+            if lhs.agent != rhs.agent {
+                return lhs.agent < rhs.agent
+            }
+            return lhs.item.label < rhs.item.label
+        }
     }
 
     // MARK: - Navigation & Keyboard Actions
@@ -933,57 +1137,70 @@ public final class BentoAppModel {
         externalActions.openInEditor(URL(fileURLWithPath: path))
     }
 
-    /// Extracts 1-based physical line excerpts for every `SourceLocation` in `finding.spans` (`PLAN.md` §6.7).
-    public func spanExcerpts(for finding: Finding, contextLines: Int = 2) -> [SpanExcerpt] {
+    /// Extracts cached 1-based physical line excerpts for `finding.spans` (`PLAN.md` §6.7),
+    /// optionally capping the number of inline spans and truncating multi-hundred-line spans.
+    public func spanExcerpts(
+        for finding: Finding,
+        contextLines: Int = 2,
+        maxSpans: Int? = nil,
+        maxLinesPerSpan: Int = BentoAppModel.defaultMaxLinesPerSpan
+    ) -> [SpanExcerpt] {
+        guard !finding.spans.isEmpty else { return [] }
+
+        let resolvedSpanLimit = maxSpans.map { max(1, min(finding.spans.count, $0)) } ?? finding.spans.count
+        let resolvedLineCap = max(4, maxLinesPerSpan)
+        let cacheKey = SpanExcerptCacheKey(
+            findingID: finding.id,
+            totalSpanCount: finding.spans.count,
+            firstSpanPath: finding.spans[0].path,
+            contextLines: contextLines,
+            maxSpans: resolvedSpanLimit,
+            maxLinesPerSpan: resolvedLineCap
+        )
+        if let cached = cachedSpanExcerpts[cacheKey] {
+            return cached
+        }
+
         var results: [SpanExcerpt] = []
-        for (idx, span) in finding.spans.enumerated() {
-            let fileURL = URL(fileURLWithPath: span.path).standardizedFileURL
-            let rawText: String
-            if let data = try? environment.fileSystem.contents(at: fileURL) {
-                rawText = String(decoding: data, as: UTF8.self)
-            } else {
-                rawText = ""
-            }
+        results.reserveCapacity(resolvedSpanLimit)
 
-            let physicalLines =
-                rawText
-                .components(separatedBy: "\n")
-                .map { $0.hasSuffix("\r") ? String($0.dropLast()) : $0 }
-
-            let totalCount = physicalLines.count
+        for idx in 0..<resolvedSpanLimit {
+            let span = finding.spans[idx]
+            let physicalLines = loadCachedPhysicalLines(forPath: span.path)
             var excerptLines: [SpanLine] = []
             let rangeLabel: String
 
-            if totalCount == 0 || (totalCount == 1 && physicalLines[0].isEmpty && rawText.isEmpty) {
-                rangeLabel = span.lineRange.map { "L\($0.lowerBound)–L\($0.upperBound)" } ?? "File"
-                excerptLines = [SpanLine(lineNumber: 1, text: "(empty or unreadable file)", isHighlighted: false)]
-            } else if let lineRange = span.lineRange {
-                let lower = max(1, min(totalCount, lineRange.lowerBound))
-                let upper = max(lower, min(totalCount, lineRange.upperBound))
-                let start = max(1, lower - max(0, contextLines))
-                let end = min(totalCount, upper + max(0, contextLines))
-                rangeLabel = lower == upper ? "L\(lower)" : "L\(lower)–L\(upper)"
-                for lineNum in start...end {
-                    excerptLines.append(
-                        SpanLine(
-                            lineNumber: lineNum,
-                            text: physicalLines[lineNum - 1],
-                            isHighlighted: (lower...upper).contains(lineNum)
-                        )
+            if let physicalLines, !physicalLines.isEmpty {
+                let totalCount = physicalLines.count
+                if let lineRange = span.lineRange {
+                    let lower = max(1, min(totalCount, lineRange.lowerBound))
+                    let upper = max(lower, min(totalCount, lineRange.upperBound))
+                    let start = max(1, lower - max(0, contextLines))
+                    let end = min(totalCount, upper + max(0, contextLines))
+                    rangeLabel = lower == upper ? "L\(lower)" : "L\(lower)–L\(upper)"
+                    excerptLines = Self.buildBoundedSpanLines(
+                        physicalLines: physicalLines,
+                        start: start,
+                        end: end,
+                        highlightedRange: lower...upper,
+                        maxLines: resolvedLineCap
                     )
+                } else {
+                    let end = min(totalCount, min(12, resolvedLineCap))
+                    rangeLabel = "L1–L\(end)"
+                    for lineNum in 1...end {
+                        excerptLines.append(
+                            SpanLine(
+                                lineNumber: lineNum,
+                                text: physicalLines[lineNum - 1],
+                                isHighlighted: true
+                            )
+                        )
+                    }
                 }
             } else {
-                let end = min(totalCount, 12)
-                rangeLabel = "L1–L\(end)"
-                for lineNum in 1...end {
-                    excerptLines.append(
-                        SpanLine(
-                            lineNumber: lineNum,
-                            text: physicalLines[lineNum - 1],
-                            isHighlighted: true
-                        )
-                    )
-                }
+                rangeLabel = span.lineRange.map { "L\($0.lowerBound)–L\($0.upperBound)" } ?? "File"
+                excerptLines = [SpanLine(lineNumber: 1, text: "(empty or unreadable file)", isHighlighted: false)]
             }
 
             results.append(
@@ -996,7 +1213,130 @@ public final class BentoAppModel {
                 )
             )
         }
+
+        cachedSpanExcerpts[cacheKey] = results
         return results
+    }
+
+    private func loadCachedPhysicalLines(forPath rawPath: String) -> [String]? {
+        let fileURL = URL(fileURLWithPath: rawPath).standardizedFileURL
+        let stdPath = fileURL.path
+        if unreadableSpanPaths.contains(stdPath) {
+            return nil
+        }
+        if let cached = cachedPhysicalLinesByPath[stdPath] {
+            return cached
+        }
+        guard let data = try? environment.fileSystem.contents(at: fileURL) else {
+            unreadableSpanPaths.insert(stdPath)
+            return nil
+        }
+        let rawText = String(decoding: data, as: UTF8.self)
+        if rawText.isEmpty {
+            unreadableSpanPaths.insert(stdPath)
+            return nil
+        }
+        let lines =
+            rawText
+            .components(separatedBy: "\n")
+            .map { $0.hasSuffix("\r") ? String($0.dropLast()) : $0 }
+        cachedPhysicalLinesByPath[stdPath] = lines
+        return lines
+    }
+
+    public func isFindingSpansExpanded(_ findingID: String) -> Bool {
+        expandedFindingSpanIDs.contains(findingID)
+    }
+
+    public func toggleFindingSpansExpanded(_ findingID: String) {
+        if expandedFindingSpanIDs.contains(findingID) {
+            expandedFindingSpanIDs.remove(findingID)
+        } else {
+            expandedFindingSpanIDs.insert(findingID)
+        }
+    }
+
+    private static func buildBoundedSpanLines(
+        physicalLines: [String],
+        start: Int,
+        end: Int,
+        highlightedRange: ClosedRange<Int>,
+        maxLines: Int
+    ) -> [SpanLine] {
+        let windowCount = end - start + 1
+        guard windowCount > maxLines else {
+            var lines: [SpanLine] = []
+            lines.reserveCapacity(windowCount)
+            for lineNum in start...end {
+                lines.append(
+                    SpanLine(
+                        lineNumber: lineNum,
+                        text: physicalLines[lineNum - 1],
+                        isHighlighted: highlightedRange.contains(lineNum)
+                    )
+                )
+            }
+            return lines
+        }
+
+        let headCount = max(2, (maxLines * 2) / 3)
+        let tailCount = max(2, maxLines - headCount)
+        let headEnd = start + headCount - 1
+        let tailStart = end - tailCount + 1
+        let omittedCount = max(1, tailStart - headEnd - 1)
+
+        var lines: [SpanLine] = []
+        lines.reserveCapacity(headCount + tailCount + 1)
+        for lineNum in start...headEnd {
+            lines.append(
+                SpanLine(
+                    lineNumber: lineNum,
+                    text: physicalLines[lineNum - 1],
+                    isHighlighted: highlightedRange.contains(lineNum)
+                )
+            )
+        }
+        lines.append(
+            SpanLine(
+                lineNumber: 0,
+                text: "… \(omittedCount) lines omitted …",
+                isHighlighted: false,
+                isOmissionMarker: true
+            )
+        )
+        for lineNum in tailStart...end {
+            lines.append(
+                SpanLine(
+                    lineNumber: lineNum,
+                    text: physicalLines[lineNum - 1],
+                    isHighlighted: highlightedRange.contains(lineNum)
+                )
+            )
+        }
+        return lines
+    }
+
+    private func clearExcerptCaches() {
+        cachedPhysicalLinesByPath.removeAll(keepingCapacity: false)
+        unreadableSpanPaths.removeAll(keepingCapacity: false)
+        cachedSpanExcerpts.removeAll(keepingCapacity: false)
+    }
+
+    private func updateFindingCounts() {
+        var errors = 0
+        var warnings = 0
+        for finding in allFindings {
+            switch finding.severity {
+            case .error:
+                errors += 1
+            case .warning:
+                warnings += 1
+            case .info:
+                break
+            }
+        }
+        errorFindingCount = errors
+        warningFindingCount = warnings
     }
 
     public func toggleDismissFinding(_ finding: Finding, dismissed: Bool = true) {
@@ -1009,6 +1349,7 @@ public final class BentoAppModel {
         } else if dismissed {
             self.allFindings.removeAll { $0.id == finding.id }
         }
+        updateFindingCounts()
     }
 
     // MARK: - Reversible Fixes & Master "Allow changes" Gate (`PLAN.md` §6.6, §6.7, §11 T15)
@@ -1382,6 +1723,9 @@ public final class BentoAppModel {
     /// Wipes every persisted SQLite table (snapshots, usage events, sessions, findings, MCP probes, fix journal, settings)
     /// and optionally deletes Keychain API keys (`PLAN.md` §7 `"Delete all <Product.name> data"`).
     public func deleteAllProductData(includeAPIKeys: Bool = false) async throws {
+        coalescedLogDeltaTask?.cancel()
+        coalescedLogDeltaTask = nil
+        derivedRebuildGeneration &+= 1
         try store.deleteAllData()
         try mcpConsentStore.revokeAll()
         confirmedAPICounters.removeAll()
@@ -1391,13 +1735,24 @@ public final class BentoAppModel {
             apiKeyPresenceVersion += 1
         }
         loadPersistedSettings()
+        clearExcerptCaches()
+        expandedFindingSpanIDs.removeAll()
+        lastHandledSnapshotID = nil
+        lastRawHygieneFindings = nil
         snapshot = nil
         repositories = []
+        totalArtifactCount = 0
+        artifactsIndex = [:]
+        artifactsByAgent = [:]
         persistedFindings = []
         allFindings = []
+        errorFindingCount = 0
+        warningFindingCount = 0
         repoBudgetsByPath = [:]
+        biggestBudgetConsumers = []
         repoUsageByPath = [:]
         globalUsageItems = []
+        unusedGlobalUsageCount = 0
         globalUsageSummary = nil
         fixHistory = []
         mcpServerEntries = []
@@ -1618,8 +1973,19 @@ public final class BentoAppModel {
         from activeSnapshot: Snapshot,
         probes: [MCPProbeRecord]
     ) -> [MCPServerInventoryEntry] {
+        Self.buildMCPServerInventoryList(
+            from: activeSnapshot,
+            probes: probes,
+            consentedHashes: mcpConsentStore.allConsentedHashes
+        )
+    }
+
+    nonisolated private static func buildMCPServerInventoryList(
+        from activeSnapshot: Snapshot,
+        probes: [MCPProbeRecord],
+        consentedHashes: Set<String>
+    ) -> [MCPServerInventoryEntry] {
         let probesByHash = Dictionary(probes.map { ($0.serverConfigHash, $0) }, uniquingKeysWith: { first, _ in first })
-        let consented = mcpConsentStore.allConsentedHashes
 
         var entries: [MCPServerInventoryEntry] = []
         var seenIDs: Set<String> = []
@@ -1638,7 +2004,7 @@ public final class BentoAppModel {
                         artifact: artifact,
                         config: config,
                         repoPath: scope.repoPath,
-                        hasConsent: consented.contains(hash),
+                        hasConsent: consentedHashes.contains(hash),
                         cachedProbe: probesByHash[hash]
                     )
                 )
@@ -1660,10 +2026,49 @@ public final class BentoAppModel {
             let stream = await ws.deltas()
             for await delta in stream {
                 guard !Task.isCancelled, let self else { break }
-                let runLogs = !delta.changedLogAgents.isEmpty
-                try? await self.rebuildDerivedState(from: delta.snapshot, runLogIngest: runLogs)
+                await self.handleLiveWatchDelta(delta)
             }
         }
+    }
+
+    private func handleLiveWatchDelta(_ delta: SnapshotDelta) async {
+        // Deduplicate `.fullScan` deltas emitted by an explicit `refreshAll()` call.
+        if delta.snapshot.id == lastHandledSnapshotID {
+            return
+        }
+        if explicitRefreshDepth > 0 && delta.reason == .fullScan {
+            lastHandledSnapshotID = delta.snapshot.id
+            return
+        }
+
+        // Pure session-log churn (e.g. an active AI coding agent streaming JSONL turns)
+        // never alters rule/config artifacts when `rescannedScopes` is empty: coalesce bursts
+        // and reuse the cached hygiene findings rather than re-auditing all repos continuously.
+        if delta.rescannedScopes.isEmpty && !delta.changedLogAgents.isEmpty {
+            let latestSnapshot = delta.snapshot
+            coalescedLogDeltaTask?.cancel()
+            coalescedLogDeltaTask = Task { [weak self] in
+                try? await Task.sleep(for: .seconds(2))
+                guard !Task.isCancelled, let self else { return }
+                guard self.explicitRefreshDepth == 0 else { return }
+                let reusedHygiene = self.lastRawHygieneFindings
+                try? await self.rebuildDerivedState(
+                    from: latestSnapshot,
+                    runLogIngest: true,
+                    reusedHygieneFindings: reusedHygiene
+                )
+            }
+            return
+        }
+
+        coalescedLogDeltaTask?.cancel()
+        coalescedLogDeltaTask = nil
+        let runLogs = !delta.changedLogAgents.isEmpty
+        try? await rebuildDerivedState(
+            from: delta.snapshot,
+            runLogIngest: runLogs,
+            reusedHygieneFindings: nil
+        )
     }
 
     private static func sortUsageItems(
@@ -1703,7 +2108,7 @@ public final class BentoAppModel {
         }
     }
 
-    private static func fitCalibrations(
+    nonisolated private static func fitCalibrations(
         sessions: [SessionRecord],
         workspace: Workspace,
         uncalibratedTokenizer: AgentTokenizerRegistry,

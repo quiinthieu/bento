@@ -171,83 +171,85 @@ struct UsageItemsTableView: View {
 
                     Divider()
 
-                    ForEach(items) { row in
-                        HStack(spacing: 10) {
-                            Button {
-                                model.inspectorSelection = .usageItem(row)
-                            } label: {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    HStack(spacing: 6) {
-                                        Text(row.name)
-                                            .font(.subheadline.weight(.medium))
-                                            .lineLimit(1)
-                                        ScopeBadgeView(scope: row.scope)
-                                    }
-                                    Text(model.abbreviateHomePath(row.path))
-                                        .font(.caption2.monospaced())
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(1)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-
-                            if showAgentColumn {
-                                Text(row.agent.shortDisplayName)
-                                    .font(.caption)
-                                    .frame(width: 85, alignment: .leading)
-                            }
-
-                            Text(row.kind.displayName)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .frame(width: 85, alignment: .leading)
-
-                            Text("\(row.invocationCount)")
-                                .font(.subheadline.monospacedDigit())
-                                .foregroundStyle(row.invocationCount == 0 ? .orange : .primary)
-                                .frame(width: 85, alignment: .trailing)
-
-                            Text(formatLastUsed(row.lastUsedAt))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .frame(width: 95, alignment: .trailing)
-
-                            Text("\(row.tokensCostPerSession)")
-                                .font(.subheadline.monospacedDigit())
-                                .frame(width: 90, alignment: .trailing)
-
-                            Text("\(row.costTimesUnusedScore)")
-                                .font(
-                                    .subheadline.monospacedDigit().weight(
-                                        row.costTimesUnusedScore > 0 ? .bold : .regular)
-                                )
-                                .foregroundStyle(row.costTimesUnusedScore > 0 ? .orange : .secondary)
-                                .frame(width: 105, alignment: .trailing)
-
-                            HStack(spacing: 4) {
-                                if let artifact = model.artifact(for: row.artifactID),
-                                    let disableKind = disableKind(for: artifact)
-                                {
-                                    Button("Disable…") {
-                                        do {
-                                            try model.openFixPreview(
-                                                for: FixRequest(kind: disableKind, artifact: artifact)
-                                            )
-                                        } catch {
-                                            model.lastErrorMessage = error.localizedDescription
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(items) { row in
+                            HStack(spacing: 10) {
+                                Button {
+                                    model.inspectorSelection = .usageItem(row)
+                                } label: {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        HStack(spacing: 6) {
+                                            Text(row.name)
+                                                .font(.subheadline.weight(.medium))
+                                                .lineLimit(1)
+                                            ScopeBadgeView(scope: row.scope)
                                         }
+                                        Text(model.abbreviateHomePath(row.path))
+                                            .font(.caption2.monospaced())
+                                            .foregroundStyle(.secondary)
+                                            .lineLimit(1)
                                     }
-                                    .controlSize(.mini)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .contentShape(Rectangle())
                                 }
-                            }
-                            .frame(width: 75, alignment: .trailing)
-                        }
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 8)
+                                .buttonStyle(.plain)
 
-                        Divider()
+                                if showAgentColumn {
+                                    Text(row.agent.shortDisplayName)
+                                        .font(.caption)
+                                        .frame(width: 85, alignment: .leading)
+                                }
+
+                                Text(row.kind.displayName)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 85, alignment: .leading)
+
+                                Text("\(row.invocationCount)")
+                                    .font(.subheadline.monospacedDigit())
+                                    .foregroundStyle(row.invocationCount == 0 ? .orange : .primary)
+                                    .frame(width: 85, alignment: .trailing)
+
+                                Text(formatLastUsed(row.lastUsedAt))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 95, alignment: .trailing)
+
+                                Text("\(row.tokensCostPerSession)")
+                                    .font(.subheadline.monospacedDigit())
+                                    .frame(width: 90, alignment: .trailing)
+
+                                Text("\(row.costTimesUnusedScore)")
+                                    .font(
+                                        .subheadline.monospacedDigit().weight(
+                                            row.costTimesUnusedScore > 0 ? .bold : .regular)
+                                    )
+                                    .foregroundStyle(row.costTimesUnusedScore > 0 ? .orange : .secondary)
+                                    .frame(width: 105, alignment: .trailing)
+
+                                HStack(spacing: 4) {
+                                    if let artifact = model.artifact(for: row.artifactID),
+                                        let disableKind = disableKind(for: artifact)
+                                    {
+                                        Button("Disable…") {
+                                            do {
+                                                try model.openFixPreview(
+                                                    for: FixRequest(kind: disableKind, artifact: artifact)
+                                                )
+                                            } catch {
+                                                model.lastErrorMessage = error.localizedDescription
+                                            }
+                                        }
+                                        .controlSize(.mini)
+                                    }
+                                }
+                                .frame(width: 75, alignment: .trailing)
+                            }
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 8)
+
+                            Divider()
+                        }
                     }
                 }
             }
